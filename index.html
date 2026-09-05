@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miliastra Animator</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body data-mode="rig">
+<div id="app">
+  <header id="topbar">
+    <h1><span data-i18n="app.title">Miliastra Animator</span><span class="badge">.gia</span></h1>
+    <nav id="mode-tabs" aria-label="Workflow">
+      <button data-mode="rig" data-i18n="mode.rig" data-i18n-title="tip.mode.rig">Rig</button>
+      <button data-mode="animate" data-i18n="mode.animate" data-i18n-title="tip.mode.animate">Animate</button>
+      <button data-mode="export" data-i18n="mode.export" data-i18n-title="tip.mode.export">Export</button>
+    </nav>
+    <div id="top-actions">
+      <button id="btn-undo" class="icon" data-i18n-title="tip.undo" data-i18n-aria>↶</button>
+      <button id="btn-redo" class="icon" data-i18n-title="tip.redo" data-i18n-aria>↷</button>
+      <button id="btn-shortcuts" class="icon" data-i18n-title="tip.shortcuts" data-i18n-aria>⌨</button>
+      <label id="lang-row"><span>🌐</span> <select id="lang-select" aria-label="Language"></select></label>
+    </div>
+  </header>
+  <div id="main">
+    <aside id="left" class="rail">
+      <div class="rail-scroll">
+        <details id="panel-project" class="panel" open>
+          <summary><span data-i18n="panel.project">Project</span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-outliner" class="panel" open>
+          <summary><span data-i18n="panel.outliner">Outliner</span><span class="count"></span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-clips" class="panel" open>
+          <summary><span data-i18n="panel.clips">Animation Clips</span><span class="count"></span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-export" class="panel" open>
+          <summary><span data-i18n="panel.export">Export</span></summary>
+          <div class="panel-body"></div>
+        </details>
+      </div>
+      <div class="resize-handle" id="resize-left"></div>
+    </aside>
+    <section id="center">
+      <div id="viewport">
+        <canvas id="canvas" tabindex="0"></canvas>
+        <button id="btn-tutorial" data-i18n="tut.button">Getting started</button>
+        <div id="vp-topbars"><div id="vp-toolbar"></div></div>
+        <div id="nav-widget"><canvas id="nav-gizmo" aria-label="Navigation gizmo"></canvas><button id="nav-proj">Persp</button></div>
+        <div id="vp-mode-banner" hidden></div>
+        <div id="vp-status"></div>
+        <div id="vp-empty"></div>
+        <div id="vp-drop"><span data-i18n="drop.viewport">Drop a .gia file to import</span></div>
+      </div>
+      <div id="timeline-resize"></div>
+      <div id="timeline">
+        <div id="tl-head"></div>
+        <div id="tl-body"><canvas id="tl-canvas" tabindex="0"></canvas><div id="tl-empty"></div></div>
+      </div>
+    </section>
+    <aside id="right" class="rail">
+      <div class="resize-handle" id="resize-right"></div>
+      <div class="rail-scroll">
+        <details id="panel-properties" class="panel" open>
+          <summary><span data-i18n="panel.properties">Properties</span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-rigging" class="panel" open>
+          <summary><span data-i18n="panel.rigging">Rigging &amp; Constraints</span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-display" class="panel">
+          <summary><span data-i18n="panel.display">Display</span></summary>
+          <div class="panel-body"></div>
+        </details>
+        <details id="panel-waypaths" class="panel">
+          <summary><span data-i18n="panel.waypaths">Waypaths</span><span class="count"></span></summary>
+          <div class="panel-body"></div>
+        </details>
+      </div>
+    </aside>
+  </div>
+</div>
+<div id="toasts"></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

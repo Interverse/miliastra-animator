@@ -1,0 +1,11 @@
+{
+  "name": "miliastra-animator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Blender-inspired web animation editor for Miliastra .gia objects (Linear Motion Devices + animation-switching node graph).",
+  "scripts": {
+    "test": "node tools/test-gia.mjs && node tools/test-core.mjs && node tools/test-reorient.mjs && node tools/test-interaction.mjs && node tools/test-export-pose.mjs && node tools/test-output-rotation.mjs && node tools/test-rest-rotation.mjs && node tools/test-display-model.mjs && node tools/test-display-parts.mjs && node tools/test-ik-controls.mjs && node tools/test-parts-plan.mjs && node tools/test-autorig.mjs && node tools/check-i18n.mjs",
+    "serve": "python -m http.server 8765"
+  }
+}
