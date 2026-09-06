@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Chiave rotazione",
   "props.reset": "Reimposta",
 
+  "props.worldLocked": "Bloccato al mondo (ignora il root motion)",
+
+  "tip.props.worldLocked": "Disattivo (predefinito): questo controllo segue il root motion dell'animazione e resta con il personaggio sia in movimento sia sul posto. Attivo: mantiene la posizione mondo quando il Root Motion viene disattivato.",
+
+  "hist.worldLocked": "Controllo bloccato al mondo",
+
+  "preview.mode": "Modalità anteprima",
+
+  "tip.preview.mode": "Il viewport mostra un risultato temporaneo. Applicalo o annullalo nel pannello flottante; camera e timeline restano utilizzabili.",
+
+  "preview.collapse": "Comprimi pannello",
+
+  "preview.expand": "Espandi pannello",
+
+  "preview.close": "Chiudi (annulla l'anteprima)",
+
   "scale.button": "Scala l'intero modello…",
 
   "tip.scale.button": "Ridimensiona il modello completo (oggetti, rig, distanze di animazione) attorno al pivot e congela la nuova dimensione",

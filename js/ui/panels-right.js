@@ -107,7 +107,10 @@ export function initRightPanels(editor, viewport) {
     // rotation fields show and accept the AUTHORED angles: 450° or -720° are kept as typed (multi-turn animation)
     const rotRow = posOnly ? null : vec3Row(t('props.rotation'), local.rotE, (v) => editor.setNodeLocal(node.id, { rot: quat.fromEulerDeg(v), rotE: v }), { step: 1, precision: 2, classes: kc('rot'), tip: t('tip.props.rotation') });
     body.append(posRow);
-    if (rotRow) body.append(rotRow); else body.append(hint(t('props.positionOnly')));
+    if (rotRow) body.append(rotRow); else {
+      body.append(hint(t('props.positionOnly')));
+      body.append(checkbox(t('props.worldLocked'), !!node.worldLocked, (v) => editor.setWorldLocked(node.id, v), t('tip.props.worldLocked')));
+    }
     const w = editor.pose().world.get(node.id);
     const worldEl = hint(worldText(w));
     if (w) body.append(worldEl);

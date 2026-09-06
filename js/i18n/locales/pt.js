@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Chave de rotação",
   "props.reset": "Redefinir",
 
+  "props.worldLocked": "Fixo ao mundo (ignorar root motion)",
+
+  "tip.props.worldLocked": "Desligado (predefinição): este controlo segue o root motion da animação e fica com a personagem tanto em movimento como no lugar. Ligado: mantém a posição mundial quando o Root Motion é desligado.",
+
+  "hist.worldLocked": "Controlo fixo ao mundo",
+
+  "preview.mode": "Modo de pré-visualização",
+
+  "tip.preview.mode": "O viewport mostra um resultado temporário. Aplique ou cancele no painel flutuante; a câmara e a linha de tempo continuam utilizáveis.",
+
+  "preview.collapse": "Recolher painel",
+
+  "preview.expand": "Expandir painel",
+
+  "preview.close": "Fechar (cancelar a pré-visualização)",
+
   "scale.button": "Escalar modelo inteiro…",
 
   "tip.scale.button": "Redimensiona o modelo completo (objetos, rig, distâncias de animação) em torno do pivô e fixa o novo tamanho",

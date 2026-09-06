@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Key rotasi",
   "props.reset": "Atur ulang",
 
+  "props.worldLocked": "Terkunci di dunia (abaikan root motion)",
+
+  "tip.props.worldLocked": "Nonaktif (bawaan): kontrol ini mengikuti root motion animasi sehingga tetap bersama karakter saat bergerak maupun di tempat. Aktif: mempertahankan posisi dunianya saat Root Motion dimatikan.",
+
+  "hist.worldLocked": "Kontrol terkunci di dunia",
+
+  "preview.mode": "Mode pratinjau",
+
+  "tip.preview.mode": "Viewport menampilkan hasil sementara. Terapkan atau batalkan di panel mengambang; kamera dan timeline tetap dapat digunakan.",
+
+  "preview.collapse": "Lipat panel",
+
+  "preview.expand": "Buka panel",
+
+  "preview.close": "Tutup (batalkan pratinjau)",
+
   "scale.button": "Skalakan seluruh model…",
 
   "tip.scale.button": "Ubah ukuran seluruh model (objek, rig, jarak animasi) di sekitar pivotnya dan bake ukuran baru",

@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Clave rotación",
   "props.reset": "Restablecer",
 
+  "props.worldLocked": "Fijo al mundo (ignorar root motion)",
+
+  "tip.props.worldLocked": "Desactivado (por defecto): este control sigue el root motion de la animación y permanece con el personaje tanto en reproducción con desplazamiento como en el sitio. Activado: conserva su posición mundial al desactivar Root Motion.",
+
+  "hist.worldLocked": "Control fijo al mundo",
+
+  "preview.mode": "Modo vista previa",
+
+  "tip.preview.mode": "El visor muestra un resultado temporal. Aplícalo o cancélalo en el panel flotante; la cámara y la línea de tiempo siguen disponibles.",
+
+  "preview.collapse": "Contraer panel",
+
+  "preview.expand": "Expandir panel",
+
+  "preview.close": "Cerrar (cancelar la vista previa)",
+
   "scale.button": "Escalar modelo completo…",
 
   "tip.scale.button": "Redimensiona el modelo completo (objetos, rig, distancias de animación) sobre su pivote y hornea el nuevo tamaño",

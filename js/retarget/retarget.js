@@ -63,7 +63,18 @@ export function planRetarget(project, src, mapping, roles) {
 
 // ---------- key reduction ----------
 function interpPos(a, b, t) { const u = (t - a.t) / Math.max(1e-9, b.t - a.t); return v3.lerp(a.v, b.v, u); }
-function interpRot(a, b, t) { const u = (t - a.t) / Math.max(1e-9, b.t - a.t); return quat.slerp(a.v, b.v, u); }
+// keys that carry unwrapped Euler angles are evaluated by angle interpolation (like the editor), else slerp
+function interpRot(a, b, t) { const u = (t - a.t) / Math.max(1e-9, b.t - a.t); if (a.e && b.e) return quat.fromEulerDeg([0, 1, 2].map((i) => a.e[i] + (b.e[i] - a.e[i]) * u)); return quat.slerp(a.v, b.v, u); }
+// Continuous editor-facing Euler channels for a dense quaternion track: each sample takes the
+// equivalent representation nearest the previous one (the first nearest to zero), so turns
+// through the X = ±90° singularity and beyond ±180° read as steady counting, never as flips.
+// Sparse quaternion keys more than 180° apart cannot tell how many turns happened; dense
+// imports (FBX / BVH / glTF samples) can, and the samples here are dense.
+export function unwrapRotationTrack(keys) {
+  let ref = [0, 0, 0];
+  for (const k of keys) { k.e = quat.eulerNear(k.v, ref); ref = k.e; }
+  return keys;
+}
 export function reduceKeys(keys, kind, tol, minSpacing = MIN_SPACING) {
   if (keys.length <= 2) return keys.slice();
   let kept;
@@ -186,8 +197,8 @@ export async function retargetClip(project, src, clip, mapping, roles, options =
   const out = createClip(project, name, Math.max(MIN_SPACING, clip.duration));
   out.loop = !!o.loop;
   let before = 0, after = 0;
-  const put = (id, ch, keys) => { before += keys.length; const r = reduceKeys(keys, ch, tol, o.minSpacing ?? MIN_SPACING); after += r.length; for (const k of r) insertKey(out, id, ch, snap(k.t), k.v, 'linear'); };
-  for (const [tid, keys] of rotKeys) if (keys.length) put(tid, 'rot', keys);
+  const put = (id, ch, keys) => { before += keys.length; const r = reduceKeys(keys, ch, tol, o.minSpacing ?? MIN_SPACING); after += r.length; for (const k of r) insertKey(out, id, ch, snap(k.t), k.v, 'linear', k.e || null); };
+  for (const [tid, keys] of rotKeys) if (keys.length) put(tid, 'rot', unwrapRotationTrack(keys));
   if (posKeys && posKeys.length && o.rootMotion !== 'none') { put(hips.targetId, 'pos', posKeys); out.rootNodeId = hips.targetId; out.rootMotion = o.rootMotion === 'keep'; }
   for (const [tid, keys] of ikKeys) if (keys.length) put(tid, 'pos', keys);
   const warnings = [];

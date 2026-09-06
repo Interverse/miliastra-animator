@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Key rotation",
   "props.reset": "Reset",
 
+  "props.worldLocked": "World-locked (ignore root motion)",
+
+  "tip.props.worldLocked": "Off (default): this control follows the animation's root motion, so it stays with the character in both moving and in-place playback. On: it keeps its world position when Root Motion is turned off.",
+
+  "hist.worldLocked": "World-locked control",
+
+  "preview.mode": "Preview mode",
+
+  "tip.preview.mode": "The viewport shows a temporary result. Apply or cancel it in the floating panel; the camera and timeline stay usable.",
+
+  "preview.collapse": "Collapse panel",
+
+  "preview.expand": "Expand panel",
+
+  "preview.close": "Close (cancel the preview)",
+
   "scale.button": "Scale entire model…",
 
   "tip.scale.button": "Resize the complete model (objects, rig, animation distances) about its pivot and bake the new size",

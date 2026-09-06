@@ -2,7 +2,8 @@
 // viewport → adjust names / assignments / skip bones → apply as one undo step.
 import { t } from '../i18n/i18n.js';
 import { h, button, btnRow, hint, selectInput, checkbox } from './dom.js';
-import { customDialog, toast } from './dialogs.js';
+import { toast } from './dialogs.js';
+import { floatingPanel } from './float-panel.js';
 import { RIG_TYPES, BASE_POSES, DEFAULT_POSE } from '../rig/autorig.js';
 import { getNode } from '../scene/scene.js';
 
@@ -67,7 +68,8 @@ export async function showAutoRigDialog(editor) {
   body.append(h('div', { class: 'hint warn' }, t('autorig.experimental')), summary, h('div', { class: 'row' }, h('span', { class: 'label', text: t('autorig.modelType') }), typeSel), poseRow, ikBox, h('div', { class: 'subhead-inline', text: t('autorig.proposed') }), list, unassigned, hint(t('autorig.notes')));
   editor.setRigPreview(proposal);
   render();
-  const r = await customDialog({ title: t('autorig.title'), body, buttons: [
+  // non-blocking: the proposed bones are drawn in the viewport while this panel floats beside it
+  const r = await floatingPanel({ key: 'autorig', width: 440, title: t('autorig.title'), body, buttons: [
     { label: t('btn.cancel'), value: () => 'cancel' },
     { label: t('autorig.apply'), primary: true, value: () => 'apply' },
   ] });

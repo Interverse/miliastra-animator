@@ -50,17 +50,23 @@ export function rotateAboutPivot(w, R, pivot) {
 // Convert one world pose to a device waypoint: apply the slot's output rotation
 // about the pivot, then position relative to the placement (world axes, or the
 // placement's own axes) and absolute rotation, both in game space.
-export function toWaypoint(point, placement, yawDeg, frame, pivot = [0, 0, 0]) {
+// `refEuler` (display-space YXZ degrees of the previous point / the placement) keeps the
+// written Euler values continuous along a path: the representation nearest the previous
+// point is chosen, so a turn through X = 90° never serializes as a ±180° jump on Y and Z
+// (game space is the same YXZ triple with Y and Z negated, so continuity carries over).
+export function toWaypoint(point, placement, yawDeg, frame, pivot = [0, 0, 0], refEuler = null) {
   const w = yawDeg ? rotateAboutPivot(point, outputRotation(yawDeg), pivot) : point;
   let delta = v3.sub(w.pos, placement.pos);
   if (frame === 'local') delta = quat.rotate(quat.conj(placement.rot), delta);
   const dg = displayToGamePos(delta);
-  const rotE = displayQuatToGameEuler(w.rot);
+  const eD = refEuler ? quat.eulerNear(w.rot, refEuler) : quat.toEulerDeg(w.rot);
+  const rotE = { x: eD[0], y: -eD[1], z: -eD[2] };
   const clean = (v) => (Math.abs(v) < 1e-7 ? 0 : v);
   return {
     pos: { x: clean(dg.x), y: clean(dg.y), z: clean(dg.z) },
     rot: { x: clean(rotE.x), y: clean(rotE.y), z: clean(rotE.z) },
     duration: Math.max(MIN_POINT_DURATION, point.duration),
+    eDisplay: eD,
   };
 }
 const yawOf = (slot) => { const y = ((slot.outputYaw || 0) % 360 + 360) % 360; return y < 1e-9 ? 0 : slot.outputYaw; };
@@ -239,7 +245,9 @@ export function exportGia(project, giaBytes, { plan = null, enforceLimit = true 
     slots.forEach((s, i) => {
       const dev = plan.devices.find((d) => d.nodeId === node.id && d.slotIndex === i);
       const restW = rest.get(node.id);
-      const points = dev.points.map((p) => toWaypoint(p, restW, dev.yaw, frame, pivot));
+      // Euler continuity along the path, starting from the resting placement's rotation
+      let ref = quat.toEulerDeg(restW.rot);
+      const points = dev.points.map((p) => { const wp = toWaypoint(p, restW, dev.yaw, frame, pivot, ref); ref = wp.eDisplay; return wp; });
       records.push(motionDeviceFields({ name: slotNames[i], motionType: s.clip.loop ? MOTION_CYCLIC : MOTION_ONE_WAY, points }));
       counts.push(points.length);
       report.devices++;

@@ -3,6 +3,7 @@
 import { t } from '../i18n/i18n.js';
 import { h, button, hint, checkbox, slider, fmt } from './dom.js';
 import { customDialog } from './dialogs.js';
+import { floatingPanel } from './float-panel.js';
 import { compressPlan, MAX_PATH_POINTS, GAME_PATH_POINTS } from '../gia/gia-export.js';
 import { simplifyPolyline } from '../anim/path-compress.js';
 
@@ -45,7 +46,8 @@ export async function showPathLimitFlow(editor, plan, over) {
   body2.append(hint(t('limit.previewHint')));
   let remember = false;
   if (ok) body2.append(checkbox(t('limit.remember'), false, (v) => { remember = v; }, t('tip.limit.remember')));
-  const second = await customDialog({ title: t('limit.previewTitle'), body: body2, buttons: ok ? [
+  // the compressed vs original paths are drawn in the viewport: a floating panel keeps them visible
+  const second = await floatingPanel({ key: 'compress', width: 520, title: t('limit.previewTitle'), body: body2, buttons: ok ? [
     { label: t('limit.cancelExport'), value: () => 'cancel' },
     { label: t('limit.useCompressed'), primary: true, value: () => 'export' },
   ] : [{ label: t('limit.cancelExport'), primary: true, value: () => 'cancel' }] });
@@ -73,7 +75,7 @@ export async function showSimplifyPathDialog(editor, wpId) {
   const sl = slider(Math.log10(tol), (v) => { tol = +Math.pow(10, v).toPrecision(2); update(); }, { min: -3, max: 0, step: 0.05 });
   body.append(hint(t('path.simplifyIntro')), h('div', { class: 'row' }, h('span', { class: 'label', text: t('path.simplifyTolerance') }), sl, val), result);
   update();
-  const r = await customDialog({ title: t('path.simplify'), body, buttons: [
+  const r = await floatingPanel({ key: 'simplify', width: 380, title: t('path.simplify'), body, buttons: [
     { label: t('btn.cancel'), value: () => 'cancel' },
     { label: t('path.simplifyApply'), primary: true, value: () => 'apply' },
   ] });

@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Clé rotation",
   "props.reset": "Réinitialiser",
 
+  "props.worldLocked": "Verrouillé au monde (ignorer le root motion)",
+
+  "tip.props.worldLocked": "Désactivé (défaut) : ce contrôle suit le root motion de l'animation et reste avec le personnage en lecture déplacée comme sur place. Activé : il garde sa position monde quand Root Motion est désactivé.",
+
+  "hist.worldLocked": "Contrôle verrouillé au monde",
+
+  "preview.mode": "Mode aperçu",
+
+  "tip.preview.mode": "La vue 3D montre un résultat temporaire. Appliquez ou annulez dans le panneau flottant ; caméra et timeline restent utilisables.",
+
+  "preview.collapse": "Replier le panneau",
+
+  "preview.expand": "Déplier le panneau",
+
+  "preview.close": "Fermer (annuler l'aperçu)",
+
   "scale.button": "Mettre le modèle entier à l'échelle…",
 
   "tip.scale.button": "Redimensionne le modèle complet (objets, rig, distances d'animation) autour de son pivot et fige la nouvelle taille",

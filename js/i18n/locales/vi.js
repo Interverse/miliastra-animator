@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Khóa xoay",
   "props.reset": "Đặt lại",
 
+  "props.worldLocked": "Khóa theo thế giới (bỏ qua root motion)",
+
+  "tip.props.worldLocked": "Tắt (mặc định): điều khiển này theo root motion của hoạt ảnh nên ở cùng nhân vật khi phát di chuyển và tại chỗ. Bật: giữ vị trí thế giới khi tắt Root Motion.",
+
+  "hist.worldLocked": "Điều khiển khóa theo thế giới",
+
+  "preview.mode": "Chế độ xem trước",
+
+  "tip.preview.mode": "Khung nhìn hiển thị kết quả tạm thời. Áp dụng hoặc hủy trong bảng nổi; camera và dòng thời gian vẫn dùng được.",
+
+  "preview.collapse": "Thu gọn bảng",
+
+  "preview.expand": "Mở rộng bảng",
+
+  "preview.close": "Đóng (hủy xem trước)",
+
   "scale.button": "Đổi tỷ lệ toàn bộ mô hình…",
 
   "tip.scale.button": "Thay đổi kích thước toàn bộ mô hình (đối tượng, rig, khoảng cách hoạt ảnh) quanh trục của nó và bake kích thước mới",

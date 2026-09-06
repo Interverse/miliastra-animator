@@ -3,7 +3,8 @@
 // Miliastra's maximum scale of 50, then one undoable whole-model scale.
 import { t } from '../i18n/i18n.js';
 import { h, button, btnRow, hint, numInput, fmt } from './dom.js';
-import { customDialog, toast } from './dialogs.js';
+import { toast } from './dialogs.js';
+import { floatingPanel } from './float-panel.js';
 import { MAX_OBJECT_SCALE } from '../gia/gia-export.js';
 
 export async function showScaleModelDialog(editor) {
@@ -35,6 +36,7 @@ export async function showScaleModelDialog(editor) {
     }
     // the footer button says "Apply anyway" while the result would exceed the limit
     if (footBtn) footBtn.textContent = over.length ? t('scale.applyAnyway') : t('scale.apply');
+    editor.setScalePreview(factor); // live: the resized model shows in the viewport
   };
   let footBtn = null;
   const setFactor = (v) => { if (!Number.isFinite(v) || v <= 0) return; factor = v; factorIn.value = fmt(factor, 4); pctIn.value = fmt(factor * 100, 2); render(); };
@@ -49,10 +51,11 @@ export async function showScaleModelDialog(editor) {
     hint(t('scale.bakeNote')),
   );
   render();
-  const r = await customDialog({ title: t('scale.title'), body, setup: (dlg) => { footBtn = dlg.querySelector('.dlg-foot button:last-child'); render(); }, buttons: [
+  const r = await floatingPanel({ key: 'scale', width: 400, title: t('scale.title'), body, setup: (panel) => { footBtn = panel.querySelector('.fp-foot button:last-child'); render(); }, buttons: [
     { label: t('btn.cancel'), value: () => 'cancel' },
     { label: t('scale.apply'), primary: true, value: () => 'apply' },
   ] });
+  editor.setScalePreview(null);
   if (r !== 'apply') return;
   if (Math.abs(factor - 1) < 1e-12) { toast(t('scale.noop'), 'info'); return; }
   if (!editor.scaleModel(factor)) return;

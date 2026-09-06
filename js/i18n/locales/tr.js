@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Dönüşü anahtarla",
   "props.reset": "Sıfırla",
 
+  "props.worldLocked": "Dünyaya kilitli (kök hareketini yok say)",
+
+  "tip.props.worldLocked": "Kapalı (varsayılan): bu denetim animasyonun kök hareketini izler, hareketli ve yerinde oynatmada karakterle kalır. Açık: Kök hareketi kapatıldığında dünya konumunu korur.",
+
+  "hist.worldLocked": "Dünyaya kilitli denetim",
+
+  "preview.mode": "Önizleme modu",
+
+  "tip.preview.mode": "Görünüm geçici bir sonuç gösteriyor. Kayan panelde uygulayın veya iptal edin; kamera ve zaman çizelgesi kullanılabilir kalır.",
+
+  "preview.collapse": "Paneli daralt",
+
+  "preview.expand": "Paneli genişlet",
+
+  "preview.close": "Kapat (önizlemeyi iptal et)",
+
   "scale.button": "Tüm modeli ölçekle…",
 
   "tip.scale.button": "Modelin tamamını (nesneler, rig, animasyon mesafeleri) pivotu etrafında boyutlandırır ve yeni boyutu pişirir",

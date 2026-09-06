@@ -2,6 +2,7 @@
 import { t } from '../i18n/i18n.js';
 import { h, button, btnRow, hint, selectInput, checkbox, numInput, textInput } from './dom.js';
 import { customDialog, toast, textPrompt } from './dialogs.js';
+import { floatingPanel } from './float-panel.js';
 import { loadAnimationFile, ACCEPT, FORMATS } from '../retarget/anim-import.js';
 import { autoMap, mappingIssues, skeletonSignature, roleMappingFromIds, mappingFromRoles, ROLES } from '../retarget/bone-map.js';
 import { retargetClip, validateRetarget, detectRootMotion, TOLERANCES, ROOT_MODES } from '../retarget/retarget.js';
@@ -195,7 +196,8 @@ export async function showRetargetDialog(editor, file = null) {
     dlg.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); on(false); const f = e.dataTransfer?.files?.[0]; if (f) { droppedFile = f; finish('drop'); } });
     window.addEventListener('blur', () => on(false));
   };
-  const r = await customDialog({ title: t('retarget.title'), body, setup: dropSetup, buttons: [
+  // non-blocking: the preview plays in the viewport and the timeline stays usable
+  const r = await floatingPanel({ key: 'retarget', width: 520, title: t('retarget.title'), body, setup: dropSetup, buttons: [
     { label: t('btn.cancel'), value: () => 'cancel' },
     { label: t('retarget.apply'), primary: true, value: () => 'apply' },
   ] });

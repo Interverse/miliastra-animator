@@ -81,7 +81,8 @@ export const quat = {
     const m11 = 1 - (yy + zz), m13 = xz + wy;
     const m21 = xy + wz, m22 = 1 - (xx + zz), m23 = yz - wx;
     const m31 = xz - wy, m33 = 1 - (xx + yy);
-    const ex = Math.asin(-Math.max(-1, Math.min(1, m23)));
+    // atan2 form of the middle angle: same value as asin(-m23) but precise next to ±90°
+    const ex = Math.atan2(-m23, Math.sqrt(m13 * m13 + m33 * m33));
     let ey, ez;
     if (Math.abs(m23) < 0.9999999) { ey = Math.atan2(m13, m33); ez = Math.atan2(m21, m22); }
     else { ey = Math.atan2(-m31, m11); ez = 0; }
@@ -89,9 +90,38 @@ export const quat = {
   },
   fromEulerDeg: (e) => quat.fromEulerYXZ(e[0] * DEG, e[1] * DEG, e[2] * DEG),
   toEulerDeg: (q) => quat.toEulerYXZ(q).map((a) => a * RAD),
-  // Euler angles of q, each component shifted by whole turns to lie nearest `ref`
-  // (the previously authored angles), so continuous edits accumulate past ±360°.
-  eulerNear: (q, ref) => unwrapDeg(quat.toEulerYXZ(q).map((a) => a * RAD), ref),
+  // The editor's Euler order is YXZ everywhere (display, keys, gizmo, export): Y first, then
+  // X, then Z. X is the middle axis, so the canonical decomposition is singular at X = ±90°:
+  // beyond it the library returns the equivalent triple (180−x, y+180, z+180) and a bone
+  // that keeps turning about X seems to count back down while Y and Z jump by 180°.
+  // Every orientation has these two triples (plus whole turns of each angle, plus a free
+  // Y/Z split exactly at the singularity). All of them, in degrees:
+  eulerCandidates(q, ref = null) {
+    const e = quat.toEulerYXZ(q).map((a) => a * RAD);
+    const out = [e, [180 - e[0], e[1] + 180, e[2] + 180]];
+    if (ref && Math.abs(Math.abs(e[0]) - 90) < 0.03) {
+      // gimbal lock: only y ± z is determined; keep the reference Z and give Y the rest
+      const t = ref[2];
+      for (const s of [1, -1]) out.push([e[0], e[1] + e[2] + s * t, t], [180 - e[0], e[1] + e[2] + 180 + s * t, t + 180]);
+    }
+    return out;
+  },
+  // Euler angles of q that are CLOSEST to `ref` (the previously authored / displayed
+  // angles): among the equivalent representations, each shifted by whole turns, the one
+  // with the smallest total change. Keeps user-facing channels continuous through the
+  // X = ±90° singularity and past ±360°; without a reference the canonical triple is used.
+  eulerNear(q, ref) {
+    const cands = quat.eulerCandidates(q, ref);
+    if (!ref) return cands[0];
+    let best = null, bestD = Infinity;
+    for (const c of cands) {
+      if (quat.angle(quat.fromEulerDeg(c), q) > 1e-5) continue; // (gimbal candidates are verified)
+      const u = unwrapDeg(c, ref);
+      const d = u.reduce((a, v, i) => a + (v - ref[i]) * (v - ref[i]), 0);
+      if (d < bestD) { bestD = d; best = u; }
+    }
+    return best || unwrapDeg(cands[0], ref);
+  },
   dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3],
   slerp(a, b, t) {
     let cos = quat.dot(a, b);

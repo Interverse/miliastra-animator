@@ -3,7 +3,8 @@
 // frozen into the rest basis.
 import { t } from '../i18n/i18n.js';
 import { h, button, btnRow, hint, selectInput, checkbox, vec3Row, fmt } from './dom.js';
-import { customDialog, toast } from './dialogs.js';
+import { toast } from './dialogs.js';
+import { floatingPanel } from './float-panel.js';
 import { quat } from '../core/math.js';
 import { FORWARDS, EDITOR_FORWARD, headingOf, headingName, yawBetween, yawQuat, modelForward } from '../anim/orient.js';
 
@@ -45,7 +46,7 @@ export async function showReorientDialog(editor, { suggestedYaw = null } = {}) {
     hint(t('orient.freezeNote')),
   );
   describe();
-  const r = await customDialog({ title: t('orient.title'), body, buttons: [
+  const r = await floatingPanel({ key: 'orient', width: 400, title: t('orient.title'), body, buttons: [
     { label: t('btn.cancel'), value: () => 'cancel' },
     { label: t('orient.apply'), primary: true, value: () => 'apply' },
   ] });

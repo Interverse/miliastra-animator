@@ -176,6 +176,83 @@ The Display panel's brightness slider shades **display geometry only** (model de
 - Applying is one undo step: bones are created with their Y axis along the detected limb direction and objects are re-parented preserving their world transforms; nothing in the geometry, animation or `.gia` data changes (the export is byte-identical until you animate). Templates live in `js/rig/autorig.js` so more body plans can be added.
 - Tests: `node tools/test-autorig.mjs` (Pantalone humanoid, a nameless quadruped, a segment chain, a bird, apply/undo exactness).
 
+## Root Motion moves the whole rig control system
+
+With Root Motion off, the evaluator (`js/anim/evaluate.js`) holds the root
+node's horizontal travel at its first key and takes the same displacement away
+from every IK target and pole that follows the root — every control that is not
+already a child of the root and not marked **World-locked** (a new checkbox on
+targets and poles) — through the control's own parent frame and frozen basis.
+The pose relative to the character is therefore identical in moving and
+in-place playback: a planted foot slides back under the in-place character
+exactly as in an in-place cycle, animated controls keep their authored motion
+plus/minus the root component, and IK re-solves to the same limb configuration
+shifted by the travel. Nothing is rewritten (root, target and pole keys stay),
+so On → Off → On restores the moving behaviour exactly. Root rotation is
+treated as animation, not root motion, and plays in both modes. Toggling
+settles any active drag first, re-evaluates the current frame and rebinds the
+gizmo; undo/redo restore the flag and thus the evaluated poses; export bakes
+whichever mode is on, once, with no residual travel in IK-controlled objects.
+Retargeted clips key their generated IK targets with the travel included, so
+they behave the same way. `node tools/test-rootmotion.mjs` (Auto-Rigged
+humanoid with foot/hand IK and knee/elbow poles, animated target and pole,
+toggles at frame 0 / middle / end, undo/redo, world-locked control, gizmo
+safety, export in both modes; root translation + rotation; Auto-Rigged
+quadruped; retargeted FBX).
+
+## Preview Mode: previews never cover the viewport
+
+Every workflow whose purpose is to inspect a proposed change now uses a compact
+floating panel (`js/ui/float-panel.js`) instead of a centred modal: Auto-Rig,
+Import animation / retargeting, Reorient model, Scale entire model, Simplify
+path and the export path-compression preview. The panel has no backdrop, floats
+at the viewport's top-right corner by default, can be dragged (position kept
+for the session), collapsed and closed, always stays inside the window, and is
+sized so small windows keep a usable viewport. Camera orbit / pan / zoom,
+framing, the timeline (play, scrub, loop) and the rest of the editor stay
+usable; Escape closes the panel only while the focus is inside it. The
+proposed result is rendered in the normal viewport as temporary, view-only
+state: Auto-Rig bones and compressed paths as lines, orientation and scale
+through the display offset (`orientPreview`, `scalePreview` — positions scale
+about the model pivot, object display, bone lengths and proxy sizes scale in
+the viewport), retargeting as a transient clip. Changing an option updates the
+viewport immediately and never creates an undo entry; Apply commits one undo
+step, Cancel / ✕ restores the committed state exactly (`restoreCommitted` for
+the transient clip). The camera is untouched by entering or leaving a preview.
+A "Preview mode" chip appears in the panel header and the viewport status line
+while a preview is open. New Project / Open / Import close every open preview
+panel and clear all preview state, so no temporary bones, paths, highlights or
+transforms survive a project switch. Brief confirmations and error messages
+(delete, unsupported file, the path-limit warning) remain ordinary modals.
+`node tools/test-preview.mjs`.
+
+## Rotation channels stay continuous through 90°
+
+The editor's Euler order is **YXZ** everywhere (inspector, keys, gizmo, imported
+conversion, Motion Device export; `fromEulerYXZ` / `toEulerYXZ` in
+`js/core/math.js`, game space is the same triple with Y and Z negated). X is
+the middle axis, so the canonical decomposition is singular at X = ±90°: past it
+the library returns the equivalent triple (180−x, y+180, z+180), which is why a
+bone turning about X used to count 89 → 90 → 89 while Y and Z jumped to ±180.
+The orientation itself is correct throughout; only the representation changed.
+`quat.eulerNear(q, ref)` now considers every equivalent representation (both
+Tait-Bryan solutions, whole turns of each angle, and the free Y/Z split exactly
+at the singularity) and returns the one closest to the previously authored or
+displayed angles. It is used for gizmo and world-space edits (`setNodeLocal`),
+for the inspector when a pose comes from quaternion-only data (IK-driven bones,
+quaternion keys — the last shown value per node is the reference), for
+retargeted tracks (`unwrapRotationTrack` gives every imported rotation key
+continuous angles before key reduction, which interpolates those angles), and
+for the exported Motion Device rotations, which are written as the
+representation nearest the previous point starting from the placement, so a
+turn through 90° never serializes as a ±180° jump. Authored values above ±360°
+are preserved; Freeze Rotation is the explicit exception and yields canonical
+zeros. Sparse quaternion keys more than 180° apart cannot reveal how many turns
+happened (a format limitation); dense FBX/BVH/glTF samples can and do.
+`window.rotationDiagnostics(nodeId)` prints authored, canonical, alternative
+and shown angles plus the source of the displayed value.
+`node tools/test-euler.mjs`.
+
 ## Scale entire model (and the per-object scale limit of 50)
 
 Rigging → Model orientation & scale → **Scale entire model…** resizes the

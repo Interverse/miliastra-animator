@@ -167,6 +167,7 @@ export class Editor {
   // Drops all session-only editing state (called whenever a different project is loaded).
   resetTransientState() {
     this.interaction = null;
+    this._shownE = new Map();
     this.exportPreviewSlot = null;
     this.displayEdit = false;
     this.displaySel = new Set(); this.displayActive = null;
@@ -425,8 +426,12 @@ export class Editor {
   beginProjectSwitch() {
     this.cancelInteraction();
     this.playing = false;
+    // every temporary preview ends with the project it belonged to
     this.rigPreview = null;
     this.exportPreviewSlot = null;
+    this.orientPreview = null;
+    this.scalePreview = null;
+    this.exportPathPreview = null;
     this.emit('project', { phase: 'teardown' });
   }
 
@@ -909,8 +914,27 @@ export class Editor {
     if (!n) return null;
     const p = this.pose().poses.get(id);
     const rot = (p?.rot || n.rot).slice();
-    const rotE = p?.rot ? (p.rotE || quat.toEulerDeg(p.rot)) : (n.rotE || quat.toEulerDeg(n.rot));
+    // authored angles when the pose carries them; otherwise (IK-driven bones, quaternion-only
+    // imported keys) the representation nearest the angles shown last for this node, so the
+    // inspector never flips to an equivalent ±180° triple while scrubbing or dragging
+    const shown = this._shownE || (this._shownE = new Map());
+    const prev = shown.get(id) || n.rotE || null;
+    const rotE = p?.rot ? (p.rotE || quat.eulerNear(p.rot, prev)) : (n.rotE || quat.eulerNear(n.rot, prev));
+    shown.set(id, rotE);
     return { pos: (p?.pos || n.pos).slice(), rot, rotE: rotE.slice() };
+  }
+  // Development diagnostics: where a displayed rotation comes from and what its alternatives are.
+  rotationDiagnostics(id = this.active) {
+    const n = getNode(this.project, id);
+    if (!n) return null;
+    const p = this.pose().poses.get(id);
+    const q = (p?.rot || n.rot).slice();
+    return {
+      node: n.name, order: 'YXZ (X is the middle axis: canonical decomposition is singular at X = ±90°)',
+      source: p?.rotE ? 'authored key/override angles' : p?.rot ? 'evaluated quaternion (IK / quaternion-only keys) → nearest to last shown' : n.rotE ? 'base authored angles' : 'base quaternion → nearest to last shown',
+      quaternion: q, canonical: quat.toEulerDeg(q), alternatives: quat.eulerCandidates(q, this._shownE?.get(id) || null),
+      authored: p?.rotE || (!p?.rot && n.rotE) || null, previousShown: this._shownE?.get(id) || null, shown: this.currentLocal(id).rotE, world: this.pose().world.get(id)?.rot,
+    };
   }
   channelKeyed(id, channel) { const c = activeClip(this.project); const tr = c && track(c, id); return !!(tr && tr[channel].length); }
   hasKeyAt(id, channel, time = this.time) { const c = activeClip(this.project); const tr = c && track(c, id); return !!(tr && tr[channel].some((k) => Math.abs(k.t - time) < 1e-6)); }
@@ -922,7 +946,7 @@ export class Editor {
     if (this.playing) this.pause(); // interactive edits pause playback (playhead stays)
     // authored angles: typed values are kept verbatim (450°, -720° …); gizmo / world-space
     // edits unwrap the new orientation next to the previous angles so turns accumulate
-    if (rot && !rotE) rotE = quat.eulerNear(rot, this.currentLocal(id).rotE);
+    if (rot && !rotE) rotE = quat.eulerNear(rot, this.currentLocal(id).rotE).map((v) => Math.round(v * 1e9) / 1e9); // quaternion round-trip noise removed
     // Preserve child world transforms: a rig/rest edit (move and/or rotate) that leaves
     // every descendant in place and never creates keyframes
     if ((rot || pos) && this.rotateMode === 'preserve') {
@@ -1151,19 +1175,32 @@ export class Editor {
   setClipRootMotion(id, on) {
     const c = getClip(this.project, id);
     if (!c) return;
+    this.finishInteraction(); // a control being dragged is settled first; the gizmo rebinds to the re-evaluated pose
+    this.clearPoseOverrides();
     c.rootMotion = !!on;
     this.invalidate();
     this.commit(t(on ? 'hist.rootMotionOn' : 'hist.rootMotionOff'));
     this.emit('time');
+    this.emit('selection');
   }
+  // IK targets / poles follow the clip's root motion unless world-locked (kept at their world position when Root Motion is off).
+  setWorldLocked(id, locked) { const n = getNode(this.project, id); if (!n || !isPositionOnly(n)) return; if (locked) n.worldLocked = true; else delete n.worldLocked; this.invalidate(); this.commit(t('hist.worldLocked')); }
   displayWorld() {
     const world = this.pose().world;
     const off = this.displayOffset();
-    if (!off) return world;
+    const S = this.scalePreview;
+    if (!off && !S) return world;
     const out = new Map();
-    for (const [id, w] of world) out.set(id, this.applyPathOffset(w, off));
+    const piv = S ? exportPivot(this.project) : null;
+    for (const [id, w] of world) {
+      let v = w;
+      if (S) v = { pos: v3.add(piv, v3.scale(v3.sub(v.pos, piv), S)), rot: v.rot }; // Scale Entire Model preview
+      out.set(id, off ? this.applyPathOffset(v, off) : v);
+    }
     return out;
   }
+  // Scale Entire Model preview (view only): positions scale about the pivot here, sizes in the viewport.
+  setScalePreview(S) { this.scalePreview = S && Number.isFinite(S) && S > 0 && Math.abs(S - 1) > 1e-9 ? S : null; this.invalidate(); this.emit('change', { transient: true }); }
 
   // ---------- clips & playback ----------
   // Create a new clip (works from the zero-animation state: nothing is derived from an

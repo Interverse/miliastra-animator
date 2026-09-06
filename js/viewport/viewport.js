@@ -728,9 +728,10 @@ export class Viewport {
         // display-model offset (editor-only): position/rotation relative to the object
         // pivot, scale multiplied into the file's zoom
         const disp = displayOf(node), zoom = node.zoom || [1, 1, 1];
-        rec.inner.position.fromArray(disp.pos);
+        const SP = ed.scalePreview || 1; // Scale Entire Model preview
+        rec.inner.position.fromArray(v3.scale(disp.pos, SP));
         rec.inner.quaternion.fromArray(disp.rot);
-        rec.inner.scale.set(zoom[0] * disp.scale[0], zoom[1] * disp.scale[1], zoom[2] * disp.scale[2]);
+        rec.inner.scale.set(zoom[0] * disp.scale[0] * SP, zoom[1] * disp.scale[1] * SP, zoom[2] * disp.scale[2] * SP);
         rec.inner.visible = S.showDecorations;
         if (!rec.group.visible) return; // nothing else to update for invisible objects
         // dirty tracking: parts + instance matrices only when the project changed
@@ -760,15 +761,15 @@ export class Viewport {
           this.pickDirty = true;
         }
       } else if (node.type === 'proxy') {
-        rec.sizeMesh.scale.fromArray(node.size);
-        rec.sizeEdge.scale.fromArray(node.size);
+        rec.sizeMesh.scale.fromArray(v3.scale(node.size, ed.scalePreview || 1));
+        rec.sizeEdge.scale.fromArray(v3.scale(node.size, ed.scalePreview || 1));
         rec.sizeMesh.material.opacity = S.proxyOpacity;
         rec.sizeMesh.material.depthWrite = S.proxyOpacity > 0.95;
         this.shade(rec.sizeMesh.material, this._tmpColor.set(node.color || '#7ec8ff'));
         rec.sizeEdge.visible = sel;
         rec.sizeEdge.material.color.set(act ? COLORS.outlineActive : COLORS.outline);
       } else if (node.type === 'bone') {
-        const L = Math.max(0.01, node.length || 0.25);
+        const L = Math.max(0.01, (node.length || 0.25) * (ed.scalePreview || 1));
         rec.boneMesh.scale.set(L, L, L);
         rec.boneWire.scale.set(L, L, L);
         const c = act ? COLORS.boneActive : sel ? COLORS.boneSel : ikBones.has(node.id) ? COLORS.boneIK : COLORS.bone;

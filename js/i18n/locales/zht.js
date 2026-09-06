@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "記錄旋轉",
   "props.reset": "重設",
 
+  "props.worldLocked": "世界鎖定（忽略根運動）",
+
+  "tip.props.worldLocked": "關（預設）：該控制器跟隨動畫的根運動，在移動和原地播放中都與角色保持一致。開：關閉根運動時保持其世界位置。",
+
+  "hist.worldLocked": "世界鎖定控制器",
+
+  "preview.mode": "預覽模式",
+
+  "tip.preview.mode": "視埠正在顯示暫時結果。請在浮動面板中套用或取消；相機和時間軸仍可使用。",
+
+  "preview.collapse": "收合面板",
+
+  "preview.expand": "展開面板",
+
+  "preview.close": "關閉（取消預覽）",
+
   "scale.button": "縮放整個模型…",
 
   "tip.scale.button": "圍繞樞軸調整整個模型（物件、綁定、動畫距離）的大小並烘焙新尺寸",

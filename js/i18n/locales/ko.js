@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "회전 키",
   "props.reset": "초기화",
 
+  "props.worldLocked": "월드 고정(루트 모션 무시)",
+
+  "tip.props.worldLocked": "꺼짐(기본): 이 컨트롤은 애니메이션의 루트 모션을 따라 이동 재생과 제자리 재생 모두에서 캐릭터와 함께 움직입니다. 켜짐: 루트 모션을 끌 때 월드 위치를 유지합니다.",
+
+  "hist.worldLocked": "월드 고정 컨트롤",
+
+  "preview.mode": "미리보기 모드",
+
+  "tip.preview.mode": "뷰포트에 임시 결과가 표시됩니다. 플로팅 패널에서 적용하거나 취소하세요. 카메라와 타임라인은 계속 사용할 수 있습니다.",
+
+  "preview.collapse": "패널 접기",
+
+  "preview.expand": "패널 펼치기",
+
+  "preview.close": "닫기(미리보기 취소)",
+
   "scale.button": "전체 모델 스케일…",
 
   "tip.scale.button": "전체 모델(객체, 리그, 애니메이션 거리)을 피벗 기준으로 크기 조절하고 새 크기를 베이크합니다",

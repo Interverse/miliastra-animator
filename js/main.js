@@ -9,6 +9,7 @@ import { Timeline } from './ui/timeline.js';
 import { initTutorial } from './ui/tutorial.js';
 import { matchAction, showShortcutsDialog, primaryKeyLabel } from './ui/shortcuts.js';
 import { showMenu, toast, confirmDialog } from './ui/dialogs.js';
+import { previewPanelCount, onPreviewPanels, closeFloatingPanels } from './ui/float-panel.js';
 import { h } from './ui/dom.js';
 import { loadRecovery, listProjects, loadPrefs, updatePrefs } from './core/persistence.js';
 import { initProjects } from './ui/projects.js';
@@ -20,7 +21,9 @@ async function main() {
   window.editor = editor; // handy for debugging
   const viewport = new Viewport(editor, document.getElementById('viewport'));
   window.viewport = viewport;
+  editor.on('project', () => closeFloatingPanels()); // New / Open / Import: any preview ends with the old project
   window.validateViewport = (opts) => viewport.validate({ warn: true, afterSync: true, ...opts }); // dev diagnostics: reports render entities with no state entity
+  window.rotationDiagnostics = (id) => editor.rotationDiagnostics(id); // dev diagnostics: authored vs canonical vs shown Euler angles of a node
   const timeline = new Timeline(editor, document.getElementById('timeline'));
   initLeftPanels(editor, viewport);
   initRightPanels(editor, viewport);
@@ -148,6 +151,7 @@ function setupStatus(editor) {
     el.append(h('span', { text: node ? `${node.name} · ${t('type.' + node.type)}${n > 1 ? ` (+${n - 1})` : ''}` : t('status.nothingSelected') }));
     el.append(h('span', { text: `${t('tool.' + editor.tool)} · ${t('space.' + editor.space)}${editor.snap.enabled ? ' · ' + t('tool.snap') : ''}` }));
     if (editor.displayEdit) el.append(h('span', { class: 'display-edit', text: t('display.editing') }));
+    if (previewPanelCount() > 0) el.append(h('span', { class: 'preview-chip', text: t('preview.mode'), title: t('tip.preview.mode') }));
     if (editor.perfActive()) el.append(h('span', { class: 'perf', text: t('display.perfActive'), title: t('tip.display.perf') }));
     if (editor.rotateMode === 'preserve') el.append(h('span', { class: 'warn', text: t('rotmode.preserve') }));
     // viewport banner: unmistakable while the gizmos edit the display geometry
@@ -165,7 +169,8 @@ function setupStatus(editor) {
     if (editor.hint) el.append(h('span', { class: 'warn', text: editor.hint }));
     else el.append(h('span', { style: 'margin-left:auto;color:#6b7482', text: t('status.navHint') }));
   };
-  editor.on('selection', render); editor.on('tool', render); editor.on('time', render); editor.on('change', render); editor.on('hint', render); editor.on('displaySel', render);
+  editor.on('selection', render); editor.on('tool', render); editor.on('time', render); editor.on('change', render);
+  onPreviewPanels(render); editor.on('hint', render); editor.on('displaySel', render);
   onLangChange(render);
   render();
   let hintTimer = null;

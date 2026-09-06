@@ -249,6 +249,22 @@ export default {
   "props.keyRot": "Rotation keyen",
   "props.reset": "Zurücksetzen",
 
+  "props.worldLocked": "Weltfixiert (Root-Motion ignorieren)",
+
+  "tip.props.worldLocked": "Aus (Standard): dieser Regler folgt der Root-Motion der Animation und bleibt bei bewegtem wie stehendem Abspielen bei der Figur. An: er behält seine Weltposition, wenn Root-Motion ausgeschaltet wird.",
+
+  "hist.worldLocked": "Weltfixierter Regler",
+
+  "preview.mode": "Vorschaumodus",
+
+  "tip.preview.mode": "Der Viewport zeigt ein vorläufiges Ergebnis. Im schwebenden Panel anwenden oder abbrechen; Kamera und Zeitleiste bleiben nutzbar.",
+
+  "preview.collapse": "Panel einklappen",
+
+  "preview.expand": "Panel ausklappen",
+
+  "preview.close": "Schließen (Vorschau abbrechen)",
+
   "scale.button": "Gesamtes Modell skalieren…",
 
   "tip.scale.button": "Das komplette Modell (Objekte, Rig, Animationsdistanzen) um seinen Pivot skalieren und die neue Größe einbacken",
