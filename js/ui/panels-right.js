@@ -1,5 +1,6 @@
-// Right rail: Properties (transform inspector), Rigging & Constraints,
-// Display, Waypaths.
+// Right rail: Properties (context-sensitive inspector), Model (whole-model
+// preparation), Rig (bones, IK & controls, utilities) and Waypaths. Which panels
+// show depends on the workspace (Model / Rig / Animate / Export).
 import { t, onLangChange } from '../i18n/i18n.js';
 import { h, row, numInput, vec3Row, textInput, selectInput, checkbox, button, btnRow, subhead, hint, empty, rerender, slider, fmt } from './dom.js';
 import { confirmDialog, toast, showMenu } from './dialogs.js';
@@ -13,6 +14,7 @@ import { quat, v3, normDeg } from '../core/math.js';
 import { chainBones, constraintIssues } from '../anim/ik.js';
 import { modelInfo } from '../scene/primitives.js';
 import { primaryKeyLabel } from './shortcuts.js';
+import { loadPrefs, updatePrefs } from '../core/persistence.js';
 import { effectiveDirectional, pathDuration, pathLength } from '../anim/waypath.js';
 import { showSimplifyPathDialog } from './export-dialogs.js';
 import { showReorientDialog } from './orient-dialog.js';
@@ -22,7 +24,7 @@ export function initRightPanels(editor, viewport) {
   const bodies = {
     properties: document.querySelector('#panel-properties .panel-body'),
     rigging: document.querySelector('#panel-rigging .panel-body'),
-    display: document.querySelector('#panel-display .panel-body'),
+    model: document.querySelector('#panel-model .panel-body'),
     waypaths: document.querySelector('#panel-waypaths .panel-body'),
   };
   const wpCount = document.querySelector('#panel-waypaths .count');
@@ -30,7 +32,13 @@ export function initRightPanels(editor, viewport) {
   const eulerOf = (q) => quat.toEulerDeg(q).map((a) => normDeg(a));
   const worldText = (w) => w ? t('props.world', { p: w.pos.map((x) => fmt(x, 3)).join(', '), r: eulerOf(w.rot).map((x) => fmt(x, 1)).join(', ') }) : '';
   let live = null;
-  let brightnessInput = null;
+  // "Advanced ▸" sections: collapsed by default, the open state persists per section
+  const advanced = (key, ...children) => {
+    const pk = 'adv:' + key;
+    const det = h('details', { class: 'adv', open: !!loadPrefs()[pk] }, h('summary', { text: t('props.advanced') }), ...children.filter(Boolean));
+    det.addEventListener('toggle', () => updatePrefs({ [pk]: det.open }));
+    return det;
+  };
   // Update the transform inputs in place during gizmo drags (no full re-render)
   function updateLive() {
     if (!live || editor.active !== live.nodeId) return;
@@ -85,9 +93,7 @@ export function initRightPanels(editor, viewport) {
     const sel = editor.selectedNodes();
     if (!node) {
       body.append(empty(t('props.empty')));
-      body.append(subhead(t('props.scene')));
-      body.append(vec3Row(t('props.globalOffset'), p.settings.globalOffset || [0, 0, 0], (v) => editor.setGlobalOffset(v), { tip: t('tip.props.globalOffset') }));
-      body.append(row(t('props.fps'), selectInput([24, 30, 60].map((f) => ({ value: f, label: String(f) })), p.settings.fps || 30, (v) => editor.setSetting('fps', parseInt(v, 10))), t('tip.props.fps')));
+      body.append(hint(t(p.nodes.length ? 'props.selectHint' : 'props.selectHintEmpty')));
       return;
     }
     if (sel.length > 1) body.append(hint(t('props.multi', { n: sel.length })));
@@ -126,6 +132,7 @@ export function initRightPanels(editor, viewport) {
         ...(node.basis ? [{ sep: true }, { label: t('props.unfreeze'), action: () => editor.unfreezeTransform(node.id) }] : []),
       ]), { tip: t('tip.props.freeze') }) : null,
     ));
+    if (node.type === 'bone' || (node.type === 'object' && childrenOf(p, node.id).length)) body.append(checkbox(t('rotmode.preserve'), editor.rotateMode === 'preserve', (v) => editor.setRotateMode(v ? 'preserve' : 'normal'), t('tip.rotmode')));
     if (node.type === 'bone' && node.basis) body.append(hint(t('props.frozenInfo', { rot: eulerOf(node.basis.rot).map((v) => fmt(v, 1)).join(', '), pos: node.basis.pos.map((v) => fmt(v, 3)).join(', ') })));
     if (editor.rotateMode === 'preserve') { body.append(hint(t('props.rotModeHint'), 'warn')); if (editor.moveRebaseInexact(node.id)) body.append(hint(t('props.rotModeMoveWarn'), 'warn')); }
     else if (clip) body.append(hint(t(p.settings.autoKey ? 'props.autoKeyOn' : 'props.autoKeyOff')));
@@ -143,7 +150,6 @@ export function initRightPanels(editor, viewport) {
         button(t('props.switchFK'), () => editor.updateConstraint(driver.id, { enabled: false })),
       ));
     }
-    if (node.type === 'object' || node.type === 'bone') body.append(diagnosticsBlock(node.id));
     if (node.type === 'object') {
       // Display model: editor-only offset of the display geometry (never exported)
       const on = editor.displayEdit;
@@ -218,23 +224,33 @@ export function initRightPanels(editor, viewport) {
       sec.append(hint(t(on ? 'display.editHint' : 'display.modelHint')));
       body.append(sec);
       live.dispRows = { pos: dPos, rot: dRot, scale: dScale, uni };
-      body.append(subhead(t('props.correction')));
-      body.append(vec3Row(t('props.correctionRot'), node.correction || [0, 0, 0], (v) => editor.setCorrection(node.id, v), { step: 1, precision: 2, tip: t('tip.props.correction') }));
-      body.append(btnRow(button(t('props.resetCorrection'), () => editor.resetCorrection(node.id), { disabled: !(node.correction || []).some((c) => c) })));
-      body.append(hint(t('props.correctionHint')));
-      body.append(subhead(t('props.objectInfo')));
       const unknown = (node.decorations || []).filter((d) => !modelInfo(d.modelId)).length;
-      body.append(h('div', { class: 'stat-grid' },
-        h('span', { class: 'k', text: 'GUID' }), h('span', { class: 'v', text: String(node.guid ?? '—') }),
-        h('span', { class: 'k', text: t('props.zoom') }), h('span', { class: 'v', text: (node.zoom || [1, 1, 1]).map((z) => fmt(z, 3)).join(' × ') }),
-        h('span', { class: 'k', text: t('project.decorations') }), h('span', { class: 'v', text: String(node.decorations?.length || 0) + (unknown ? ` (${t('props.unknownN', { n: unknown })})` : '') }),
-        h('span', { class: 'k', text: t('props.unitType') }), h('span', { class: 'v', text: node.isStatic ? t('props.static') : t('props.dynamic') }),
-      ));
       if (node.isStatic) body.append(hint(t('props.staticHint'), 'warn'));
-      if (unknown) body.append(hint(t('props.unknownHint')));
+      body.append(advanced('object',
+        subhead(t('props.correction')),
+        vec3Row(t('props.correctionRot'), node.correction || [0, 0, 0], (v) => editor.setCorrection(node.id, v), { step: 1, precision: 2, tip: t('tip.props.correction') }),
+        btnRow(button(t('props.resetCorrection'), () => editor.resetCorrection(node.id), { disabled: !(node.correction || []).some((c) => c) })),
+        hint(t('props.correctionHint')),
+        subhead(t('props.objectInfo')),
+        h('div', { class: 'stat-grid' },
+          h('span', { class: 'k', text: 'GUID' }), h('span', { class: 'v', text: String(node.guid ?? '—') }),
+          h('span', { class: 'k', text: t('props.zoom') }), h('span', { class: 'v', text: (node.zoom || [1, 1, 1]).map((z) => fmt(z, 3)).join(' × ') }),
+          h('span', { class: 'k', text: t('project.decorations') }), h('span', { class: 'v', text: String(node.decorations?.length || 0) + (unknown ? ` (${t('props.unknownN', { n: unknown })})` : '') }),
+          h('span', { class: 'k', text: t('props.unitType') }), h('span', { class: 'v', text: node.isStatic ? t('props.static') : t('props.dynamic') }),
+        ),
+        unknown ? hint(t('props.unknownHint')) : null,
+        diagnosticsBlock(node.id),
+      ));
     } else if (node.type === 'bone') {
       body.append(subhead(t('props.bone')));
       body.append(row(t('props.length'), numInput(node.length, (v) => editor.setNodeProps(node.id, { length: Math.max(0.01, v) }), { step: 0.05, min: 0.01 }), t('tip.props.length')));
+      const kids = childrenOf(p, node.id);
+      const used = p.constraints.filter((k) => chainBones(p, k).some((b) => b.id === node.id));
+      body.append(h('div', { class: 'stat-grid' },
+        h('span', { class: 'k', text: t('props.children') }), h('span', { class: 'v', text: String(kids.length) }),
+        h('span', { class: 'k', text: t('rig.constraints') }), h('span', { class: 'v', text: used.length ? used.map((k) => k.name).join(', ') : t('props.none') }),
+      ));
+      body.append(advanced('bone', diagnosticsBlock(node.id)));
     } else if (node.type === 'proxy') {
       body.append(subhead(t('props.proxy')));
       body.append(row(t('props.shape'), selectInput(['cuboid', 'cylinder', 'sphere'].map((s) => ({ value: s, label: t('shape.' + s) })), node.shape, (v) => editor.setNodeProps(node.id, { shape: v }))));
@@ -245,57 +261,73 @@ export function initRightPanels(editor, viewport) {
       body.append(hint(t('props.proxyHint')));
     } else if (node.type === 'target' || node.type === 'pole') {
       const used = p.constraints.filter((k) => k.targetId === node.id || k.poleId === node.id);
+      body.append(subhead(t(node.type === 'target' ? 'props.ikTarget' : 'props.poleTarget')));
       body.append(hint(used.length ? t('props.usedBy', { names: used.map((k) => k.name).join(', ') }) : t('props.unused')));
+      for (const k of used) body.append(btnRow(button(t('props.selectChainBone', { name: getNode(p, k.boneId)?.name || '?' }), () => editor.select(k.boneId), { disabled: !k.boneId }), button(t('rig.ikOn'), () => editor.updateConstraint(k.id, { enabled: !k.enabled }), { cls: k.enabled ? 'mini primary-mini' : 'mini', tip: t('tip.rig.ikfk') })));
+      if (!used.length) body.append(hint(t('props.controlHint')));
     }
     if (sel.length > 1) body.append(btnRow(button(t('btn.deleteSelected'), () => editor.deleteSelected(), { cls: 'mini danger' })));
   }
 
-  // ---------- Rigging ----------
+  // ---------- Rig ----------
+  // Bones → IK & Controls → Constraints → Rig utilities. Whole-model preparation
+  // (orientation, scale) lives in the Model panel.
   function renderRigging(body) {
     const p = editor.project;
     const node = editor.activeNode();
     const bones = p.nodes.filter((n) => n.type === 'bone');
+    const objs = p.nodes.filter((n) => n.type === 'object');
     const boneOptions = [{ value: '', label: t('props.none') }, ...bones.map((b) => ({ value: b.id, label: b.name }))];
-    if (!node) {
-      body.append(empty(t('rig.empty')));
+    if (!p.nodes.length) {
+      body.append(empty(t('rig.noModel')));
+      body.append(btnRow(button(t('cmd.goModel'), () => editor.setMode('model'))));
+      return;
+    }
+    // --- Bones ---
+    body.append(subhead(t('rig.bonesHead'), h('span', { class: 'count', style: 'margin-left:auto', text: String(bones.length) })));
+    if (!bones.length) {
+      body.append(empty(t('rig.noBonesTitle')));
+      body.append(hint(t('rig.noBonesHint')));
+      body.append(btnRow(
+        button(t('autorig.button'), () => showAutoRigDialog(editor), { cls: 'mini primary-mini', tip: t('tip.autorig') }),
+        button(t('add.bone'), () => editor.addBone(null), { tip: t('tip.add.bone') }),
+        button(t('add.bonesForSelected'), () => editor.addBonesForSelected(), { disabled: !editor.selectedNodes().some((n) => n.type === 'object'), tip: t('tip.add.bonesForSelected') }),
+      ));
+    } else if (!node) {
+      body.append(hint(t('rig.empty')));
       body.append(btnRow(button(t('add.bone'), () => editor.addBone(null), { tip: t('tip.add.bone') })));
     } else if (node.type === 'bone') {
-      body.append(subhead(t('rig.bone', { name: node.name })));
+      body.append(hint(t('rig.bone', { name: node.name })));
       body.append(row(t('props.length'), numInput(node.length, (v) => editor.setNodeProps(node.id, { length: Math.max(0.01, v) }), { step: 0.05, min: 0.01 })));
       body.append(row(t('rig.parentBone'), selectInput(boneOptions.filter((o) => o.value !== node.id), node.parent && getNode(p, node.parent)?.type === 'bone' ? node.parent : '', (v) => editor.reparentNodes([node.id], v || null))));
       body.append(btnRow(
         button(t('rig.addChildBone'), () => editor.addBone(node.id), { tip: t('tip.rig.addChildBone') }),
-        button(t('rig.addIK'), () => editor.addConstraint(node.id), { tip: t('tip.rig.addIK') }),
+        button(t('rig.addIK'), () => editor.addConstraint(node.id), { cls: 'mini primary-mini', tip: t('tip.rig.addIK') }),
       ));
       const others = editor.selectedNodes().filter((n) => n.id !== node.id && n.type !== 'bone');
       if (others.length) body.append(btnRow(button(t('rig.attachSelected', { n: others.length }), () => editor.reparentNodes(others.map((n) => n.id), node.id), { tip: t('tip.rig.attach') })));
       else body.append(hint(t('rig.attachHint')));
-    } else {
-      body.append(subhead(t('rig.object', { name: node.name })));
+    } else if (node.type === 'object' || node.type === 'proxy') {
+      body.append(hint(t('rig.object', { name: node.name })));
       body.append(row(t('rig.attachTo'), selectInput(boneOptions, node.parent && getNode(p, node.parent)?.type === 'bone' ? node.parent : '', (v) => editor.reparentNodes([node.id], v || null)), t('tip.rig.attachTo')));
-      if (!bones.length) body.append(hint(t('rig.noBones')));
       body.append(btnRow(
         button(t('rig.addBoneHere'), () => editor.addBone(null), { tip: t('tip.rig.addBoneHere') }),
         button(t('add.bonesForSelected'), () => editor.addBonesForSelected(), { tip: t('tip.add.bonesForSelected') }),
       ));
     }
-    body.append(subhead(t('autorig.title')));
-    body.append(btnRow(button(t('autorig.button'), () => showAutoRigDialog(editor), { cls: 'mini', tip: t('tip.autorig') })));
-    body.append(subhead(t('orient.section')));
-    body.append(hint(t('orient.intro')));
+    // --- IK & Controls ---
+    body.append(subhead(t('rig.ikHead'), h('span', { class: 'count', style: 'margin-left:auto', text: String(p.constraints.length) })));
     body.append(btnRow(
-      button(t('orient.button'), () => showReorientDialog(editor), { cls: 'mini', tip: t('tip.orient.button') }),
-      button(t('scale.button'), () => showScaleModelDialog(editor), { cls: 'mini', tip: t('tip.scale.button') }),
+      button(t('add.target'), () => editor.addNode('target', { atActive: true }), { tip: t('tip.add.target') }),
+      button(t('add.pole'), () => editor.addNode('pole', { atActive: true }), { tip: t('tip.add.pole') }),
     ));
-    body.append(hint(t('autorig.intro')));
-    body.append(subhead(t('rig.constraints'), h('span', { class: 'count', style: 'margin-left:auto', text: String(p.constraints.length) })));
-    if (!p.constraints.length) body.append(hint(t('rig.noConstraints')));
+    if (!p.constraints.length) body.append(hint(t(bones.length ? 'rig.noConstraints' : 'rig.noConstraintsNoBones')));
     for (const k of p.constraints) {
       const el = h('div', { class: 'slot' });
       const issues = constraintIssues(p, k);
       el.append(h('div', { class: 'slot-head' }, h('span', { class: 'ico target', text: '⊕' }), textInput(k.name, (v) => editor.updateConstraint(k.id, { name: v })), button('✕', () => editor.removeConstraint(k.id), { cls: 'mini danger', tip: t('tip.rig.removeIK') })));
       el.append(row(t('rig.tipBone'), selectInput(boneOptions, k.boneId, (v) => editor.updateConstraint(k.id, { boneId: v })), t('tip.rig.tipBone')));
-      const targets = p.nodes.filter((n) => n.type !== 'object' || true).map((n) => ({ value: n.id, label: `${n.name} (${t('type.' + n.type)})` }));
+      const targets = p.nodes.map((n) => ({ value: n.id, label: `${n.name} (${t('type.' + n.type)})` }));
       const targetRow = row(t('rig.target'), selectInput([{ value: '', label: t('props.none') }, ...targets], k.targetId || '', (v) => editor.updateConstraint(k.id, { targetId: v || null })), t('tip.rig.target'));
       targetRow.append(button('⌖', () => editor.select(k.targetId), { disabled: !k.targetId, cls: 'mini', tip: t('tip.rig.selectTarget') }));
       el.append(targetRow);
@@ -308,53 +340,67 @@ export function initRightPanels(editor, viewport) {
       el.append(hint(t('rig.chainInfo', { bones: chain.map((b) => b.name).join(' → ') || '—' })));
       el.append(checkbox(k.enabled ? t('rig.ikOn') : t('rig.ikOff'), k.enabled, (v) => editor.updateConstraint(k.id, { enabled: v }), t('tip.rig.ikfk')));
       el.append(row(t('rig.influence'), slider(k.influence ?? 1, (v, commit) => { k.influence = v; if (commit) editor.updateConstraint(k.id, { influence: v }); else editor.transient(); }), t('tip.rig.influence')));
-      el.append(row(t('rig.iterations'), numInput(k.iterations || 12, (v) => editor.updateConstraint(k.id, { iterations: Math.max(1, Math.round(v)) }), { step: 1, min: 1, precision: 0, width: 60 })));
+      el.append(advanced('ik-' + k.id, row(t('rig.iterations'), numInput(k.iterations || 12, (v) => editor.updateConstraint(k.id, { iterations: Math.max(1, Math.round(v)) }), { step: 1, min: 1, precision: 0, width: 60 }))));
       for (const i of issues) el.append(hint(t('val.ik.' + i, { name: k.name }), i === 'missingPole' ? 'warn' : 'err'));
       body.append(el);
     }
-    body.append(hint(t('rig.help')));
+    // --- Rig utilities ---
+    body.append(subhead(t('rig.utilities')));
+    body.append(checkbox(t('rotmode.preserve'), editor.rotateMode === 'preserve', (v) => editor.setRotateMode(v ? 'preserve' : 'normal'), t('tip.rotmode')));
+    if (node?.type === 'bone') body.append(btnRow(
+      button(t('props.freeze') + ' ▾', (e) => showMenu(e.currentTarget, [
+        { label: t('props.freezeRot'), action: () => editor.freezeTransform(node.id, { pos: false, rot: true }) },
+        { label: t('props.freezePos'), action: () => editor.freezeTransform(node.id, { pos: true, rot: false }) },
+        { label: t('props.freezeBoth'), action: () => editor.freezeTransform(node.id, { pos: true, rot: true }) },
+        ...(node.basis ? [{ sep: true }, { label: t('props.unfreeze'), action: () => editor.unfreezeTransform(node.id) }] : []),
+      ]), { tip: t('tip.props.freeze') }),
+    ));
+    if (bones.length) body.append(btnRow(button(t('autorig.button'), () => showAutoRigDialog(editor), { tip: t('tip.autorig') })));
+    body.append(advanced('rig-help', hint(t('autorig.intro')), hint(t('rig.help')), objs.length ? hint(t('rig.modelHint')) : null));
   }
 
-  // ---------- Display ----------
-  function renderDisplay(body) {
-    const S = editor.project.settings;
-    body.append(row(t('display.opacity'), slider(S.proxyOpacity, (v, commit) => editor.setSetting('proxyOpacity', v, commit), { min: 0.05, max: 1, step: 0.01 }), t('tip.display.opacity')));
-    body.append(hint(t('display.opacityHint')));
-    const toggles = [['showDecorations', 'display.decorations'], ['showProxies', 'display.proxies'], ['showBones', 'display.bones'], ['showAxes', 'display.axes'], ['showPivots', 'display.pivots'], ['showConstraints', 'display.constraints'], ['showWaypaths', 'display.waypaths'], ['showGrid', 'display.grid']];
-    for (const [key, label] of toggles) body.append(checkbox(t(label), S[key] !== false, (v) => editor.setSetting(key, v)));
-    body.append(subhead(t('display.viewport')));
-    const stats = editor.sceneStats();
-    body.append(row(t('display.unknown'), selectInput([{ value: 'simplified', label: t('display.unknownSimplified') }, { value: 'boxes', label: t('display.unknownBoxes') }, { value: 'hidden', label: t('display.unknownHidden') }], editor.view.unknownMode || 'simplified', (v) => editor.setViewPref({ unknownMode: v })), t('tip.display.unknown')));
-    body.append(hint(t('display.unknownHint')));
-    const perfRow = row(t('display.perf'), selectInput([{ value: 'auto', label: t('display.perfAuto') }, { value: 'on', label: t('display.perfOn') }, { value: 'off', label: t('display.perfOff') }], editor.view.perfMode || 'auto', (v) => editor.setViewPref({ perfMode: v })), t('tip.display.perf'));
-    perfRow.append(h('span', { class: 'chip' + (stats.perf ? ' warn' : ''), text: stats.perf ? t('display.perfActive') : t('display.perfInactive') }));
-    body.append(perfRow);
-    body.append(hint(t('display.perfHint', { parts: stats.parts })));
-    // native range input; the value is applied live and the panel is NOT re-rendered
-    // while dragging (a rebuilt input would end the drag under the pointer)
-    brightnessInput = slider(editor.view.brightness ?? 1, (v) => editor.setViewPref({ brightness: v }), { min: 0.3, max: 2.2, step: 0.05 });
-    brightnessInput.dataset.focusId = 'brightness';
-    const bRow = row(t('display.brightness'), brightnessInput, t('tip.display.brightness'));
-    bRow.append(button('\u21ba', () => editor.setViewPref({ brightness: 1 }), { tip: t('display.resetBrightness'), cls: 'mini' }));
-    body.append(bRow);
-    body.append(subhead(t('display.navigation')));
-    const group = (label, ...items) => h('div', { class: 'nav-group' }, h('div', { class: 'nav-group-title', text: label }), ...items);
-    body.append(group(t('display.pan'),
-      checkbox(t('display.reversePanX'), !!editor.view.reversePanX, (v) => editor.setViewPref({ reversePanX: v }), t('tip.display.reversePan')),
-      checkbox(t('display.reversePanY'), !!editor.view.reversePanY, (v) => editor.setViewPref({ reversePanY: v }), t('tip.display.reversePan'))));
-    body.append(group(t('display.orbit'),
-      checkbox(t('display.reverseOrbitX'), !!editor.view.reverseOrbitX, (v) => editor.setViewPref({ reverseOrbitX: v }), t('tip.display.reverseOrbit')),
-      checkbox(t('display.reverseOrbitY'), !!editor.view.reverseOrbitY, (v) => editor.setViewPref({ reverseOrbitY: v }), t('tip.display.reverseOrbit'))));
-    body.append(group(t('display.keyboard'),
-      checkbox(t('display.wasd'), editor.wasd, (v) => editor.setWasd(v), t('tip.display.wasd'))));
-    body.append(hint(t('display.navHint')));
+  // ---------- Model ----------
+  // Whole-model preparation: import status, orientation & scale, scene settings, proxies.
+  function renderModel(body) {
+    const p = editor.project;
+    const S = p.settings;
+    const objs = p.nodes.filter((n) => n.type === 'object');
+    if (!objs.length) {
+      body.append(empty(t('model.empty')));
+      body.append(btnRow(button(t('viewport.import'), () => editor.pickGiaFile?.(), { cls: 'mini primary-mini', tip: t('project.drop') })));
+      body.append(hint(t('model.emptyHint')));
+      return;
+    }
+    const decs = objs.reduce((a, o) => a + (o.decorations?.length || 0), 0);
+    const unknown = objs.reduce((a, o) => a + (o.decorations || []).filter((d) => !modelInfo(d.modelId)).length, 0);
+    body.append(h('div', { class: 'stat-grid' },
+      h('span', { class: 'k', text: t('project.file') }), h('span', { class: 'v', text: editor.giaName || '—', title: editor.giaName || '' }),
+      h('span', { class: 'k', text: t('project.objects') }), h('span', { class: 'v', text: String(objs.length) }),
+      h('span', { class: 'k', text: t('project.decorations') }), h('span', { class: 'v', text: String(decs) + (unknown ? ` (${t('props.unknownN', { n: unknown })})` : '') }),
+    ));
+    body.append(subhead(t('orient.section')));
+    body.append(hint(t('model.orientIntro')));
+    body.append(btnRow(
+      button(t('orient.button'), () => showReorientDialog(editor), { tip: t('tip.orient.button') }),
+      button(t('scale.button'), () => showScaleModelDialog(editor), { tip: t('tip.scale.button') }),
+    ));
+    body.append(subhead(t('props.scene')));
+    body.append(vec3Row(t('props.globalOffset'), S.globalOffset || [0, 0, 0], (v) => editor.setGlobalOffset(v), { tip: t('tip.props.globalOffset') }));
+    body.append(row(t('props.fps'), selectInput([24, 30, 60].map((f) => ({ value: f, label: String(f) })), S.fps || 30, (v) => editor.setSetting('fps', parseInt(v, 10))), t('tip.props.fps')));
     body.append(subhead(t('display.proxies')));
     body.append(btnRow(
       button(t('shape.cuboid'), () => editor.addProxy('cuboid')),
       button(t('shape.cylinder'), () => editor.addProxy('cylinder')),
       button(t('shape.sphere'), () => editor.addProxy('sphere')),
     ));
+    body.append(row(t('display.opacity'), slider(S.proxyOpacity, (v, commit) => editor.setSetting('proxyOpacity', v, commit), { min: 0.05, max: 1, step: 0.01 }), t('tip.display.opacity')));
     body.append(hint(t('display.proxyHint')));
+    body.append(advanced('model',
+      hint(t('display.opacityHint')),
+      unknown ? hint(t('props.unknownHint')) : null,
+      hint(t('model.displayHint')),
+      btnRow(button(t('display.edit'), () => editor.toggleDisplayEdit(), { cls: editor.displayEdit ? 'mini primary-mini' : 'mini', tip: t('tip.display.edit', { k: primaryKeyLabel('tool.displayEdit') }) })),
+    ));
   }
 
   // ---------- Waypaths ----------
@@ -413,10 +459,10 @@ export function initRightPanels(editor, viewport) {
     body.append(hint(t('path.bakeHint')));
   }
 
-  function renderAll(which = ['properties', 'rigging', 'display', 'waypaths']) {
+  function renderAll(which = ['properties', 'rigging', 'model', 'waypaths']) {
     if (which.includes('properties')) rerender(bodies.properties, renderProperties);
     if (which.includes('rigging')) rerender(bodies.rigging, renderRigging);
-    if (which.includes('display')) rerender(bodies.display, renderDisplay);
+    if (which.includes('model')) rerender(bodies.model, renderModel);
     if (which.includes('waypaths')) { rerender(bodies.waypaths, renderWaypaths); wpCount.textContent = editor.project.waypaths.length ? String(editor.project.waypaths.length) : ''; }
   }
   let liveAt = 0;
@@ -432,8 +478,8 @@ export function initRightPanels(editor, viewport) {
   editor.on('time', () => renderAll(['properties']));
   editor.on('overrides', () => renderAll(['properties']));
   editor.on('displaySel', () => renderAll(['properties']));
-  editor.on('view', () => { if (brightnessInput && brightnessInput.isConnected && document.activeElement !== brightnessInput) brightnessInput.value = String(editor.view.brightness ?? 1); });
-  editor.on('tool', () => renderAll(['display', 'properties']));
+  editor.on('tool', () => renderAll(['model', 'properties', 'rigging']));
+  editor.on('mode', () => renderAll());
   onLangChange(() => renderAll());
   renderAll();
   return { renderAll };

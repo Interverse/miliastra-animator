@@ -1,4 +1,4 @@
-// Left rail: Project, Outliner, Animation Clips, Export.
+// Left rail: Project (with the workflow guide), Outliner, Animations, Export (checklist).
 import { t, onLangChange } from '../i18n/i18n.js';
 import { h, row, numInput, textInput, selectInput, checkbox, button, btnRow, subhead, hint, empty, rerender, fmt } from './dom.js';
 import { textPrompt, confirmDialog, showMenu, toast, messageDialog } from './dialogs.js';
@@ -11,7 +11,7 @@ import { primaryKeyLabel } from './shortcuts.js';
 import { downloadBytes } from './editor.js';
 import { showRetargetDialog } from './retarget-dialog.js';
 import { showPathLimitFlow } from './export-dialogs.js';
-import { pathLimitViolations, MAX_PATH_POINTS } from '../gia/gia-export.js';
+import { pathLimitViolations, MAX_PATH_POINTS, MAX_OBJECT_SCALE } from '../gia/gia-export.js';
 
 const ICONS = { object: '▣', bone: '⌇', proxy: '◇', target: '⊕', pole: '◎', decoration: '·' };
 
@@ -30,11 +30,43 @@ export function initLeftPanels(editor, viewport) {
   let exportPlan = null; // final path points per object/animation (rebuilt with the validation while the Export panel is open)
   let validationTimer = null;
 
+  // ---------- Workflow guide ----------
+  // Model → Rig → Animate → Export: where the project stands and the one next step
+  // a beginner should take. Clicking a step opens that workspace.
+  function workflowGuide() {
+    const p = editor.project;
+    const objs = p.nodes.filter((n) => n.type === 'object');
+    const bones = p.nodes.filter((n) => n.type === 'bone');
+    const keyed = p.clips.some((c) => Object.values(c.tracks).some((tr) => tr.pos.length || tr.rot.length));
+    const done = { model: objs.length > 0, rig: bones.length > 0, animate: keyed, export: !!editor.lastReport };
+    const steps = ['model', 'rig', 'animate', 'export'];
+    const wrap = h('div', { class: 'guide' });
+    const stepper = h('div', { class: 'guide-steps', role: 'tablist' });
+    steps.forEach((m, i) => {
+      const b = h('button', { class: 'guide-step' + (editor.mode === m ? ' current' : '') + (done[m] ? ' done' : ''), title: t('tip.mode.' + m), onclick: () => { editor.setMode(m); } },
+        h('span', { class: 'guide-num', text: done[m] ? '✓' : String(i + 1) }), h('span', { class: 'guide-label', text: t('mode.' + m) }));
+      stepper.append(b);
+    });
+    wrap.append(stepper);
+    const next = !objs.length ? 'import' : !p.clips.length ? (bones.length ? 'animate' : 'rig') : !keyed ? 'keys' : !editor.lastReport ? 'export' : 'done';
+    const nextMode = { import: 'model', rig: 'rig', animate: 'animate', keys: 'animate', export: 'export', done: null }[next];
+    const line = h('div', { class: 'guide-next' }, h('span', { text: t('guide.next.' + next) }));
+    if (nextMode && nextMode !== editor.mode) line.append(button(t('mode.' + nextMode) + ' →', () => editor.setMode(nextMode), { cls: 'mini' }));
+    else if (next === 'import') line.append(button(t('viewport.import'), () => editor.pickGiaFile?.(), { cls: 'mini primary-mini' }));
+    else if (next === 'animate') line.append(button(t('export.addAnimation'), () => editor.createClip(), { cls: 'mini primary-mini' }));
+    else if (next === 'export') line.append(button(t('export.download'), () => { editor.setMode('export'); document.getElementById('btn-export')?.focus(); }, { cls: 'mini' }));
+    wrap.append(line);
+    if (next === 'rig') wrap.append(hint(t('guide.optional')));
+    return wrap;
+  }
+
   // ---------- Project ----------
   function renderProject(body) {
     const p = editor.project;
+    body.append(workflowGuide());
     const input = h('input', { type: 'file', accept: '.gia' });
     input.addEventListener('change', () => { const f = input.files[0]; if (f) readFile(f, { guarded: true }); input.value = ''; });
+    editor.pickGiaFile = () => input.click();
     const drop = h('label', { class: 'filedrop' }, h('span', { text: t('project.drop') }), h('span', { class: 'hint', text: t('project.dropHint') }), input);
     drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
     drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
@@ -55,6 +87,7 @@ export function initLeftPanels(editor, viewport) {
     const projInput = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
     projInput.addEventListener('change', async () => { const f = projInput.files[0]; if (!f) return; try { editor.openProjectFile(await f.text()); toast(t('toast.projectOpened')); } catch (e) { toast(t('toast.projectOpenFailed'), 'error'); } projInput.value = ''; });
     body.append(projInput);
+    editor.pickProjectFile = () => projInput.click();
     editor.exportProjectFile = () => downloadBytes(new TextEncoder().encode(editor.projectFileJSON()), (editor.projectName || editor.giaName || 'project').replace(/\.gia$/i, '') + '.animator.json', 'application/json');
     body.append(btnRow(
       button(`${t('project.saveLocal')} (${primaryKeyLabel('file.save')})`, () => editor.saveLocal(), { cls: hasContent && editor.dirty ? 'mini primary-mini' : 'mini', disabled: !hasContent, tip: t('tip.project.saveLocal') }),
@@ -76,7 +109,7 @@ export function initLeftPanels(editor, viewport) {
     if (!/\.gia$/i.test(file.name)) { toast(t('toast.notGia'), 'warn'); return; }
     if (guarded && editor.guardUnsaved && !(await editor.guardUnsaved())) return;
     const buf = new Uint8Array(await file.arrayBuffer());
-    if (editor.importGia(buf, file.name)) { setTimeout(() => viewport.frameAll(), 50); editor.setMode('rig'); }
+    if (editor.importGia(buf, file.name)) { setTimeout(() => viewport.frameAll(), 50); editor.setMode('model'); }
   }
   editor.readFile = readFile;
 
@@ -215,18 +248,28 @@ export function initLeftPanels(editor, viewport) {
     ].filter(Boolean));
   }
 
-  // ---------- Clips ----------
+  // ---------- Animations ----------
   function renderClips(body) {
     const p = editor.project;
     const active = activeClip(p);
+    const importSection = () => {
+      body.append(subhead(t('clip.importHead')));
+      body.append(btnRow(button(t('retarget.button'), () => showRetargetDialog(editor), { tip: t('tip.retarget.button') })));
+      body.append(hint(t('clip.importHint')));
+    };
+    if (!p.clips.length) {
+      body.append(empty(t('clip.emptyTitle')));
+      body.append(hint(t(p.nodes.length ? 'clip.empty' : 'clip.emptyNoModel')));
+      body.append(btnRow(button(t('export.addAnimation'), () => editor.createClip(), { cls: 'mini primary-mini', tip: t('tip.clip.new') })));
+      importSection();
+      return;
+    }
     body.append(btnRow(
-      button(t('clip.new'), () => editor.createClip(), { tip: t('tip.clip.new') }),
+      button(t('export.addAnimation'), () => editor.createClip(), { tip: t('tip.clip.new') }),
       button(t('clip.duplicate'), () => active && editor.duplicateClip(active.id), { disabled: !active, tip: t('tip.clip.duplicate') }),
       button(t('clip.rename'), async () => { if (!active) return; const v = await textPrompt({ title: t('clip.rename'), value: active.name }); if (v) editor.renameClip(active.id, v); }, { disabled: !active }),
-      button(t('retarget.button'), () => showRetargetDialog(editor), { tip: t('tip.retarget.button') }),
       button(t('btn.delete'), async () => { if (!active) return; if (await confirmDialog({ title: t('btn.delete'), message: t('clip.deleteConfirm', { name: active.name }), danger: true })) editor.deleteClip(active.id); }, { disabled: !active, cls: 'mini danger' }),
     ));
-    if (!p.clips.length) { body.append(empty(t('clip.empty'))); return; }
     const list = h('div', { class: 'list' });
     for (const c of p.clips) {
       const keys = Object.values(c.tracks).reduce((a, tr) => a + tr.pos.length + tr.rot.length, 0);
@@ -252,6 +295,7 @@ export function initLeftPanels(editor, viewport) {
       }
     }
     body.append(hint(t('clip.activeHint', { name: active ? active.name : '—' })));
+    importSection();
   }
 
   // ---------- Export ----------
@@ -261,6 +305,23 @@ export function initLeftPanels(editor, viewport) {
     const cfg = p.exportConfig;
     const n = slots.length;
     body.append(hint(t('export.intro')));
+    // --- checklist: everything the file needs before it can be downloaded ---
+    const errs0 = validation.filter((i) => i.level === 'error'), warns0 = validation.filter((i) => i.level === 'warning');
+    const pathOver = exportPlan ? pathLimitViolations(exportPlan) : [];
+    const scaleOver = editor.objectScaleViolations();
+    const scrollTo = (el) => el && el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const items = [
+      { state: editor.giaBytes ? 'ok' : 'bad', label: t('export.check.model'), action: () => editor.setMode('model') },
+      { state: n ? 'ok' : 'bad', label: t('export.check.anims', { n, max: MAX_DEVICES_PER_OBJECT }), action: () => scrollTo(body.querySelector('.slot') || body.querySelector('.limit-bar')) },
+      { state: n ? 'ok' : 'todo', label: t('export.check.initial', { name: n ? (slots[cfg.initialSlot | 0] || slots[0])?.name || getClip(p, (slots[cfg.initialSlot | 0] || slots[0])?.clipId)?.name || '' : '—' }), action: () => scrollTo(body.querySelector('.slot.initial')) },
+      { state: !exportPlan ? 'todo' : pathOver.length ? 'warn' : 'ok', label: pathOver.length ? t('export.check.pathsOver', { n: pathOver.length, max: MAX_PATH_POINTS }) : t('export.check.paths', { max: MAX_PATH_POINTS }), action: () => { if (pathOver.length) editor.select(pathOver.map((o) => o.nodeId).filter(Boolean)); } },
+      { state: scaleOver.length ? 'bad' : 'ok', label: scaleOver.length ? t('export.check.scaleOver', { n: scaleOver.length, max: MAX_OBJECT_SCALE }) : t('export.check.scale', { max: MAX_OBJECT_SCALE }), action: () => { if (scaleOver.length) editor.select(scaleOver.map((o) => o.nodeId)); else editor.setMode('model'); } },
+      { state: errs0.length ? 'bad' : warns0.length ? 'warn' : 'ok', label: errs0.length ? t('export.validationErrors', { n: errs0.length }) : warns0.length ? t('export.validationWarnings', { n: warns0.length }) : t('export.validationOk'), action: () => scrollTo(body.querySelector('.validation-list')) },
+    ];
+    const ICON = { ok: '✓', warn: '⚠', bad: '✕', todo: '○' };
+    const check = h('div', { class: 'checklist' });
+    for (const it of items) check.append(h('button', { class: 'check-item ' + it.state, onclick: it.action, title: t('export.check.tip') }, h('span', { class: 'check-ico', text: ICON[it.state] }), h('span', { class: 'check-label', text: it.label })));
+    body.append(check);
     body.append(subhead(t('export.animations'), h('span', { class: 'count', style: 'margin-left:auto', text: `${n} / ${MAX_DEVICES_PER_OBJECT}` })));
     const bar = h('div', { class: 'limit-bar' });
     for (let i = 0; i < MAX_DEVICES_PER_OBJECT; i++) bar.append(h('i', { class: i < n ? 'used' : '' }));
@@ -310,11 +371,12 @@ export function initLeftPanels(editor, viewport) {
     body.append(adv);
 
     body.append(subhead(t('export.validation')));
+    body.classList.add('has-checklist');
     const errs = validation.filter((i) => i.level === 'error').length, warns = validation.filter((i) => i.level === 'warning').length;
     if (!validation.length) body.append(hint(t('export.validationOk'), 'ok'));
     else {
       body.append(hint(errs ? t('export.validationErrors', { n: errs }) : warns ? t('export.validationWarnings', { n: warns }) : t('export.validationInfo'), errs ? 'err' : warns ? 'warn' : ''));
-      const list = h('div');
+      const list = h('div', { class: 'validation-list' });
       for (const i of validation.slice(0, 30)) {
         const el = h('div', { class: 'issue ' + i.level }, h('span', { class: 'lvl', text: i.level === 'error' ? '✕' : i.level === 'warning' ? '⚠' : 'ℹ' }), h('span', { class: 'msg', text: t(i.key, i.params) }));
         if (i.nodeId) el.append(h('span', { class: 'go', text: '→', title: t('tip.issue.go'), onclick: () => editor.select(i.nodeId) }));
@@ -410,6 +472,7 @@ export function initLeftPanels(editor, viewport) {
   editor.on('export', () => renderAll(['export']));
   editor.on('preview', () => renderAll(['export']));
   editor.on('dirty', () => renderAll(['project']));
+  editor.on('mode', () => renderAll(['project']));
   editor.on('projects', () => renderAll(['project']));
   editor.on('time', () => renderAll(['clips']));
   onLangChange(() => renderAll());

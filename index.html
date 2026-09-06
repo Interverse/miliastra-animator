@@ -15,11 +15,13 @@
 }
 </script>
 </head>
-<body data-mode="rig">
+<body data-mode="model">
 <div id="app">
   <header id="topbar">
     <h1><span data-i18n="app.title">Miliastra Animator</span><span class="badge">.gia</span></h1>
+    <nav id="menubar" aria-label="Menus"></nav>
     <nav id="mode-tabs" aria-label="Workflow">
+      <button data-mode="model" data-i18n="mode.model" data-i18n-title="tip.mode.model">Model</button>
       <button data-mode="rig" data-i18n="mode.rig" data-i18n-title="tip.mode.rig">Rig</button>
       <button data-mode="animate" data-i18n="mode.animate" data-i18n-title="tip.mode.animate">Animate</button>
       <button data-mode="export" data-i18n="mode.export" data-i18n-title="tip.mode.export">Export</button>
@@ -27,8 +29,10 @@
     <div id="top-actions">
       <button id="btn-undo" class="icon" data-i18n-title="tip.undo" data-i18n-aria>↶</button>
       <button id="btn-redo" class="icon" data-i18n-title="tip.redo" data-i18n-aria>↷</button>
-      <button id="btn-shortcuts" class="icon" data-i18n-title="tip.shortcuts" data-i18n-aria>⌨</button>
-      <label id="lang-row"><span>🌐</span> <select id="lang-select" aria-label="Language"></select></label>
+      <button id="btn-search" class="icon" data-i18n-title="tip.search" data-i18n-aria>🔍</button>
+      <button id="btn-settings" class="icon" data-i18n-title="tip.settings" data-i18n-aria>⚙</button>
+      <button id="btn-left-drawer" class="icon drawer-toggle" data-i18n-title="ui.leftPanel" data-i18n-aria>☰</button>
+      <button id="btn-right-drawer" class="icon drawer-toggle" data-i18n-title="ui.rightPanel" data-i18n-aria>☷</button>
     </div>
   </header>
   <div id="main">
@@ -43,7 +47,7 @@
           <div class="panel-body"></div>
         </details>
         <details id="panel-clips" class="panel" open>
-          <summary><span data-i18n="panel.clips">Animation Clips</span><span class="count"></span></summary>
+          <summary><span data-i18n="panel.clips">Animations</span><span class="count"></span></summary>
           <div class="panel-body"></div>
         </details>
         <details id="panel-export" class="panel" open>
@@ -77,12 +81,12 @@
           <summary><span data-i18n="panel.properties">Properties</span></summary>
           <div class="panel-body"></div>
         </details>
-        <details id="panel-rigging" class="panel" open>
-          <summary><span data-i18n="panel.rigging">Rigging &amp; Constraints</span></summary>
+        <details id="panel-model" class="panel" open>
+          <summary><span data-i18n="panel.model">Model</span></summary>
           <div class="panel-body"></div>
         </details>
-        <details id="panel-display" class="panel">
-          <summary><span data-i18n="panel.display">Display</span></summary>
+        <details id="panel-rigging" class="panel" open>
+          <summary><span data-i18n="panel.rigging">Rig</span></summary>
           <div class="panel-body"></div>
         </details>
         <details id="panel-waypaths" class="panel">

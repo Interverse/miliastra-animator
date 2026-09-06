@@ -1,6 +1,6 @@
 // Application bootstrap: i18n, editor, viewport, panels, timeline, toolbar,
 // keyboard shortcuts, layout persistence and session restore.
-import { initI18n, setLanguage, currentLang, LANGS, t, onLangChange, applyI18n } from './i18n/i18n.js';
+import { initI18n, t, onLangChange } from './i18n/i18n.js';
 import { Editor } from './ui/editor.js';
 import { Viewport } from './viewport/viewport.js';
 import { initLeftPanels } from './ui/panels-left.js';
@@ -8,7 +8,10 @@ import { initRightPanels } from './ui/panels-right.js';
 import { Timeline } from './ui/timeline.js';
 import { initTutorial } from './ui/tutorial.js';
 import { matchAction, showShortcutsDialog, primaryKeyLabel } from './ui/shortcuts.js';
-import { showMenu, toast, confirmDialog } from './ui/dialogs.js';
+import { showMenu, toast } from './ui/dialogs.js';
+import { setupMenus } from './ui/menus.js';
+import { showCommandPalette } from './ui/command-palette.js';
+import { showSettingsDialog } from './ui/settings-dialog.js';
 import { previewPanelCount, onPreviewPanels, closeFloatingPanels } from './ui/float-panel.js';
 import { h } from './ui/dom.js';
 import { loadRecovery, listProjects, loadPrefs, updatePrefs } from './core/persistence.js';
@@ -27,8 +30,11 @@ async function main() {
   const timeline = new Timeline(editor, document.getElementById('timeline'));
   initLeftPanels(editor, viewport);
   initRightPanels(editor, viewport);
-  initTutorial(editor);
-  setupTopbar(editor);
+  const tutorial = initTutorial(editor);
+  const ctx = { editor, viewport, timeline, tutorial };
+  window.appContext = ctx;
+  setupMenus(ctx);
+  setupTopbar(editor, ctx);
   initProjects(editor);
   setupToolbar(editor, viewport);
   setupStatus(editor);
@@ -37,7 +43,7 @@ async function main() {
   setupFailsafes(editor);
   setupDrop(editor);
   setupEmptyState(editor);
-  editor.setMode(loadPrefs().mode || 'rig');
+  editor.setMode(loadPrefs().mode || 'model');
 
   editor.on('framed', () => setTimeout(() => viewport.frameAll(), 60));
 
@@ -52,18 +58,28 @@ async function main() {
   }
 }
 
-function setupTopbar(editor) {
-  const sel = document.getElementById('lang-select');
-  for (const l of LANGS) sel.append(h('option', { value: l.code, text: l.name, selected: l.code === currentLang() }));
-  sel.addEventListener('change', () => setLanguage(sel.value, true));
-  onLangChange((code) => { sel.value = code; });
+function setupTopbar(editor, ctx) {
   for (const b of document.querySelectorAll('#mode-tabs button')) b.addEventListener('click', () => { editor.setMode(b.dataset.mode); updatePrefs({ mode: b.dataset.mode }); });
   const leftScroll = document.querySelector('#left .rail-scroll');
-  const order = { rig: ['panel-project', 'panel-outliner', 'panel-clips', 'panel-export'], animate: ['panel-clips', 'panel-outliner', 'panel-project', 'panel-export'], export: ['panel-export', 'panel-clips', 'panel-project', 'panel-outliner'] };
+  const rightScroll = document.querySelector('#right .rail-scroll');
+  // panel order per workspace (the stylesheet hides what a workspace does not need)
+  const order = {
+    model: ['panel-project', 'panel-outliner', 'panel-clips', 'panel-export'],
+    rig: ['panel-project', 'panel-outliner', 'panel-clips', 'panel-export'],
+    animate: ['panel-clips', 'panel-outliner', 'panel-project', 'panel-export'],
+    export: ['panel-export', 'panel-project', 'panel-outliner', 'panel-clips'],
+  };
+  const orderRight = {
+    model: ['panel-model', 'panel-properties', 'panel-rigging', 'panel-waypaths'],
+    rig: ['panel-rigging', 'panel-properties', 'panel-model', 'panel-waypaths'],
+    animate: ['panel-properties', 'panel-waypaths', 'panel-rigging', 'panel-model'],
+    export: ['panel-properties', 'panel-rigging', 'panel-model', 'panel-waypaths'],
+  };
   const syncMode = () => {
     for (const b of document.querySelectorAll('#mode-tabs button')) b.classList.toggle('active', b.dataset.mode === editor.mode);
-    for (const id of order[editor.mode] || order.rig) leftScroll.appendChild(document.getElementById(id));
-    leftScroll.scrollTop = 0;
+    for (const id of order[editor.mode] || order.model) leftScroll.appendChild(document.getElementById(id));
+    for (const id of orderRight[editor.mode] || orderRight.model) rightScroll.appendChild(document.getElementById(id));
+    leftScroll.scrollTop = 0; rightScroll.scrollTop = 0;
   };
   editor.on('mode', syncMode);
   syncMode();
@@ -73,7 +89,17 @@ function setupTopbar(editor) {
   const syncHist = () => { undo.disabled = !editor.history.canUndo(); redo.disabled = !editor.history.canRedo(); };
   editor.history.onChange(syncHist);
   syncHist();
-  document.getElementById('btn-shortcuts').addEventListener('click', () => showShortcutsDialog());
+  document.getElementById('btn-search').addEventListener('click', () => showCommandPalette(ctx));
+  document.getElementById('btn-settings').addEventListener('click', () => showSettingsDialog(editor));
+  // narrow layouts: the side rails become drawers over the viewport
+  const drawers = { left: document.getElementById('left'), right: document.getElementById('right') };
+  const closeDrawers = () => { for (const k in drawers) drawers[k].classList.remove('open'); document.body.classList.remove('drawer-open'); };
+  const toggleDrawer = (side) => { const open = !drawers[side].classList.contains('open'); closeDrawers(); if (open) { drawers[side].classList.add('open'); document.body.classList.add('drawer-open'); } };
+  document.getElementById('btn-left-drawer').addEventListener('click', () => toggleDrawer('left'));
+  document.getElementById('btn-right-drawer').addEventListener('click', () => toggleDrawer('right'));
+  document.getElementById('viewport').addEventListener('pointerdown', () => { if (document.body.classList.contains('drawer-open')) closeDrawers(); });
+  editor.on('mode', closeDrawers);
+  window.matchMedia('(max-width: 899px)').addEventListener('change', (e) => { if (!e.matches) closeDrawers(); });
 }
 
 function setupToolbar(editor, viewport) {
@@ -87,15 +113,9 @@ function setupToolbar(editor, viewport) {
       editor.availableTools().includes('rotate') ? tb(t('tool.rotate'), t('tip.tool.rotate') + ' \u00b7 ' + t('tip.tool.toggle', { k: primaryKeyLabel('tool.toggleMoveRotate') }), () => editor.setTool('rotate'), { key: primaryKeyLabel('tool.rotate'), cls: editor.tool === 'rotate' ? 'active' : '' }) : null,
       editor.availableTools().includes('scale') ? tb(t('tool.scale'), t('tip.tool.scale'), () => editor.setTool('scale'), { key: primaryKeyLabel('tool.scale'), cls: editor.tool === 'scale' ? 'active' : '' }) : null,
     );
-    const displayGroup = h('div', { class: 'tb-group' },
-      tb(t('display.edit'), t('tip.display.edit', { k: primaryKeyLabel('tool.displayEdit') }), () => editor.toggleDisplayEdit(), { cls: editor.displayEdit ? 'pressed display-edit' : '' }),
-    );
     const space = h('div', { class: 'tb-group' },
       tb(editor.space === 'world' ? t('space.world') : t('space.local'), t('tip.space', { k: primaryKeyLabel('tool.space') }), () => editor.toggleSpace(), { cls: editor.space === 'local' ? 'pressed' : '' }),
       tb(t('tool.snap'), t('tip.snap', { k: primaryKeyLabel('tool.snap') }), () => editor.setSnap({ enabled: !editor.snap.enabled }), { cls: editor.snap.enabled ? 'pressed' : '' }),
-    );
-    const rotMode = h('div', { class: 'tb-group' },
-      tb(t(editor.rotateMode === 'preserve' ? 'rotmode.preserve' : 'rotmode.normal'), t('tip.rotmode'), () => editor.toggleRotateMode(), { cls: editor.rotateMode === 'preserve' ? 'pressed' : '' }),
     );
     const snapPos = h('input', { type: 'number', step: 0.01, min: 0.001, value: editor.snap.pos, title: t('tip.snapPos') });
     snapPos.addEventListener('change', () => editor.setSnap({ pos: Math.max(0.001, parseFloat(snapPos.value) || 0.1) }));
@@ -113,16 +133,26 @@ function setupToolbar(editor, viewport) {
         { sep: true },
         { label: t('view.validate'), action: () => { const r = viewport.validate({ warn: true, afterSync: true }); toast(r.ok ? t('toast.viewportOk', { n: r.entities, s: r.sceneObjects }) : t('toast.viewportIssues', { n: r.issues.length, kinds: [...new Set(r.issues.map((i) => i.kind))].join(', ') }), r.ok ? 'success' : 'error', r.ok ? 3000 : 8000); } },
       ])),
+      tb(t('tool.display') + ' ▾', t('tip.tool.display'), (e) => displayMenu(editor, e.currentTarget), { cls: editor.displayEdit ? 'pressed display-edit' : '' }),
     );
-    const add = h('div', { class: 'tb-group' },
-      tb(t('add.menu') + ' ▾', t('tip.add.menu', { k: primaryKeyLabel('edit.add') }), (e) => addMenu(editor, e.currentTarget)),
-    );
-    bar.append(tools, displayGroup, space, rotMode, view, add);
+    bar.append(tools, space, view);
   };
   build();
   editor.on('tool', build);
   editor.on('selection', build); // the available tools depend on what is selected
   onLangChange(build);
+}
+
+// viewport display toggles (project settings) and the display-model editing mode
+export function displayMenu(editor, anchor) {
+  const S = editor.project.settings;
+  const toggles = [['showGrid', 'display.grid'], ['showBones', 'display.bones'], ['showConstraints', 'display.constraints'], ['showProxies', 'display.proxies'], ['showDecorations', 'display.decorations'], ['showAxes', 'display.axes'], ['showPivots', 'display.pivots'], ['showWaypaths', 'display.waypaths']];
+  showMenu(anchor, [
+    { label: t('display.edit'), key: primaryKeyLabel('tool.displayEdit'), checked: editor.displayEdit, action: () => editor.toggleDisplayEdit() },
+    { sep: true },
+    { head: t('view.displayHead') },
+    ...toggles.map(([k, label]) => ({ label: t(label), checked: S[k] !== false, action: () => editor.setSetting(k, S[k] === false) })),
+  ]);
 }
 
 export function addMenu(editor, anchor) {
@@ -182,7 +212,8 @@ function setupEmptyState(editor) {
   const render = () => {
     el.innerHTML = '';
     if (editor.project.nodes.length) return;
-    el.append(t('viewport.empty'), h('small', { text: t('viewport.emptyHint') }));
+    const btn = h('button', { class: 'mini primary-mini', text: t('viewport.import'), onclick: () => editor.pickGiaFile?.() });
+    el.append(h('div', { text: t('viewport.empty') }), h('small', { text: t('viewport.emptyHint') }), btn);
   };
   editor.on('change', render); onLangChange(render); render();
 }
@@ -327,6 +358,8 @@ function setupKeyboard(editor, viewport, timeline) {
         case 'view.projection': viewport.cam.toggleProjection(); viewport.nav.syncBtn(); return true;
         case 'view.front': case 'view.back': case 'view.right': case 'view.left': case 'view.top': case 'view.bottom': viewport.setView(action.slice(5)); return true;
         case 'view.wasd': editor.setWasd(!editor.wasd); toast(t(editor.wasd ? 'toast.wasdOn' : 'toast.wasdOff'), 'info'); return true;
+        case 'app.search': showCommandPalette(window.appContext); return true;
+        case 'app.settings': showSettingsDialog(editor); return true;
       }
       return false;
     })();

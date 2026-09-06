@@ -106,14 +106,20 @@ export function showMenu(anchor, items) {
     if (it.sep) { menu.appendChild(el('div', 'sep')); continue; }
     if (it.head) { menu.appendChild(el('div', 'menu-head', it.head)); continue; }
     const b = el('button', null);
-    b.append(el('span', null, it.icon || ''), el('span', null, it.label));
+    const icon = it.checked === true ? '✓' : it.checked === false ? '' : (it.icon || '');
+    b.append(el('span', 'menu-ico', icon), el('span', 'menu-label', it.label));
+    if (it.key) b.append(el('span', 'menu-key', it.key));
+    if (it.checked != null) b.classList.add(it.checked ? 'checked' : 'unchecked');
     if (it.disabled) b.disabled = true;
     b.addEventListener('click', () => { menu.remove(); it.action?.(); });
     menu.appendChild(b);
   }
   const host = anchor.closest('.tb-group') || anchor.parentElement;
   host.style.position = 'relative';
+  if (host.id === 'menubar') menu.style.left = anchor.offsetLeft + 'px';
   host.appendChild(menu);
+  // keep the menu inside the window
+  requestAnimationFrame(() => { const r = menu.getBoundingClientRect(); if (r.right > window.innerWidth - 8) menu.style.left = (parseFloat(menu.style.left) || 0) - (r.right - window.innerWidth + 8) + 'px'; });
   const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); window.removeEventListener('pointerdown', close, true); } };
   setTimeout(() => window.addEventListener('pointerdown', close, true), 0);
   return menu;

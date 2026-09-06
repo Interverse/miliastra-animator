@@ -8,6 +8,8 @@ import { customDialog } from './dialogs.js';
 export const ACTIONS = [
   { id: 'file.save', cat: 'file', keys: ['ctrl+s'] },
   { id: 'file.saveAs', cat: 'file', keys: ['ctrl+shift+s'] },
+  { id: 'app.search', cat: 'file', keys: ['ctrl+shift+p'] },
+  { id: 'app.settings', cat: 'file', keys: ['ctrl+,'] },
   { id: 'tool.select', cat: 'tools', keys: ['q'] },
   { id: 'tool.move', cat: 'tools', keys: ['w', 'g'] },
   { id: 'tool.rotate', cat: 'tools', keys: ['e', 'r'] },

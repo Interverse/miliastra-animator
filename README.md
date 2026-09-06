@@ -108,10 +108,50 @@ All UI strings live in `js/i18n/locales/<code>.js`; English is the fallback.
 Language choice is shared with the other Miliastra Toolkit sites through the
 `miliastra-lang` localStorage key as described in `References/language-sync.md`.
 
+## Editor organisation: Model → Rig → Animate → Export
+
+The editor is organised as four **workspaces** (tabs in the top bar) that follow the order
+of the work; each shows only the panels that step needs, so the viewport keeps its space:
+
+| Workspace | Left rail | Right rail | Purpose |
+| --- | --- | --- | --- |
+| **Model** | Project (with the workflow guide), Outliner | Model, Properties | Import the `.gia`, check orientation & scale (Reorient / Scale entire model), scene settings (global offset, FPS), proxies. The timeline is hidden here. |
+| **Rig** | Project, Outliner | Rig, Properties | Bones → IK & controls (targets, poles, constraints) → Rig utilities (Preserve child world transforms, Freeze, Auto-Rig). |
+| **Animate** | Animations, Outliner, Project | Properties, Waypaths | Animations list with an *Import animation* subsection (retargeting), timeline, keyframes, root motion, paths. |
+| **Export** | Export (checklist), Project, Outliner | Properties | A checklist — model loaded, animations chosen (≤5), initial animation, path points ≤49, object scale ≤50, validation — where every item is clickable and jumps to the thing to fix, then the Export button. |
+
+Other organising principles:
+
+- **Context-sensitive Properties.** The panel shows what the selection is: object (transform,
+  display model, then *Advanced ▸* correction / object info / diagnostics), bone (transform,
+  length, children, IK constraints, *Advanced ▸* diagnostics), IK target / pole target (which
+  constraint uses it, jump to the chain bone, IK on/off, world-locked), display part, or a hint
+  when nothing is selected. *Advanced ▸* sections are collapsed by default and remember their state.
+- **Workflow guide.** The Project panel shows the four steps with done/current marks and the one
+  next action ("Next: add an animation" …); empty states in every panel say what to do next.
+- **Menus.** File / Edit / View / Help in the top bar carry the global actions (new/open/save/import/
+  export, undo/redo/keys/selection/parenting + the Add list, camera views/framing/checkable display
+  toggles/performance mode/validate viewport, tutorial/controls/shortcuts/settings/about). Menus,
+  the palette and the panels are built from one command registry (`js/ui/commands.js`), so every
+  surface runs the same editor method and a setting has one canonical state.
+- **Command search.** 🔍 or `Ctrl+Shift+P` (Ctrl+K stays Auto Key) opens a palette that searches
+  localized command names and keywords; unavailable commands are listed disabled.
+- **Settings (⚙, `Ctrl+,`).** Global preferences only — General (language, time display),
+  Navigation (reverse pan/orbit, WASD), Viewport (brightness, unknown geometry, performance mode),
+  Input & Shortcuts (snap step/angle, rebindable shortcuts). Project settings stay with the project
+  (Model workspace, View menu, Export workspace) and are never mixed with global ones.
+- **Toolbar** = Select / Move / Rotate / Scale, Local/World + snapping, Frame selected / Frame all /
+  View ▾ / Display ▾. Space still cycles Move/Rotate; Shift+A still opens the Add menu.
+- **Narrow layouts.** Below 900 px the side rails become drawers (☰ / ☷ buttons in the top bar,
+  tap the viewport to close); medium widths shrink the rails and hide the title.
+- Everything is localized in all 15 languages (`tools/check-i18n.mjs` enforces key parity) and
+  `tools/test-ui-shell.mjs` checks the workspace/panel matrix, shortcut labels and collisions, the
+  command registry ↔ menu wiring and the new keys in every locale.
+
 ## Layout
 
 ```
-index.html            shell (three panes + timeline)
+index.html            shell (menus, four workspace tabs, two rails + timeline)
 css/style.css         toolkit visual style
 js/gia/               protobuf walker, .gia model, motion devices, node graph, import/export
 js/scene/             scene graph + proxy geometry catalogue

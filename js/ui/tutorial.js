@@ -5,7 +5,8 @@ import { t, onLangChange } from '../i18n/i18n.js';
 import { loadPrefs, updatePrefs } from '../core/persistence.js';
 
 const STEPS = [
-  { id: 'panel-project', key: 'tut.import', open: true, mode: 'rig' },
+  { id: 'panel-project', key: 'tut.import', open: true, mode: 'model' },
+  { id: 'panel-model', key: 'tut.model', open: true, mode: 'model' },
   { id: 'panel-outliner', key: 'tut.bones', open: true, mode: 'rig' },
   { id: 'panel-rigging', key: 'tut.rigging', open: true, mode: 'rig' },
   { id: 'panel-clips', key: 'tut.clip', open: true, mode: 'animate' },
@@ -73,7 +74,7 @@ export function initTutorial(editor) {
     el.scrollIntoView({ block: 'nearest' });
     const { pop } = overlay;
     pop.innerHTML = '';
-    const h = document.createElement('h3'); h.textContent = t(s.key + '.t');
+    const h = document.createElement('h3'); h.textContent = (s.mode ? `${steps.filter((x, i) => x.mode && i <= idx).length}. ` : '') + t(s.key + '.t').replace(/^\d+\.\s*/, '');
     const body = document.createElement('div'); body.className = 'tut-body'; body.textContent = t(s.key + '.b');
     const bar = document.createElement('div'); bar.className = 'tut-bar';
     const prog = document.createElement('span'); prog.className = 'tut-prog'; prog.textContent = `${idx + 1} / ${steps.length}`;
