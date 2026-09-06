@@ -87,14 +87,35 @@ aside.rail { background: var(--surf); position: relative; display: flex; flex-di
 .empty { font-size: 12px; color: var(--t3); padding: 10px 6px; text-align: center; line-height: 1.5; border: 1px dashed var(--border-strong); border-radius: 6px; }
 
 /* rows & controls */
-.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; min-width: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; min-width: 0; flex-wrap: wrap; } /* wraps only when the controls cannot fit at their minimum widths */
+.row > .chip { flex: 0 1 auto; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row > span, .row > label { flex: 1 1 60px; min-width: 56px; overflow-wrap: break-word; hyphens: auto; font-size: 12px; color: var(--t2); }
 .row > input[type="text"], .row > select { flex: 0 1 160px; min-width: 64px; width: auto; }
 .row > input[type="number"] { flex: 0 1 84px; min-width: 56px; }
 .row[title] { cursor: help; }
-.row-triple { display: grid; grid-template-columns: minmax(44px, 62px) repeat(3, minmax(0, 1fr)); gap: 4px; align-items: center; margin: 6px 0; }
+/* XYZ vector rows: one line when the rail is wide enough, otherwise two columns
+   (X Y / Z) and finally one field per line. Breakpoints follow the rail's own
+   width (container query), so dragging the sidebar reflows the fields live. */
+.rail-scroll { container-type: inline-size; container-name: rail; }
+.row-triple { display: grid; grid-template-columns: minmax(44px, 62px) repeat(3, minmax(0, 1fr)); gap: 4px; align-items: center; margin: 6px 0; min-width: 0; }
 .row-triple > span { font-size: 12px; color: var(--t2); min-width: 0; overflow-wrap: break-word; }
-.row-triple input { width: 100%; min-width: 0; }
+.row-triple .ax { display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0; }
+.row-triple .ax > b { display: none; flex: 0 0 auto; width: 9px; font-size: 10px; font-weight: 600; color: var(--t3); text-align: center; }
+.row-triple input { width: 100%; min-width: 0; flex: 1 1 0; }
+/* medium: label on its own line, X Y Z with axis letters on the next */
+@container rail (max-width: 308px) {
+  .row-triple { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 3px; }
+  .row-triple > span { grid-column: 1 / -1; }
+  .row-triple .ax > b { display: inline-block; }
+}
+/* narrow: two columns (X Y / Z) */
+@container rail (max-width: 270px) {
+  .row-triple { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* very narrow: one field per line */
+@container rail (max-width: 150px) {
+  .row-triple { grid-template-columns: minmax(0, 1fr); }
+}
 .axis-x { border-left: 3px solid #e5534b !important; }
 .axis-y { border-left: 3px solid #57ab5a !important; }
 .axis-z { border-left: 3px solid #539bf5 !important; }
@@ -314,6 +335,19 @@ body[data-mode="export"] #panel-rigging, body[data-mode="export"] #panel-waypath
 .list-row.part .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-row.part .meta { color: var(--amber); font-size: 9px; }
 
+/* ---------- retarget dialog ---------- */
+dialog:has(.retarget) { max-width: min(760px, calc(100vw - 40px)); width: min(760px, calc(100vw - 40px)); }
+.retarget { width: 100%; max-width: 100%; }
+.retarget .stat-grid .v { white-space: normal; }
+.retarget select { max-width: 100%; }
+.retarget .row > select { flex: 0 1 320px; max-width: 60%; }
+.retarget-clips .retarget-clip-row { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; padding: 2px 0; font-size: 12px; }
+.retarget-table { max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 4px; }
+.retarget-row { display: grid; grid-template-columns: 1fr 110px 1fr; gap: 6px; align-items: center; padding: 2px 4px; font-size: 12px; border-bottom: 1px solid #262a32; }
+.retarget-row.missing .name { color: var(--amber); }
+.retarget-row .k { color: var(--t3); font-size: 11px; }
+.retarget-preview .row { display: flex; gap: 8px; align-items: center; }
+
 /* ---------- transform diagnostics ---------- */
 details.diag { margin: 6px 0; font-size: 11px; }
 details.diag summary { cursor: pointer; color: var(--t3); }
@@ -348,3 +382,17 @@ button.mini.primary-mini:hover:not(:disabled) { background: var(--blue-h); }
   #left { width: 260px; }
   #right { width: 240px; }
 }
+
+/* ---------- path point limit dialogs ---------- */
+dialog:has(.limit) { max-width: min(680px, calc(100vw - 40px)); width: min(680px, calc(100vw - 40px)); }
+.limit { width: 100%; }
+.limit-table { border: 1px solid var(--border); border-radius: 6px; padding: 4px; margin: 8px 0; max-height: 260px; overflow-y: auto; font-size: 12px; }
+.limit-row { display: grid; grid-template-columns: 1.2fr 1fr 0.8fr 1.4fr; gap: 6px; padding: 3px 4px; border-bottom: 1px solid #262a32; align-items: center; }
+.limit-row:last-child { border-bottom: none; }
+.limit-row.head { color: var(--t3); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+.limit-row .num { font-variant-numeric: tabular-nums; }
+.limit-row.bad { color: var(--amber); }
+.limit-row.good span:last-child { color: var(--t2); }
+.limit .row > input[type="range"] { flex: 1 1 200px; }
+
+.retarget.dragover { outline: 2px dashed var(--blue); outline-offset: 4px; border-radius: 6px; }

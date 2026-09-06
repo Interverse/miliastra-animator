@@ -89,6 +89,9 @@ export const quat = {
   },
   fromEulerDeg: (e) => quat.fromEulerYXZ(e[0] * DEG, e[1] * DEG, e[2] * DEG),
   toEulerDeg: (q) => quat.toEulerYXZ(q).map((a) => a * RAD),
+  // Euler angles of q, each component shifted by whole turns to lie nearest `ref`
+  // (the previously authored angles), so continuous edits accumulate past ±360°.
+  eulerNear: (q, ref) => unwrapDeg(quat.toEulerYXZ(q).map((a) => a * RAD), ref),
   dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3],
   slerp(a, b, t) {
     let cos = quat.dot(a, b);
@@ -119,6 +122,12 @@ export const quat = {
 };
 
 // ---------- rigid transforms {pos, rot} ----------
+// Shift each angle by multiples of 360° so it is the representation closest to ref.
+export function unwrapDeg(e, ref) {
+  if (!ref) return e.slice();
+  return e.map((v, i) => Number.isFinite(ref[i]) ? v + 360 * Math.round((ref[i] - v) / 360) : v);
+}
+
 export const xf = {
   identity: () => ({ pos: [0, 0, 0], rot: [0, 0, 0, 1] }),
   clone: (t) => ({ pos: v3.clone(t.pos), rot: quat.clone(t.rot) }),

@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Nur Hinweise.",
   "export.levels": "✕ blockiert Export · ⚠ möglicherweise ungenau · ℹ Hinweis",
   "export.download": "Animierte .gia exportieren",
+
+  "limit.title": "Limit für Pfadpunkte",
+
+  "limit.message": "Dieser Pfad enthält mehr als das sichere Maximum von {max} Bewegungspunkten. Das {game}-Punkte-Limit im Spiel ist derzeit unzuverlässig, daher begrenzt dieser Editor exportierte Pfade auf {max} Punkte.",
+
+  "limit.colAnimation": "Animation",
+
+  "limit.colObject": "Objekt / Pfad",
+
+  "limit.colPoints": "Punkte",
+
+  "limit.colStatus": "Status",
+
+  "limit.over": "über dem Limit",
+
+  "limit.choices": "Automatisch komprimieren entfernt redundante Punkte (kollinear, nahezu doppelt, gebackene Zwischenwerte) und bewahrt Form, Start/Ende, Kurven, Höhenänderungen, Timing, Tempo- und Ausrichtungswechsel. Abbrechen kehrt ohne Änderung und ohne Datei zum Editor zurück.",
+
+  "limit.compress": "Automatisch komprimieren",
+
+  "limit.cancelExport": "Export abbrechen",
+
+  "limit.previewTitle": "Vorschau der Komprimierung",
+
+  "limit.previewOk": "Alle betroffenen Pfade passen jetzt in {max} Punkte. Der Viewport zeigt den Originalpfad grau und den komprimierten Pfad bernsteinfarben.",
+
+  "limit.previewFail": "Die automatische Komprimierung konnte nicht alle Pfade ohne sichtbare Änderung der Bewegung auf {max} Punkte bringen. Nichts wurde exportiert; vereinfachen Sie die Animation (weniger Keys, geringere Präzision oder teilen) und versuchen Sie es erneut.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "max. Abweichung {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "Abweichung zu groß: {pos} cm / {rot}°",
+
+  "limit.notReached": "Limit nicht erreichbar",
+
+  "limit.previewHint": "Die komprimierten Pfade gelten nur für diesen Export; das Projekt behält die Originalanimation.",
+
+  "limit.remember": "Diese Animationen bei künftigen Exporten automatisch komprimieren (Projekteinstellung, rückgängig machbar)",
+
+  "tip.limit.remember": "Aktiviert „Automatisch komprimieren“ für die betroffenen Export-Slots. Die bearbeitbare Animation bleibt unverändert.",
+
+  "limit.useCompressed": "Komprimierten Pfad verwenden & exportieren",
+
+  "export.pathPoints": "Pfadpunkte: bis zu {n} von {max} pro Objekt ({objs} bewegte Objekte)",
+
+  "export.pathPointsCompressed": "automatisch komprimiert von {from}",
+
+  "export.pathPointsOver": "Überschreitet das Limit von {max} Punkten: beim Export wird automatische Komprimierung angeboten.",
+
+  "export.autoCompress": "Beim Export automatisch auf {max} Punkte komprimieren",
+
+  "tip.export.autoCompress": "Komprimiert die Pfade dieser Animation bei jedem Export auf das Miliastra-Limit (die bearbeitbare Animation bleibt unverändert)",
+
+  "export.autoCompressFailed": "{n} Pfad(e) lassen sich nicht sicher automatisch komprimieren; der Export stoppt und erklärt es.",
+
+  "export.limitSummary": "{n} Pfad(e) überschreiten das Limit von {max} Punkten. Der Export bietet automatische Komprimierung oder Abbruch an.",
+
+  "toast.exportPathLimit": "Export gestoppt: {n} Pfad(e) überschreiten das Limit von {max} Punkten",
+
+  "hist.exportCompress": "Export-Autokomprimierung",
+
+  "hist.simplifyPath": "Pfad vereinfachen",
+
+  "path.simplify": "Pfad vereinfachen…",
+
+  "tip.path.simplify": "Redundante Punkte innerhalb einer Toleranz entfernen (Live-Anzahl)",
+
+  "path.simplifyIntro": "Entfernt Punkte, deren Fehlen den Pfad um weniger als die Toleranz verschiebt. Start, Ende und Ecken bleiben erhalten.",
+
+  "path.simplifyTolerance": "Toleranz",
+
+  "path.simplifyResult": "{before} → {after} Punkte (max. Abweichung {err} cm)",
+
+  "path.simplifyApply": "Vereinfachen",
   "export.report": "Letzter Export",
   "export.reportParts": "Animierte Objekte",
   "export.reportDevices": "Bewegungsgeräte",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Position keyen",
   "props.keyRot": "Rotation keyen",
   "props.reset": "Zurücksetzen",
+
+  "scale.button": "Gesamtes Modell skalieren…",
+
+  "tip.scale.button": "Das komplette Modell (Objekte, Rig, Animationsdistanzen) um seinen Pivot skalieren und die neue Größe einbacken",
+
+  "scale.title": "Gesamtes Modell skalieren",
+
+  "scale.explain": "Die gesamte Baugruppe skaliert gleichmäßig um den Modell-Pivot: Abstände zwischen Teilen, Knochenpositionen und -längen, IK-Ziele und Pole, Anzeigegeometrie, Translations-Keys, Root-Motion und Wegpfade. Rotationen und Timing bleiben gleich. Die neue Größe wird zum bearbeitbaren Modell – nichts wird doppelt angewendet.",
+
+  "scale.presets": "Vorgaben",
+
+  "scale.factorLabel": "Skalierungsfaktor (×)",
+
+  "scale.percent": "Prozent (%)",
+
+  "scale.factor": "Faktor",
+
+  "scale.extent": "Modellausdehnung",
+
+  "scale.largest": "Größte Objektskalierung",
+
+  "scale.max": "max. {max}",
+
+  "scale.overWarning": "{n} Objekt(e) würden Miliastras maximale Skalierung von {max} überschreiten. Das Modell kann trotzdem skaliert werden, lässt sich aber erst exportieren, wenn sie im Limit liegen.",
+
+  "scale.axis": "Achse {axis}",
+
+  "scale.more": "… und {n} weitere",
+
+  "scale.overHint": "Kleineren Faktor wählen oder trotzdem skalieren und später verkleinern (Rückgängig stellt die Originalgröße exakt wieder her).",
+
+  "scale.bakeNote": "Ein Undo-Schritt. Das Ergebnis wird als normale Größe mit dem Projekt gespeichert.",
+
+  "scale.apply": "Modell skalieren",
+
+  "scale.applyAnyway": "Trotzdem anwenden",
+
+  "scale.noop": "Faktor 1× ändert nichts.",
+
+  "scale.applied": "Modell um {f}× skaliert. Rig, Animationen und Pfade wurden mitskaliert.",
+
+  "scale.appliedOver": "Modell um {f}× skaliert. {n} Objekt(e) überschreiten jetzt die maximale Skalierung von {max}: Export blockiert, bis sie verkleinert sind.",
+
+  "hist.scaleModel": "Gesamtes Modell skalieren",
+
+  "val.objectScale": "Objekt {name} ({guid}) – Skalierung {axis}: {value} überschreitet Miliastras maximale Objektskalierung von {max}.",
+
+  "toast.exportObjectScale": "Export gestoppt: {n} Objekt(e) überschreiten die maximale Skalierung von {max} ({names})",
+
+  "orient.section": "Modellausrichtung & -größe",
+
+  "orient.intro": "Blickt das Modell in die falsche Richtung (z. B. +X statt +Z), wird die gesamte Baugruppe – Objekte, Knochen, IK, Animation – als Einheit gedreht und das zur neuen Ruhelage.",
+
+  "orient.button": "Modell neu ausrichten…",
+
+  "tip.orient.button": "Das komplette Modell um seinen Pivot drehen und das Ergebnis in die Ruhebasis einfrieren",
+
+  "orient.title": "Modell neu ausrichten",
+
+  "orient.explain": "Das gesamte Modell (Objekte und Dekorationen, Knochen, IK-Ziele und Pole, Constraints, Wegpfade und jede Animation) dreht sich gemeinsam um den Modell-Pivot. Nichts bewegt sich relativ zueinander.",
+
+  "orient.detected": "Aus dem Rig erkannt: das Modell blickt derzeit nach {fwd}.",
+
+  "orient.notDetected": "Kein humanoides Rig gefunden, um die Blickrichtung zu erkennen; unten wählen oder eine eigene Rotation verwenden.",
+
+  "orient.current": "Modell blickt derzeit nach",
+
+  "orient.target": "Soll blicken nach",
+
+  "orient.dir.pZ": "+Z (Editor / glTF / FBX vorwärts)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Schnelle Drehungen um Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "Eigene X/Y/Z°",
+
+  "tip.orient.custom": "Beliebige Rotation in Grad; Y ist die übliche Korrektur für seitlich blickende Modelle",
+
+  "orient.preview": "Vorschau im Viewport",
+
+  "orient.result": "Rotation X {x}°, Y {y}°, Z {z}° → das Modell blickt nach {fwd}.",
+
+  "orient.freezeNote": "Die Drehung wird in die Ruhebasis eingefroren: Wurzelknochen behalten ihre Rotationswerte (meist 0), Animationen werden umgerechnet und spielen in der neuen Richtung gleich, der Export wendet sie genau einmal an.",
+
+  "orient.apply": "Modell neu ausrichten",
+
+  "orient.noop": "Keine Rotation anzuwenden.",
+
+  "orient.applied": "Modell um Y {deg}° gedreht; es blickt jetzt nach {fwd}. Die neue Ausrichtung ist die Ruhepose.",
+
+  "orient.mismatchTitle": "Blickrichtung passt nicht",
+
+  "orient.mismatch": "Das importierte Skelett blickt nach {src}, Ihr Modell nach {model} (Unterschied {deg}° um Y). Retargeting auf ein seitlich stehendes Modell verdreht jeden Knochen und schickt Root-Motion in die falsche Richtung.",
+
+  "orient.mismatchHint": "„Modell neu ausrichten“ dreht das ganze Modell (mit Rig und Animationen) in die Richtung des importierten Skeletts und friert das als neue Ruhelage ein; auch später unter Rigging → Modellausrichtung möglich. „Trotzdem fortfahren“ lässt das Modell unverändert.",
+
+  "orient.continueAnyway": "Ohne Neuausrichtung fortfahren",
+
+  "orient.reorientNow": "Modell neu ausrichten (Y {deg}°)",
+
+  "hist.reorientModel": "Modell neu ausrichten",
+
+  "clip.rootMotion": "Root-Motion (bewegt {node})",
+
+  "tip.clip.rootMotion": "An: die Animation bewegt sich durch die Szene, die Bewegung wird exportiert. Aus: derselbe Clip spielt auf der Stelle; die Bewegungs-Keys bleiben erhalten.",
+
+  "clip.rootOn": "Root-Motion",
+
+  "clip.rootOff": "auf der Stelle",
+
+  "clip.rootMotionOnHint": "Root-Motion an: die Figur bewegt sich durch die Szene, die Bewegung wird in den exportierten Pfad gebacken.",
+
+  "clip.rootMotionOffHint": "Root-Motion aus: horizontale Bewegung wird für Vorschau und Export ignoriert (vertikale bleibt). Die Keys werden nicht verändert.",
+
+  "hist.rootMotionOn": "Root-Motion an",
+
+  "hist.rootMotionOff": "Root-Motion aus",
+
+  "props.freeze": "Einfrieren",
+
+  "props.freezeRot": "Rotation einfrieren",
+
+  "props.freezePos": "Position einfrieren",
+
+  "props.freezeBoth": "Position & Rotation einfrieren",
+
+  "props.unfreeze": "Auftauen (lokale Werte wiederherstellen)",
+
+  "tip.props.freeze": "Knochen genau an Ort und Stelle lassen und seine aktuelle Transformation zur neuen Ruhelage machen: lokale Werte werden 0. Nachfahren, Objekte, IK und vorhandene Keys bleiben sichtbar unverändert.",
+
+  "props.frozenInfo": "Eingefrorene Basis: Rotation {rot}°, Position {pos}. Lokale Werte sind relativ dazu; Zurücksetzen kehrt dorthin zurück.",
+
+  "hist.freeze": "Transformation einfrieren",
+
+  "hist.freezeRot": "Rotation einfrieren",
+
+  "hist.freezePos": "Position einfrieren",
+
+  "hist.unfreeze": "Transformation auftauen",
+
+  "toast.freezeIK": "Dieser Knochen ist Teil einer IK-Kette: sie wird aus der neuen Ruhebasis neu gelöst und zeigt dieselbe Pose.",
+
+  "toast.freezeRebased": "{n} Keyframe(s) wurden in die neue Ruhebasis umgerechnet; die Animation ist sichtbar unverändert.",
   "tip.props.keyPos": "Einen Positions-Keyframe zur aktuellen Zeit einfügen",
   "tip.props.keyRot": "Einen Rotations-Keyframe zur aktuellen Zeit einfügen",
   "tip.props.reset": "Auf die Transformation aus der Datei (Objekte) bzw. die Identität zurücksetzen",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Rasterschritt Rotation (°)",
   "view.frameSelected": "Auswahl einpassen",
   "view.frameAll": "Alles einpassen",
+
+  "view.validate": "Viewport-Zustand prüfen",
+
+  "toast.viewportOk": "Viewport stimmt mit dem Projekt überein: {n} Elemente, {s} Szenenobjekte",
+
+  "toast.viewportIssues": "Viewport nicht synchron: {n} Problem(e) ({kinds}) — siehe Konsole",
   "tip.view.frameSelected": "Die Ansicht auf die Auswahl zentrieren ({k})",
   "tip.view.frameAll": "Alles in die Ansicht einpassen ({k})",
   "view.views": "Ansicht",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Vertikales Drehen umkehren",
   "tip.display.reverseOrbit": "Betrifft nur das Drehen durch Ziehen im Viewport; Schwenken, Zoom und das Navigations-Gizmo bleiben unverändert",
   "rotmode.normal": "Kinder folgen",
-  "rotmode.preserve": "Kinder halten",
-  "tip.rotmode": "Rotationsmodus. Kinder folgen: Nachfahren erben die Rotation. Kinder halten: Knochen/Objekt neu ausrichten, während alle Nachfahren exakt an Ort und Stelle bleiben (Ruhe-/Rig-Bearbeitung; Keyframes werden umgerechnet, damit die Animation erhalten bleibt).",
-  "props.rotModeHint": "Kinder halten ist aktiv: Rotationsänderungen richten die Achsen dieses Elements neu aus; Kinder bleiben stehen und Keyframes werden umgerechnet statt gesetzt.",
-  "hist.reorient": "Neu ausrichten (Kinder halten)",
+  "rotmode.preserve": "Welt-Transformationen der Kinder erhalten",
+  "tip.rotmode": "Diesen Knochen bewegen oder drehen, während alle Nachfahren im Weltraum sichtbar an Ort und Stelle bleiben. Kinder folgen: Nachfahren bewegen und drehen sich mit. Erhalten: Rig-/Ruhebearbeitung – lokale Transformationen der Nachfahren werden neu berechnet, Keyframes umgerechnet (Animation unverändert), keine Keys erzeugt.",
+  "props.rotModeHint": "„Welt-Transformationen der Kinder erhalten“ ist aktiv: Positions- und Rotationsänderungen verschieben die Ruhetransformation dieses Elements; Nachfahren bleiben exakt stehen und Keyframes werden umgerechnet statt gesetzt.",
+  "hist.reorient": "Transformieren (Kinder erhalten)",
   "toast.reorientRebased": "Neu ausgerichtet: {n} Keyframe(s) in {m} Clip(s) wurden umgerechnet, die sichtbare Animation ist unverändert",
   "toast.reorientIK": "Dieser Knochen gehört zu einer IK-Kette; das IK-Ergebnis wird aus der neuen Ruheausrichtung neu berechnet",
+
+  "toast.reorientInexact": "Die Rotation von {names} ist animiert; beim Verschieben bleiben Nachfahren nur im aktuellen Frame exakt fixiert. Bei Bedarf rückgängig machen.",
+
+  "props.rotModeMoveWarn": "Die Rotation dieses Elements ist animiert: Verschieben hält Nachfahren nur im aktuellen Frame fest (Drehen bleibt exakt).",
   "project.name": "Projekt",
   "project.state": "Status",
   "project.untitled": "Unbenanntes Projekt",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Zuerst ein Modell importieren",
   "autorig.noBones": "Für diese Anordnung konnten keine Knochen vorgeschlagen werden",
   "hist.autoRig": "Auto-Rig",
+  "autorig.basePose": "Grundpose",
+  "autorig.pose.tpose": "T-Pose",
+  "autorig.pose.apose": "A-Pose",
+  "autorig.pose.standing": "Stehend (neutral)",
+  "autorig.pose.spread": "Flügel gespreizt",
+  "autorig.pose.straight": "Gerade Kette",
+  "autorig.pose.detected": "Importierte Pose behalten",
+  "autorig.poseInfo": "Das Rig wird in {pose} erstellt; die Modellteile wandern mit ihren Knochen in diese Pose (rückgängig machbar, Geometrie unverändert).",
+  "autorig.poseKeep": "Das Rig folgt der importierten Pose unverändert.",
+  "retarget.button": "Animation importieren…",
+  "tip.retarget.button": "Eine FBX- / BVH- / glTF- / GLB- / VRM- / DAE-Animation importieren und auf dieses Rig übertragen",
+  "retarget.title": "Animation importieren (Retargeting)",
+  "retarget.needRig": "Zuerst Knochen anlegen (Auto-Rig oder Knochen hinzufügen): importierte Animation wird auf das Rig übertragen.",
+  "retarget.parsing": "{name} wird gelesen…",
+  "retarget.intro": "Nur Animation: Meshes in der Datei werden ignoriert. Quellknochen dem Rig zuordnen, Vorschau, dann als normale Clips anwenden (ein Rückgängig-Schritt).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Clips",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Optionen",
+  "retarget.mapping": "Knochenzuordnung (Ziel ← Quelle)",
+  "retarget.preview": "Vorschau",
+  "retarget.rootMotion": "Root-Bewegung",
+  "retarget.root.inPlace": "Aus — auf der Stelle abspielen (Bewegung importiert, pro Clip einschaltbar)",
+  "retarget.root.keep": "An — die Figur bewegt sich (auf ihre Größe skaliert)",
+  "retarget.root.none": "Root-Translation nicht importieren",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Automatisch zuordnen",
+  "retarget.clearMap": "Leeren",
+  "retarget.savePreset": "Vorgabe speichern",
+  "retarget.loadPreset": "Vorgabe laden",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Vorschau",
+  "retarget.stop": "Vorschau stoppen",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Anwenden",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Animation importieren",
 };

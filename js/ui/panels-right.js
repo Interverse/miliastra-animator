@@ -2,18 +2,21 @@
 // Display, Waypaths.
 import { t, onLangChange } from '../i18n/i18n.js';
 import { h, row, numInput, vec3Row, textInput, selectInput, checkbox, button, btnRow, subhead, hint, empty, rerender, slider, fmt } from './dom.js';
-import { confirmDialog, toast } from './dialogs.js';
+import { confirmDialog, toast, showMenu } from './dialogs.js';
 import { getNode, childrenOf } from '../scene/scene.js';
 import { displayOf, hasDisplayOffset, isPositionOnly } from './editor.js';
 import { hasPartEdits, PART_KINDS } from '../scene/display-parts.js';
 import { showAutoRigDialog } from './autorig-dialog.js';
-import { textPrompt, showMenu } from './dialogs.js';
+import { textPrompt } from './dialogs.js';
 import { activeClip } from '../anim/clips.js';
 import { quat, v3, normDeg } from '../core/math.js';
 import { chainBones, constraintIssues } from '../anim/ik.js';
 import { modelInfo } from '../scene/primitives.js';
 import { primaryKeyLabel } from './shortcuts.js';
 import { effectiveDirectional, pathDuration, pathLength } from '../anim/waypath.js';
+import { showSimplifyPathDialog } from './export-dialogs.js';
+import { showReorientDialog } from './orient-dialog.js';
+import { showScaleModelDialog } from './scale-dialog.js';
 
 export function initRightPanels(editor, viewport) {
   const bodies = {
@@ -35,7 +38,7 @@ export function initRightPanels(editor, viewport) {
     if (!local) return;
     const set = (inputs, vals, prec) => inputs.forEach((inp, i) => { if (document.activeElement !== inp) inp.value = fmt(vals[i], prec); });
     set(live.posRow.inputs, local.pos, 3);
-    if (live.rotRow) set(live.rotRow.inputs, eulerOf(local.rot), 2);
+    if (live.rotRow) set(live.rotRow.inputs, local.rotE, 2);
     const w = editor.pose().world.get(live.nodeId);
     if (w && live.worldEl) live.worldEl.textContent = worldText(w);
     if (live.partRows) {
@@ -101,7 +104,8 @@ export function initRightPanels(editor, viewport) {
     const kc = (ch) => ['x', 'y', 'z'].map(() => keyedClass(node.id, ch));
     const posOnly = isPositionOnly(node);
     const posRow = vec3Row(t('props.position'), local.pos, (v) => editor.setNodeLocal(node.id, { pos: v }), { classes: kc('pos'), tip: t('tip.props.position') });
-    const rotRow = posOnly ? null : vec3Row(t('props.rotation'), eulerOf(local.rot), (v) => editor.setNodeLocal(node.id, { rot: quat.fromEulerDeg(v) }), { step: 1, precision: 2, classes: kc('rot'), tip: t('tip.props.rotation') });
+    // rotation fields show and accept the AUTHORED angles: 450° or -720° are kept as typed (multi-turn animation)
+    const rotRow = posOnly ? null : vec3Row(t('props.rotation'), local.rotE, (v) => editor.setNodeLocal(node.id, { rot: quat.fromEulerDeg(v), rotE: v }), { step: 1, precision: 2, classes: kc('rot'), tip: t('tip.props.rotation') });
     body.append(posRow);
     if (rotRow) body.append(rotRow); else body.append(hint(t('props.positionOnly')));
     const w = editor.pose().world.get(node.id);
@@ -112,8 +116,15 @@ export function initRightPanels(editor, viewport) {
       button(t('props.keyPos'), () => editor.insertKeyframe([node.id], ['pos']), { disabled: !clip, tip: t('tip.props.keyPos') }),
       posOnly ? null : button(t('props.keyRot'), () => editor.insertKeyframe([node.id], ['rot']), { disabled: !clip, tip: t('tip.props.keyRot') }),
       button(t('props.reset'), () => editor.resetTransform(node.id), { tip: t('tip.props.reset') }),
+      node.type === 'bone' ? button(t('props.freeze') + ' ▾', (e) => showMenu(e.currentTarget, [
+        { label: t('props.freezeRot'), action: () => editor.freezeTransform(node.id, { pos: false, rot: true }) },
+        { label: t('props.freezePos'), action: () => editor.freezeTransform(node.id, { pos: true, rot: false }) },
+        { label: t('props.freezeBoth'), action: () => editor.freezeTransform(node.id, { pos: true, rot: true }) },
+        ...(node.basis ? [{ sep: true }, { label: t('props.unfreeze'), action: () => editor.unfreezeTransform(node.id) }] : []),
+      ]), { tip: t('tip.props.freeze') }) : null,
     ));
-    if (editor.rotateMode === 'preserve') body.append(hint(t('props.rotModeHint'), 'warn'));
+    if (node.type === 'bone' && node.basis) body.append(hint(t('props.frozenInfo', { rot: eulerOf(node.basis.rot).map((v) => fmt(v, 1)).join(', '), pos: node.basis.pos.map((v) => fmt(v, 3)).join(', ') })));
+    if (editor.rotateMode === 'preserve') { body.append(hint(t('props.rotModeHint'), 'warn')); if (editor.moveRebaseInexact(node.id)) body.append(hint(t('props.rotModeMoveWarn'), 'warn')); }
     else if (clip) body.append(hint(t(p.settings.autoKey ? 'props.autoKeyOn' : 'props.autoKeyOff')));
     // unkeyed pose edit at this frame (Auto Key off): make the state visible and keyable
     if (editor.hasPoseOverride(node.id)) {
@@ -267,6 +278,12 @@ export function initRightPanels(editor, viewport) {
     }
     body.append(subhead(t('autorig.title')));
     body.append(btnRow(button(t('autorig.button'), () => showAutoRigDialog(editor), { cls: 'mini', tip: t('tip.autorig') })));
+    body.append(subhead(t('orient.section')));
+    body.append(hint(t('orient.intro')));
+    body.append(btnRow(
+      button(t('orient.button'), () => showReorientDialog(editor), { cls: 'mini', tip: t('tip.orient.button') }),
+      button(t('scale.button'), () => showScaleModelDialog(editor), { cls: 'mini', tip: t('tip.scale.button') }),
+    ));
     body.append(hint(t('autorig.intro')));
     body.append(subhead(t('rig.constraints'), h('span', { class: 'count', style: 'margin-left:auto', text: String(p.constraints.length) })));
     if (!p.constraints.length) body.append(hint(t('rig.noConstraints')));
@@ -380,7 +397,10 @@ export function initRightPanels(editor, viewport) {
         r.style.gridTemplateColumns = '24px 1fr 1fr 1fr 60px';
         body.append(r);
       });
-      body.append(btnRow(button(t('path.addPoint'), () => editor.addPathPoint(wp.id, editor.pathPointSel?.wpId === wp.id ? editor.pathPointSel.index : null), { tip: t('tip.path.addPoint') })));
+      body.append(btnRow(
+        button(t('path.addPoint'), () => editor.addPathPoint(wp.id, editor.pathPointSel?.wpId === wp.id ? editor.pathPointSel.index : null), { tip: t('tip.path.addPoint') }),
+        button(t('path.simplify'), () => showSimplifyPathDialog(editor, wp.id), { disabled: wp.points.length <= 2, tip: t('tip.path.simplify') }),
+      ));
       body.append(hint(t('path.pointHint')));
       body.append(h('div', { class: 'row' }, checkbox(t('path.duration'), wp.useDuration, (v) => editor.updateWaypath(wp.id, { useDuration: v })), numInput(wp.duration, (v) => editor.updateWaypath(wp.id, { duration: Math.max(0, v) }), { step: 0.1, min: 0 })));
       if (!wp.useDuration) body.append(row(t('path.velocity'), numInput(wp.velocity, (v) => editor.updateWaypath(wp.id, { velocity: Math.max(0.01, v) }), { step: 0.1, min: 0.01 })));

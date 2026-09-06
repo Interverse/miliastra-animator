@@ -4,6 +4,13 @@
 // (hold the right mouse button, or enable WASD mode).
 import * as THREE from 'three';
 
+// Drag → orbit direction. The vertical default was corrected (nav prefs v2): the
+// direction that used to need "Reverse vertical orbit" is now the normal one, and
+// checking the option reverses it. Horizontal orbit is unchanged.
+export function orbitSigns({ reverseOrbitX = false, reverseOrbitY = false } = {}) {
+  return { x: reverseOrbitX ? -1 : 1, y: reverseOrbitY ? 1 : -1 };
+}
+
 export class CameraController {
   constructor(dom, opts = {}) {
     this.dom = dom;
@@ -125,7 +132,7 @@ export class CameraController {
       d.x = e.clientX; d.y = e.clientY;
       if (Math.abs(dx) + Math.abs(dy) > 0) d.moved = true;
       if (d.mode === 'orbit' || d.mode === 'fly') {
-        const ox = this.reverseOrbitX ? -1 : 1, oy = this.reverseOrbitY ? -1 : 1;
+        const { x: ox, y: oy } = orbitSigns(this);
         this.orbit(dx * 0.008 * ox, dy * 0.008 * oy);
       }
       else if (d.mode === 'pan') {

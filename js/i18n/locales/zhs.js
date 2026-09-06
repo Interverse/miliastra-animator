@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "仅有提示。",
   "export.levels": "✕ 阻止导出 · ⚠ 可能不准确 · ℹ 提示",
   "export.download": "导出动画 .gia",
+
+  "limit.title": "路径移动点数上限",
+
+  "limit.message": "此路径包含的移动点超过了安全上限 {max} 个。游戏内的 {game} 点上限目前不可靠，因此本编辑器将导出路径限制为 {max} 个点。",
+
+  "limit.colAnimation": "动画",
+
+  "limit.colObject": "对象 / 路径",
+
+  "limit.colPoints": "点数",
+
+  "limit.colStatus": "状态",
+
+  "limit.over": "超出上限",
+
+  "limit.choices": "自动压缩会移除冗余点（共线、近乎重复、烘焙的中间采样），同时保留形状、起点/终点、转弯、高度变化、时序、速度变化和朝向变化。取消将返回编辑器，不更改项目也不保存文件。",
+
+  "limit.compress": "自动压缩",
+
+  "limit.cancelExport": "取消导出",
+
+  "limit.previewTitle": "压缩预览",
+
+  "limit.previewOk": "所有受影响的路径现已在 {max} 个点以内。视口中灰色为原路径，琥珀色为压缩后的路径。",
+
+  "limit.previewFail": "自动压缩无法在不明显改变运动的情况下将所有路径减少到 {max} 个点。未导出任何内容；请简化动画（减少关键帧、降低精度或拆分）后重试。",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "最大偏差 {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "偏差过大：{pos} cm / {rot}°",
+
+  "limit.notReached": "无法达到上限",
+
+  "limit.previewHint": "压缩后的路径仅用于本次导出；项目保留原始动画。",
+
+  "limit.remember": "今后导出时也自动压缩这些动画（项目设置，可撤销）",
+
+  "tip.limit.remember": "为受影响的导出槽位开启“自动压缩”。可编辑的动画不会改变。",
+
+  "limit.useCompressed": "使用压缩路径并导出",
+
+  "export.pathPoints": "路径点：每个对象最多 {n} / {max}（{objs} 个移动对象）",
+
+  "export.pathPointsCompressed": "已从 {from} 自动压缩",
+
+  "export.pathPointsOver": "超出 {max} 点上限：导出时将提供自动压缩。",
+
+  "export.autoCompress": "导出时自动压缩到 {max} 个点",
+
+  "tip.export.autoCompress": "每次导出时将此动画的路径压缩到 Miliastra 上限（可编辑的动画不变）",
+
+  "export.autoCompressFailed": "{n} 条路径无法安全地自动压缩；导出将停止并说明原因。",
+
+  "export.limitSummary": "{n} 条路径超出 {max} 点上限。导出时将提供自动压缩或取消。",
+
+  "toast.exportPathLimit": "导出已停止：{n} 条路径超出 {max} 点上限",
+
+  "hist.exportCompress": "导出自动压缩",
+
+  "hist.simplifyPath": "简化路径",
+
+  "path.simplify": "简化路径…",
+
+  "tip.path.simplify": "在容差范围内移除冗余点（实时计数）",
+
+  "path.simplifyIntro": "移除缺失后路径偏移小于容差的点。起点、终点和拐角会被保留。",
+
+  "path.simplifyTolerance": "容差",
+
+  "path.simplifyResult": "{before} → {after} 个点（最大偏差 {err} cm）",
+
+  "path.simplifyApply": "简化",
   "export.report": "上次导出",
   "export.reportParts": "动画对象",
   "export.reportDevices": "运动装置",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "记录位置",
   "props.keyRot": "记录旋转",
   "props.reset": "重置",
+
+  "scale.button": "缩放整个模型…",
+
+  "tip.scale.button": "围绕枢轴调整整个模型（对象、绑定、动画距离）的大小并烘焙新尺寸",
+
+  "scale.title": "缩放整个模型",
+
+  "scale.explain": "整个组合围绕模型枢轴统一缩放：部件间距、骨骼位置和长度、IK 目标和极向、显示几何、平移关键帧、根运动和路径。旋转和时间不变。新尺寸成为可编辑的模型——不会有任何内容被重复应用。",
+
+  "scale.presets": "预设",
+
+  "scale.factorLabel": "缩放系数（×）",
+
+  "scale.percent": "百分比（%）",
+
+  "scale.factor": "系数",
+
+  "scale.extent": "模型尺寸",
+
+  "scale.largest": "最大对象缩放",
+
+  "scale.max": "最大 {max}",
+
+  "scale.overWarning": "{n} 个对象将超过 Miliastra 的最大缩放 {max}。模型仍可缩放，但在它们回到限制内之前无法导出。",
+
+  "scale.axis": "轴 {axis}",
+
+  "scale.more": "…另有 {n} 个",
+
+  "scale.overHint": "选择更小的系数，或仍然缩放并稍后缩小（撤销可精确恢复原始尺寸）。",
+
+  "scale.bakeNote": "一步撤销。结果作为项目的正常尺寸保存。",
+
+  "scale.apply": "缩放模型",
+
+  "scale.applyAnyway": "仍然应用",
+
+  "scale.noop": "系数 1× 不会改变任何内容。",
+
+  "scale.applied": "模型已缩放 {f}×。绑定、动画和路径已随之调整。",
+
+  "scale.appliedOver": "模型已缩放 {f}×。{n} 个对象现在超过最大缩放 {max}：在缩小之前导出被阻止。",
+
+  "hist.scaleModel": "缩放整个模型",
+
+  "val.objectScale": "对象 {name}（{guid}）— 缩放 {axis}：{value} 超过 Miliastra 的最大对象缩放 {max}。",
+
+  "toast.exportObjectScale": "导出已停止：{n} 个对象超过最大缩放 {max}（{names}）",
+
+  "orient.section": "模型朝向与缩放",
+
+  "orient.intro": "如果模型朝向错误（例如朝 +X 而不是 +Z），将整个组合——对象、骨骼、IK、动画——作为一个整体旋转，并将其作为新的静止姿势。",
+
+  "orient.button": "重新定向模型…",
+
+  "tip.orient.button": "围绕枢轴旋转整个模型并将结果冻结到静止基准",
+
+  "orient.title": "重新定向模型",
+
+  "orient.explain": "整个模型（对象及装饰、骨骼、IK 目标和极向、约束、路径以及每个动画）围绕模型枢轴一起旋转。彼此之间的相对位置不变。",
+
+  "orient.detected": "从绑定检测：模型当前朝向 {fwd}。",
+
+  "orient.notDetected": "未找到可检测当前朝向的人形绑定；请在下方选择或使用自定义旋转。",
+
+  "orient.current": "模型当前朝向",
+
+  "orient.target": "应朝向",
+
+  "orient.dir.pZ": "+Z（编辑器 / glTF / FBX 前方）",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "绕 Y 快速旋转",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "自定义 X/Y/Z°",
+
+  "tip.orient.custom": "任意角度旋转；朝向侧面的模型通常用 Y 修正",
+
+  "orient.preview": "在视口中预览",
+
+  "orient.result": "旋转 X {x}°、Y {y}°、Z {z}° → 模型将朝向 {fwd}。",
+
+  "orient.freezeNote": "旋转被冻结到静止基准：根骨骼保留其旋转值（通常为 0），动画被重新基准化以在新方向上播放相同的动作，导出只应用一次。",
+
+  "orient.apply": "重新定向模型",
+
+  "orient.noop": "没有要应用的旋转。",
+
+  "orient.applied": "模型已绕 Y 旋转 {deg}°；现在朝向 {fwd}。新朝向即为静止姿势。",
+
+  "orient.mismatchTitle": "前方方向不匹配",
+
+  "orient.mismatch": "导入的骨架朝向 {src}，而你的模型朝向 {model}（绕 Y 相差 {deg}°）。对侧向的模型进行重定向会扭曲每根骨骼并使根运动方向错误。",
+
+  "orient.mismatchHint": "“重新定向模型”会将整个模型（含绑定和动画）转到与导入骨架相同的方向，并冻结为新的静止姿势；也可以稍后在 绑定 → 模型朝向 中执行。继续则保持模型不变。",
+
+  "orient.continueAnyway": "不重新定向，继续",
+
+  "orient.reorientNow": "重新定向模型（Y {deg}°）",
+
+  "hist.reorientModel": "重新定向模型",
+
+  "clip.rootMotion": "根运动（移动 {node}）",
+
+  "tip.clip.rootMotion": "开：动画在场景中移动，且移动会被导出。关：同一片段原地播放；移动关键帧保留。",
+
+  "clip.rootOn": "根运动",
+
+  "clip.rootOff": "原地",
+
+  "clip.rootMotionOnHint": "根运动开启：角色在场景中移动，移动会烘焙到导出路径中。",
+
+  "clip.rootMotionOffHint": "根运动关闭：预览和导出忽略水平移动（垂直运动保留）。关键帧不会被修改。",
+
+  "hist.rootMotionOn": "开启根运动",
+
+  "hist.rootMotionOff": "关闭根运动",
+
+  "props.freeze": "冻结",
+
+  "props.freezeRot": "冻结旋转",
+
+  "props.freezePos": "冻结位置",
+
+  "props.freezeBoth": "冻结位置和旋转",
+
+  "props.unfreeze": "解冻（恢复局部值）",
+
+  "tip.props.freeze": "让骨骼保持原位，并将其当前变换设为新的静止姿势：局部值变为 0。后代、对象、IK 和现有关键帧在视觉上保持不变。",
+
+  "props.frozenInfo": "冻结基准：旋转 {rot}°，位置 {pos}。局部值相对于它；重置会回到它。",
+
+  "hist.freeze": "冻结变换",
+
+  "hist.freezeRot": "冻结旋转",
+
+  "hist.freezePos": "冻结位置",
+
+  "hist.unfreeze": "解冻变换",
+
+  "toast.freezeIK": "此骨骼属于 IK 链：链会从新的静止基准重新求解并显示相同姿势。",
+
+  "toast.freezeRebased": "{n} 个关键帧已重新基准化到新的静止基准；动画在视觉上不变。",
   "tip.props.keyPos": "在当前时间插入位置关键帧",
   "tip.props.keyRot": "在当前时间插入旋转关键帧",
   "tip.props.reset": "重置为文件中的变换（对象）或单位变换",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "旋转吸附步长（°）",
   "view.frameSelected": "聚焦所选",
   "view.frameAll": "聚焦全部",
+
+  "view.validate": "校验视口状态",
+
+  "toast.viewportOk": "视口与项目一致：{n} 个实体，{s} 个场景对象",
+
+  "toast.viewportIssues": "视口未同步：{n} 个问题（{kinds}）— 请查看控制台",
   "tip.view.frameSelected": "将视图居中到所选项（{k}）",
   "tip.view.frameAll": "让所有内容适配视图（{k}）",
   "view.views": "视图",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "反转垂直环绕",
   "tip.display.reverseOrbit": "仅影响在视口中拖动环绕；平移、缩放和导航球不受影响",
   "rotmode.normal": "子级跟随",
-  "rotmode.preserve": "保持子级",
-  "tip.rotmode": "旋转模式。子级跟随：后代继承旋转。保持子级：重新定向骨骼/对象，而所有后代保持原位（静止/绑定编辑；关键帧会被重新基准化以保留动画）。",
-  "props.rotModeHint": "“保持子级”已开启：旋转编辑会重新定向此项的坐标轴；子级保持原位，关键帧被重新基准化而非记录新关键帧。",
-  "hist.reorient": "重新定向（保持子级）",
+  "rotmode.preserve": "保持子级世界变换",
+  "tip.rotmode": "移动或旋转此骨骼时，其所有后代在世界空间中保持原位。子级跟随：后代随之移动和旋转。保持：绑定/静止姿势编辑——重新计算后代的局部变换，关键帧被重新基准化（动画不变），且不创建关键帧。",
+  "props.rotModeHint": "“保持子级世界变换”已开启：位置和旋转编辑会移动此项的静止变换；后代保持原位，关键帧被重新基准化而不是被创建。",
+  "hist.reorient": "变换（保持子级）",
   "toast.reorientRebased": "已重新定向：{m} 个片段中的 {n} 个关键帧已重新基准化，可见动画保持不变",
   "toast.reorientIK": "此骨骼属于 IK 链；IK 结果将根据新的静止朝向重新计算",
+
+  "toast.reorientInexact": "{names} 的旋转带有动画，移动它时后代仅在当前帧保持精确固定。若非所愿请撤销。",
+
+  "props.rotModeMoveWarn": "此项的旋转带有动画：移动它只能在当前帧保持后代固定（旋转仍然精确）。",
   "project.name": "项目",
   "project.state": "状态",
   "project.untitled": "未命名项目",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "请先导入模型",
   "autorig.noBones": "无法为此布局提出骨骼",
   "hist.autoRig": "自动绑定",
+  "autorig.basePose": "基础姿势",
+  "autorig.pose.tpose": "T 姿势",
+  "autorig.pose.apose": "A 姿势",
+  "autorig.pose.standing": "站立（中性）",
+  "autorig.pose.spread": "展翅",
+  "autorig.pose.straight": "直线链",
+  "autorig.pose.detected": "保留导入姿势",
+  "autorig.poseInfo": "绑定将以{pose}创建；模型部件会随骨骼移动到该姿势（可撤销，几何体不变）。",
+  "autorig.poseKeep": "绑定按导入姿势原样创建。",
+  "retarget.button": "导入动画…",
+  "tip.retarget.button": "导入 FBX / BVH / glTF / GLB / VRM / DAE 动画并重定向到此绑定",
+  "retarget.title": "导入动画（重定向）",
+  "retarget.needRig": "请先添加骨骼（自动绑定或添加骨骼）：导入的动画会重定向到绑定上。",
+  "retarget.parsing": "正在解析 {name}…",
+  "retarget.intro": "仅导入动画：文件中的网格会被忽略。将源骨骼映射到你的绑定，预览后作为普通片段应用（一步撤销）。",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "片段",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "选项",
+  "retarget.mapping": "骨骼映射（目标 ← 源）",
+  "retarget.preview": "预览",
+  "retarget.rootMotion": "根运动",
+  "retarget.root.inPlace": "关 — 原地播放（已导入移动，可按片段开启）",
+  "retarget.root.keep": "开 — 角色移动（按身高缩放）",
+  "retarget.root.none": "不导入根平移",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "自动映射",
+  "retarget.clearMap": "清除",
+  "retarget.savePreset": "保存预设",
+  "retarget.loadPreset": "加载预设",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "预览",
+  "retarget.stop": "停止预览",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "应用",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "导入动画",
 };

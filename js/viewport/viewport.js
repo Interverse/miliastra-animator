@@ -15,6 +15,7 @@ import { getNode, boneTail } from '../scene/scene.js';
 import { chainBones } from '../anim/ik.js';
 import { v3, quat, xf } from '../core/math.js';
 import { effectiveDirectional } from '../anim/waypath.js';
+import { EntityRegistry, viewportEntities, validateSceneModel } from './scene-model.js';
 
 const COLORS = {
   bone: 0xb18cff, boneSel: 0xff9f43, boneActive: 0xffd166, boneIK: 0x5fd3c9,
@@ -72,21 +73,28 @@ export class Viewport {
       onDragStart: (mode, pointerId) => editor.beginInteraction('viewport-' + mode, { finish: () => this.cam.cancelDrag(), pointerId }),
       onDragEnd: (mode) => editor.endInteraction('viewport-' + mode),
     });
+    // Scene layout: env (survives projects) · projectRoot (replaced wholesale on every
+    // project switch) · overlay (editor-only visuals, cleared with their owning state).
+    this.env = new THREE.Group(); this.env.name = 'env';
+    this.scene.add(this.env);
     this.hemi = new THREE.HemisphereLight(0xdde6f5, 0x1a1c22, 1.1);
-    this.scene.add(this.hemi);
+    this.env.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xffffff, 1.4);
     this.sun.position.set(3, 6, 4);
-    this.scene.add(this.sun);
+    this.env.add(this.sun);
     this.grid = new THREE.GridHelper(20, 20, 0x3a4150, 0x262a32);
     this.grid.position.y = -0.0005;
-    this.scene.add(this.grid);
+    this.env.add(this.grid);
     this.axes = new THREE.AxesHelper(1);
-    this.scene.add(this.axes);
-    this.nodeRoot = new THREE.Group();
-    this.scene.add(this.nodeRoot);
-    this.overlay = new THREE.Group();
+    this.env.add(this.axes);
+    this.projectRoot = new THREE.Group(); this.projectRoot.name = 'projectRoot';
+    this.scene.add(this.projectRoot);
+    this.nodeRoot = new THREE.Group(); this.nodeRoot.name = 'nodes';
+    this.projectRoot.add(this.nodeRoot);
+    this.overlay = new THREE.Group(); this.overlay.name = 'overlay';
     this.scene.add(this.overlay);
-    this.groups = new Map(); // nodeId → { group, sig, meshes, edges, kind }
+    // every rendered node lives in the registry under its state id (see scene-model.js)
+    this.registry = new EntityRegistry();
     this._tmpColor = new THREE.Color();
     this._tmpSphere = new THREE.Sphere();
     this._tmpV = new THREE.Vector3();
@@ -97,8 +105,13 @@ export class Viewport {
     this.setupRotateGizmo();
     this.setupPointer();
     this.setupOverlayObjects();
-    this.pathVisual = { sig: null, group: new THREE.Group() };
-    this.overlay.add(this.pathVisual.group);
+    this.pathVisual = { sig: null, group: new THREE.Group(), points: [] };
+    this.pathVisual.group.name = 'waypaths';
+    this.projectRoot.add(this.pathVisual.group);
+    // a project switch tears the whole project root down before the new state is shown
+    this.editor.on('project', (e) => { if (e?.phase === 'teardown') this.resetProject(); });
+    // development diagnostics after history / project changes (opt-in: localStorage.debugViewport = '1')
+    this.editor.on('change', (e) => { if (this.debug && e && /^(undo|new|open|import|cancel)$/.test(e.label || '')) this.validate({ warn: true, afterSync: true }); });
     this.resize();
     new ResizeObserver(() => this.resize()).observe(container);
     this.keys = new Set();
@@ -120,13 +133,13 @@ export class Viewport {
 
   // ---------- gizmo ----------
   setupGizmo() {
-    this.handle = new THREE.Object3D();
-    this.scene.add(this.handle);
+    this.handle = new THREE.Object3D(); this.handle.name = 'gizmoHandle';
+    this.overlay.add(this.handle);
     const tc = new TransformControls(this.cam.camera, this.canvas);
     tc.size = 0.85;
     this.tc = tc;
     const helper = tc.getHelper ? tc.getHelper() : tc;
-    this.scene.add(helper);
+    this.overlay.add(helper);
     this.tcHelper = helper;
     tc.attach(this.handle);
     tc.enabled = false;
@@ -165,9 +178,9 @@ export class Viewport {
 
   // ---------- rotation gizmo (screen-angle rings, Blender-style) ----------
   setupRotateGizmo() {
-    this.rg = new THREE.Group();
+    this.rg = new THREE.Group(); this.rg.name = 'rotateGizmo';
     this.rg.visible = false;
-    this.scene.add(this.rg);
+    this.overlay.add(this.rg);
     this.rgRings = [];
     this.rgPicks = [];
     const defs = [
@@ -375,6 +388,12 @@ export class Viewport {
     if (tgt.kind === 'node') {
       const dw = ed.displayWorld();
       for (const id of ed.selection) { const w = dw.get(id); if (w) this.drag.starts.set(id, xf.clone(w)); }
+      // Preserve child world transforms: one exact delta from the drag-start snapshot, descendants rebased
+      if (ed.rotateMode === 'preserve' && this.drag.starts.size) {
+        this.drag.preserve = true;
+        ed.beginReorient([...this.drag.starts.keys()]);
+        if (ed.tool === 'move' && [...this.drag.starts.keys()].some((id) => ed.moveRebaseInexact(id))) ed.setHint(t('props.rotModeMoveWarn'));
+      }
     }
   }
   onGizmoChange() {
@@ -418,7 +437,8 @@ export class Viewport {
       let nw;
       if (ed.tool === 'rotate') {
         const rel = v3.sub(w0.pos, s.pos);
-        nw = { pos: v3.add(s.pos, quat.rotate(dRot, rel)), rot: quat.norm(quat.mul(dRot, w0.rot)) };
+        // preserve mode reorients in place (no orbit about the pivot)
+        nw = { pos: d.preserve ? w0.pos : v3.add(s.pos, quat.rotate(dRot, rel)), rot: quat.norm(quat.mul(dRot, w0.rot)) };
       } else nw = { pos: v3.add(w0.pos, dPos), rot: w0.rot };
       ed.setNodeWorld(id, ed.removePathOffset(nw, off), { commit: false });
     }
@@ -429,7 +449,8 @@ export class Viewport {
     this.cam.enabled = true;
     if (!d) return;
     const ed = this.editor;
-    if (d.cancelled) { ed.restoreCommitted(); ed.setHint(t('hint.cancelled')); }
+    if (d.cancelled) { ed._reorient = null; ed.restoreCommitted(); ed.setHint(t('hint.cancelled')); }
+    else if (d.preserve) { if (ed._reorient?.moved.size) ed.endReorient(); else { ed._reorient = null; ed.transient(); } }
     else if (d.tgt.kind === 'path') ed.commit('path');
     else if (d.tgt.kind === 'display') ed.commit(t('hist.display'));
     else if (d.tgt.kind === 'parts') ed.commit(t('hist.displayPart'));
@@ -541,22 +562,13 @@ export class Viewport {
   }
 
   // ---------- node visuals ----------
-  signature(node) {
-    switch (node.type) {
-      case 'object': return `o|${node.zoom?.join(',')}`;
-      case 'bone': return `b`;
-      case 'proxy': return `p|${node.shape}|${node.color}`;
-      default: return node.type;
-    }
-  }
-  ensureGroup(node) {
-    const sig = this.signature(node);
-    let rec = this.groups.get(node.id);
-    if (rec && rec.sig === sig) return rec;
-    if (rec) this.disposeGroup(node.id);
+  get groups() { return this.registry.entries; } // nodeId → { group, sig, meshes, edges, kind, … }
+  get debug() { try { return !!(this.editor.debugViewport || globalThis.localStorage?.getItem('debugViewport')); } catch { return false; } }
+  // Build the Three.js representation of one node (registry-owned: callers never keep it elsewhere).
+  createGroup(node) {
     const group = new THREE.Group();
     group.userData.nodeId = node.id;
-    rec = { group, sig, meshes: [], edges: [], kind: node.type, inner: null, axes: null, pivot: null };
+    const rec = { id: node.id, group, sig: null, meshes: [], edges: [], kind: node.type, inner: null, axes: null, pivot: null };
     if (node.type === 'object') {
       // display parts are drawn by an instanced PartsView (one draw call per geometry)
       const inner = new THREE.Group();
@@ -605,18 +617,61 @@ export class Viewport {
     pivot.renderOrder = 17; pivot.visible = false;
     group.add(pivot); rec.pivot = pivot;
     this.nodeRoot.add(group);
-    this.groups.set(node.id, rec);
     this.pickDirty = true;
     return rec;
   }
-  disposeGroup(id) {
-    const rec = this.groups.get(id);
+  // Remove a node's representation from the scene and release its own resources
+  // (geometries come from the shared cache and are never disposed here).
+  disposeGroup(rec) {
     if (!rec) return;
-    this.nodeRoot.remove(rec.group);
+    rec.group.removeFromParent();
     if (rec.pv) rec.pv.dispose();
     rec.group.traverse((o) => { if (o.material && !o.userData.shared && !o.userData.parts && !o.userData.outline && !o.userData.bounds) { if (Array.isArray(o.material)) o.material.forEach((m) => m.dispose()); else o.material.dispose(); } });
-    this.groups.delete(id);
+    rec.group.clear();
+    if (this.drag?.starts?.has(rec.id) || this.rotDrag?.starts?.has(rec.id)) this.editor.finishInteraction(); // a drag must never outlive its object
     this.pickDirty = true;
+  }
+  // Full project teardown: everything under the project root goes, the gizmo detaches,
+  // hover/drag state resets. The environment (camera, lights, grid, axes) survives.
+  resetProject() {
+    this.rotDrag = null;
+    if (this.drag) this.drag = null;
+    if (this.tc.dragging) { try { this.tc.pointerUp(null); } catch {} }
+    this.tc.axis = null;
+    this.releaseCapture(this._pointerId);
+    this.cam.enabled = true;
+    this.setRingHover(null);
+    this.registry.clear((rec) => this.disposeGroup(rec));
+    this.clearPathVisual();
+    this.pathVisual.sig = null;
+    this.projectRoot.removeFromParent();
+    this.projectRoot = new THREE.Group(); this.projectRoot.name = 'projectRoot';
+    this.nodeRoot = new THREE.Group(); this.nodeRoot.name = 'nodes';
+    this.projectRoot.add(this.nodeRoot, this.pathVisual.group);
+    this.scene.add(this.projectRoot);
+    this.setLines([]);
+    this.tc.enabled = false; this.tcHelper.visible = false; this.rg.visible = false;
+    this.pickables = []; this.pickDirty = true;
+    this.building = false;
+  }
+  // Diagnostics: does the scene graph match the editor state exactly? { ok, issues, … }
+  validate({ warn = false, afterSync = false } = {}) {
+    const ed = this.editor;
+    if (afterSync) { try { this.sync(); } catch (e) { console.error(e); } }
+    const extraIssues = [];
+    for (const c of this.scene.children) if (c !== this.env && c !== this.projectRoot && c !== this.overlay) extraIssues.push({ kind: 'unknownSceneChild', id: c.name || c.type });
+    for (const c of this.projectRoot.children) if (c !== this.nodeRoot && c !== this.pathVisual.group) extraIssues.push({ kind: 'strayProjectChild', id: c.name || c.type });
+    if (this.tcHelper.visible && !this.gizmoTarget()) extraIssues.push({ kind: 'gizmoWithoutTarget' });
+    if (this.rg.visible && !this.gizmoTarget()) extraIssues.push({ kind: 'rotateGizmoWithoutTarget' });
+    const res = validateSceneModel({
+      project: ed.project, registryIds: this.registry.ids(), attached: (id) => this.groups.get(id)?.group.parent === this.nodeRoot, building: !!this.building,
+      rootChildCount: this.nodeRoot.children.length, gizmoIds: [this.drag?.tgt?.node?.id, this.rotDrag?.nodeId, ...(this.drag?.starts?.keys() || [])],
+      selection: [...ed.selection], active: ed.active, pathPointWaypaths: (this.pathVisual.points || []).map((m) => m.userData.pathPoint.wpId), pathPointSel: ed.pathPointSel, extraIssues,
+    });
+    let sceneObjects = 0; this.scene.traverse(() => sceneObjects++);
+    res.sceneObjects = sceneObjects;
+    if (warn && !res.ok) console.warn('[viewport] state/scene mismatch', res.issues);
+    return res;
   }
   // Pick list is rebuilt lazily (only when structure or visibility changed), never per frame.
   rebuildPickables() {
@@ -632,7 +687,6 @@ export class Viewport {
     const project = ed.project;
     const S = project.settings;
     const dw = ed.displayWorld();
-    const seen = new Set();
     const ikBones = new Set();
     for (const k of project.constraints) if (k.enabled) for (const b of chainBones(project, k)) ikBones.add(b.id);
     const camDist = this.cam.distance;
@@ -643,16 +697,26 @@ export class Viewport {
     const fov = this.cam.persp.fov, viewH = this.canvas.clientHeight || 600;
     const ortho = this.cam.projection === 'ortho';
     const camPos = this.cam.camera.position;
-    // progressive scene construction: new objects are built within a time budget per frame
+    // Reconcile the registry with the project (create / rebuild / update / dispose);
+    // progressive construction: new objects are built within a time budget per frame.
     const t0 = performance.now();
-    let deferred = 0, total = 0;
-    for (const node of project.nodes) {
-      total++;
-      if (!this.groups.has(node.id) && node.type === 'object' && performance.now() - t0 > 12) { deferred++; continue; }
-      seen.add(node.id);
-      const rec = this.ensureGroup(node);
+    const ctx = { ed, project, S, dw, ikBones, camDist, perf, playing, unknownMode, brightness, fov, viewH, ortho, camPos };
+    const stats = this.registry.reconcile(viewportEntities(project), {
+      create: (d) => this.createGroup(d.node),
+      update: (rec, d) => this.updateGroup(rec, d.node, ctx),
+      dispose: (rec) => this.disposeGroup(rec),
+      defer: (d) => d.type === 'object' && performance.now() - t0 > 12,
+    });
+    if (stats.deferred) { this.building = true; ed.setHint(t('hint.buildingScene', { n: stats.total - stats.deferred, total: stats.total })); }
+    else if (this.building) { this.building = false; ed.setHint(''); }
+    this.syncOverlays(ctx);
+  }
+  // Per-frame update of one node's representation from its state and world transform.
+  updateGroup(rec, node, ctx) {
+    const { ed, S, dw, ikBones, camDist, perf, playing, unknownMode, brightness, fov, viewH, ortho, camPos } = ctx;
+    {
       const w = dw.get(node.id);
-      if (!w) continue;
+      if (!w) return;
       rec.group.position.fromArray(w.pos);
       rec.group.quaternion.fromArray(w.rot);
       const sel = ed.selection.has(node.id), act = ed.active === node.id;
@@ -668,7 +732,7 @@ export class Viewport {
         rec.inner.quaternion.fromArray(disp.rot);
         rec.inner.scale.set(zoom[0] * disp.scale[0], zoom[1] * disp.scale[1], zoom[2] * disp.scale[2]);
         rec.inner.visible = S.showDecorations;
-        if (!rec.group.visible) continue; // nothing else to update for invisible objects
+        if (!rec.group.visible) return; // nothing else to update for invisible objects
         // dirty tracking: parts + instance matrices only when the project changed
         if (rec.partsVer !== ed.changeVersion) {
           rec.parts = displayParts(node);
@@ -722,10 +786,10 @@ export class Viewport {
       const ps = camDist * 0.004;
       rec.pivot.scale.set(ps, ps, ps);
     }
-    for (const id of [...this.groups.keys()]) if (!seen.has(id) && getNode(project, id) === undefined) this.disposeGroup(id);
-    if (deferred) { this.building = true; ed.setHint(t('hint.buildingScene', { n: total - deferred, total })); }
-    else if (this.building) { this.building = false; ed.setHint(''); }
-
+  }
+  // Derived visuals (no registry entries): constraint / parent lines, previews, waypaths, gizmos.
+  syncOverlays(ctx) {
+    const { ed, project, S, dw } = ctx;
     // constraint lines
     const segs = [];
     if (S.showConstraints) {
@@ -747,6 +811,8 @@ export class Viewport {
     }
     // Auto-Rig preview: proposed bones as head → tail lines
     if (ed.rigPreview) for (const b of ed.rigPreview.bones) if (!b.skip) segs.push({ a: b.head, b: b.tail, color: COLORS.rigPreview });
+    // export path compression preview: original path dim, compressed path bright
+    if (ed.exportPathPreview) for (const path of ed.exportPathPreview) for (let i = 1; i < path.points.length; i++) segs.push({ a: path.points[i - 1], b: path.points[i], color: path.color });
     // parent relationship lines for selected bones/nodes
     for (const id of ed.selection) {
       const n = getNode(project, id);
@@ -798,8 +864,7 @@ export class Viewport {
     if (sig === this.pathVisual.sig) return;
     this.pathVisual.sig = sig;
     const g = this.pathVisual.group;
-    while (g.children.length) { const c = g.children.pop(); c.geometry?.dispose?.(); }
-    this.pathVisual.points = [];
+    this.clearPathVisual();
     if (S.showWaypaths) {
       const pivot = ed.scenePivot();
       for (const wp of wps) {
@@ -826,13 +891,27 @@ export class Viewport {
             const selP = ed.pathPointSel && ed.pathPointSel.wpId === wp.id && ed.pathPointSel.index === i;
             const m = new THREE.Mesh(cachedGeometry('pathpt', () => new THREE.SphereGeometry(0.03, 10, 8)), new THREE.MeshBasicMaterial({ color: selP ? COLORS.pathPointSel : active ? COLORS.pathPoint : 0x6b7482, depthTest: false }));
             m.position.set(...p); m.renderOrder = 19;
-            m.userData.pathPoint = { wpId: wp.id, index: i }; m.userData.overlay = true;
+            m.userData.pathPoint = { wpId: wp.id, index: i }; m.userData.overlay = true; m.userData.shared = true;
             g.add(m);
             this.pathVisual.points.push(m);
           });
         }
       }
     }
+    this.pickDirty = true;
+  }
+
+  clearPathVisual() {
+    const g = this.pathVisual.group;
+    for (const c of [...g.children]) {
+      // ArrowHelper geometries are module-level shared objects in Three; path points use the shared cache
+      c.traverse((o) => {
+        if (o.geometry && !o.userData.shared && !c.isArrowHelper) o.geometry.dispose();
+        if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose());
+      });
+      g.remove(c);
+    }
+    this.pathVisual.points = [];
     this.pickDirty = true;
   }
 

@@ -1,18 +1,19 @@
 // Central editor state and commands. Every mutation of the project goes
 // through here so undo/redo, autosave and UI refresh stay consistent.
-import { createProject, createNode, getNode, childrenOf, descendants, reparent, deleteNode, worldTransforms, setWorldTransform, localTransform, parentWorld, orderedNodes, isAncestor, boneTail } from '../scene/scene.js';
+import { createProject, createNode, getNode, childrenOf, descendants, reparent, deleteNode, worldTransforms, setWorldTransform, localTransform, parentWorld, orderedNodes, isAncestor, boneTail, editableLocalFromWorld, rootNodes } from '../scene/scene.js';
 import * as DP from '../scene/display-parts.js';
 import { perfModeActive } from '../viewport/parts-plan.js';
 import { proposeRig, applyRig } from '../rig/autorig.js';
 import { v3, quat, xf } from '../core/math.js';
 import { History } from '../core/history.js';
-import { saveRecovery, clearRecovery, loadPrefs, updatePrefs, putProject, getProject, deleteProject, newProjectId, isQuotaError, PROJECT_SCHEMA } from '../core/persistence.js';
+import { saveRecovery, clearRecovery, loadPrefs, savePrefs, updatePrefs, migrateNavPrefs, putProject, getProject, deleteProject, newProjectId, isQuotaError, PROJECT_SCHEMA } from '../core/persistence.js';
 import { createClip, uniqueClipName, duplicateClip, getClip, activeClip, insertKey, keyRef, moveKeys, deleteKeys, copyKeys, pasteKeys, setInterpolation, clipEnd, track, evaluateKeys, snapTime } from '../anim/clips.js';
-import { evaluatePose } from '../anim/evaluate.js';
+import { evaluatePose, rootMotionNode, clipHasRootMotion } from '../anim/evaluate.js';
 import { createConstraint, chainBones } from '../anim/ik.js';
 import { createWaypath, evaluateWaypath, bakeWaypathKeys, pathDuration } from '../anim/waypath.js';
 import { importGia } from '../gia/gia-import.js';
-import { exportGia, exportPlacement, exportSlots, initialSlotIndex, toWaypoint, exportPivot, outputRotation } from '../gia/gia-export.js';
+import { exportGia, exportPlacement, exportSlots, initialSlotIndex, toWaypoint, exportPivot, outputRotation, buildExportPlan, pathLimitViolations, compressPlan, MAX_PATH_POINTS, MAX_OBJECT_SCALE, objectScaleViolations } from '../gia/gia-export.js';
+import { simplifyPolyline } from '../anim/path-compress.js';
 import { restWorld } from '../anim/evaluate.js';
 import { displayQuatToGameEuler, displayToGamePos } from '../core/math.js';
 import { validateProject, hasErrors } from '../validation.js';
@@ -55,7 +56,10 @@ export class Editor {
     this.mode = 'rig';
     this.tool = 'select';
     this.space = 'world';
-    const prefs = loadPrefs();
+    let prefs = loadPrefs();
+    // navigation preferences are versioned: existing users keep their effective orbit direction
+    const mig = migrateNavPrefs(prefs);
+    if (mig.changed) { prefs = mig.prefs; savePrefs(prefs); }
     this.snap = { enabled: false, pos: 0.1, rot: 15, ...(prefs.snap || {}) };
     this.timeDisplay = prefs.timeDisplay || 'frames';
     this.wasd = !!prefs.wasd;
@@ -188,11 +192,12 @@ export class Editor {
   // silently overwritten by the keyframe value while the user is editing.
   // Overrides are tagged with the clip and time they were made at and only apply
   // there, so undo/redo can never show a frame-10 pose edit on frame 20.
-  setPoseOverride(id, ch, val) {
+  setPoseOverride(id, ch, val, e = null) {
     const clipId = this.project.activeClipId, t = this.time;
     const prev = this.poseOverrides.get(id);
     const o = prev && prev.clipId === clipId && Math.abs(prev.t - t) < 1e-6 ? { ...prev } : { clipId, t };
     o[ch] = val.slice();
+    if (ch === 'rot') { if (e) o.rotE = e.slice(); else delete o.rotE; }
     this.poseOverrides.set(id, o);
     this._overrideVer++;
     this.invalidate();
@@ -309,6 +314,7 @@ export class Editor {
     return true;
   }
   applyRecord(rec, { dirty = false } = {}) {
+    this.beginProjectSwitch();
     this.project = { ...createProject(), ...rec.project };
     this.project.settings = { ...createProject().settings, ...(rec.project?.settings || {}) };
     this.giaBytes = rec.giaBytes ? new Uint8Array(rec.giaBytes) : null;
@@ -372,8 +378,8 @@ export class Editor {
     this.emit('outliner');
     this.scheduleSave();
   }
-  undo() { this.settleGizmo(); const s = this.history.undo(); if (s) this.applyState(s); }
-  redo() { this.settleGizmo(); const s = this.history.redo(); if (s) this.applyState(s); }
+  undo() { this.finishInteraction(); const s = this.history.undo(); if (s) this.applyState(s); }
+  redo() { this.finishInteraction(); const s = this.history.redo(); if (s) this.applyState(s); }
   // Swap in a project snapshot without moving the playhead (time is not undoable).
   keepPlayheads(state) {
     const heads = new Map(this.project.clips.map((c) => [c.id, c.playhead || 0]));
@@ -381,24 +387,47 @@ export class Editor {
     return state;
   }
   applyState(state) {
-    this.settleGizmo();
+    // an unfinished drag must not keep references to objects the restored state may lack
+    this.finishInteraction();
     this._reorient = null;
+    this.rigPreview = null;
     const st = this.parseState(state);
     this.project = this.keepPlayheads(st.project);
     this._committedProjectJson = null;
     this.poseOverrides = new Map(st.overrides);
     this._overrideVer++;
-    this.pruneSelection();
+    const selChanged = this.pruneSelection();
     this.invalidate();
     this.emit('overrides');
     this.emit('change', { label: 'undo' });
+    if (selChanged) this.emit('selection');
     this.scheduleSave();
   }
+  // Drop every selection / hover reference to entities that no longer exist. Returns true when something changed.
   pruneSelection() {
-    for (const id of [...this.selection]) if (!getNode(this.project, id)) this.selection.delete(id);
-    if (this.active && !getNode(this.project, this.active)) this.active = [...this.selection][0] || null;
+    let changed = false;
+    for (const id of [...this.selection]) if (!getNode(this.project, id)) { this.selection.delete(id); changed = true; }
+    if (this.active && !getNode(this.project, this.active)) { this.active = [...this.selection][0] || null; changed = true; }
+    if (this._displaySelOwner && !getNode(this.project, this._displaySelOwner)) { this.displaySel = new Set(); this.displayActive = null; this._displaySelOwner = null; changed = true; }
+    if (this.displayEdit && (!this.active || getNode(this.project, this.active)?.type !== 'object')) { this.displayEdit = false; changed = true; }
+    if (this.pathPointSel) {
+      const wp = this.project.waypaths.find((w) => w.id === this.pathPointSel.wpId);
+      if (!wp || !wp.points?.[this.pathPointSel.index]) { this.pathPointSel = null; changed = true; }
+    }
+    if (this.exportPreviewSlot != null && !(this.project.exportSlots || this.project.export?.slots || [])[this.exportPreviewSlot]) this.exportPreviewSlot = null;
     this.selectedKeys = new Set([...this.selectedKeys].filter((r) => this.keyExists(r)));
     if (!getClip(this.project, this.project.activeClipId)) this.project.activeClipId = this.project.clips[0]?.id || null;
+    return changed;
+  }
+  // First step of every project switch (New / Open / Recent / Import / Recover / Duplicate):
+  // cancel the interaction that may still hold the old objects, stop playback, drop previews,
+  // and tell the viewport to dispose the old project root before the new state appears.
+  beginProjectSwitch() {
+    this.cancelInteraction();
+    this.playing = false;
+    this.rigPreview = null;
+    this.exportPreviewSlot = null;
+    this.emit('project', { phase: 'teardown' });
   }
 
   // ---------- modes & tools ----------
@@ -541,13 +570,13 @@ export class Editor {
   sceneStats() { return { objects: this.project.nodes.filter((n) => n.type === 'object').length, parts: this.totalParts(), perf: this.perfActive() }; }
 
   // ---------- Experimental Auto-Rig ----------
-  proposeAutoRig(opts = {}) { return proposeRig(this.project, { objectIds: opts.objectIds || null, type: opts.type || 'auto', ik: !!opts.ik }); }
+  proposeAutoRig(opts = {}) { return proposeRig(this.project, { objectIds: opts.objectIds || null, type: opts.type || 'auto', ik: !!opts.ik, pose: opts.pose || null }); }
   setRigPreview(p) { this.rigPreview = p || null; this.emit('change', { transient: true }); }
   // Applies a proposal as ONE undo step; returns created ids. Existing bones are kept
   // (the dialog warns), objects are re-parented preserving their world transforms.
   applyAutoRig(proposal) {
     this.settleGizmo();
-    const created = applyRig(this.project, proposal, { createNode, createConstraint, reparent });
+    const created = applyRig(this.project, proposal, { createNode, createConstraint, reparent, setWorldTransform });
     this.rigPreview = null;
     this.commit(t('hist.autoRig'));
     if (created.bones.length) this.select(created.bones[0]);
@@ -603,22 +632,28 @@ export class Editor {
   setRotateMode(m) { this.rotateMode = m === 'preserve' ? 'preserve' : 'normal'; updatePrefs({ rotateMode: this.rotateMode }); this.emit('tool'); }
   toggleRotateMode() { this.setRotateMode(this.rotateMode === 'preserve' ? 'normal' : 'preserve'); }
 
-  // ---------- reorient: rotate a node, keep descendants fixed in world space ----------
+  // ---------- preserve child world transforms: move / rotate a node, keep descendants fixed ----------
   // Snapshot-based so a drag applies one exact delta from the drag-start state
-  // (no accumulation): Δ = startLocal⁻¹ ∘ newLocal is post-multiplied onto the
-  // node's base rotation and all of its rotation keys, and Δ⁻¹ is pre-multiplied
-  // onto every direct child's base pos/rot and keys. Grandchildren are relative
-  // to their own parent and need no change; corrections stay untouched.
+  // (no accumulation). The node's own base pos/rot and keys receive the local
+  // delta (Δrot post-multiplied, Δpos added in the parent frame). Descendants
+  // are then rebased by the node's ACTUAL world change after re-evaluation
+  // (M = newWorld⁻¹ ∘ startWorld, computed with full rigid transforms, never
+  // Euler subtraction): every direct child's base pos/rot and keys become
+  // M ∘ child, so child world = newWorld ∘ M ∘ child = startWorld ∘ child is
+  // exactly what it was. Grandchildren are relative to their own parent and
+  // need no change; attached objects (with their decorations) are children
+  // like any other; corrections stay untouched. The hierarchy carries no
+  // scale (object zoom scales only its own display), so no shear can arise.
   beginReorient(ids) {
     this.clearPoseOverrides(ids);
     const snap = new Map();
-    const snapNode = (n) => ({ rot: quat.clone(n.rot), pos: v3.clone(n.pos) });
+    const snapNode = (n) => ({ rot: quat.clone(n.rot), pos: v3.clone(n.pos), rotE: n.rotE ? n.rotE.slice() : null });
     const snapKeys = (nodeId) => {
       const out = [];
       for (const clip of this.project.clips) {
         const tr = clip.tracks[nodeId];
         if (!tr) continue;
-        for (const ch of ['pos', 'rot']) for (const k of tr[ch]) out.push({ clip, ch, key: k, v: k.v.slice() });
+        for (const ch of ['pos', 'rot']) for (const k of tr[ch]) out.push({ clip, ch, key: k, v: k.v.slice(), e: k.e ? k.e.slice() : null });
       }
       return out;
     };
@@ -627,45 +662,60 @@ export class Editor {
       if (!node) continue;
       const children = childrenOf(this.project, id);
       snap.set(id, {
-        startLocal: quat.clone(this.currentLocal(id).rot),
-        startWorld: quat.clone(this.pose().world.get(id).rot),
+        startLocal: xf.clone(this.currentLocal(id)),
+        startWorld: xf.clone(this.pose().world.get(id)),
         self: snapNode(node), selfKeys: snapKeys(id),
+        // translating a node whose rotation is animated cannot be compensated exactly at every
+        // frame (the descendants' offset depends on the node's rotation at each time)
+        rotAnimated: this.project.clips.some((c) => c.tracks[id]?.rot.length > 1),
         children: children.map((c) => ({ node: c, base: snapNode(c), keys: snapKeys(c.id) })),
       });
     }
-    this._reorient = { snap, rebasedKeys: 0, clips: new Set() };
+    this._reorient = { snap, rebasedKeys: 0, clips: new Set(), moved: new Set(), inexact: new Set() };
   }
-  applyReorient(id, newLocalRot) {
+  // newLocal: { pos?, rot? } (a bare quaternion is accepted for rotation-only calls)
+  applyReorient(id, newLocal) {
     const R = this._reorient;
     const s = R?.snap.get(id);
     const node = getNode(this.project, id);
     if (!s || !node) return;
+    if (Array.isArray(newLocal)) newLocal = { rot: newLocal };
+    const newRot = newLocal.rot || s.startLocal.rot;
+    const newPos = newLocal.pos || s.startLocal.pos;
     // restore the drag-start state, then apply the exact delta once
     node.rot = quat.clone(s.self.rot); node.pos = v3.clone(s.self.pos);
-    for (const k of s.selfKeys) k.key.v = k.v.slice();
-    for (const c of s.children) { c.node.rot = quat.clone(c.base.rot); c.node.pos = v3.clone(c.base.pos); for (const k of c.keys) k.key.v = k.v.slice(); }
-    const delta = quat.norm(quat.mul(quat.conj(s.startLocal), newLocalRot));
-    const inv = quat.conj(delta);
+    for (const k of s.selfKeys) { k.key.v = k.v.slice(); if (k.e) k.key.e = k.e.slice(); else delete k.key.e; }
+    for (const c of s.children) { c.node.rot = quat.clone(c.base.rot); c.node.pos = v3.clone(c.base.pos); for (const k of c.keys) { k.key.v = k.v.slice(); if (k.e) k.key.e = k.e.slice(); else delete k.key.e; } }
+    const dRot = quat.norm(quat.mul(quat.conj(s.startLocal.rot), newRot));
+    const dPos = v3.sub(newPos, s.startLocal.pos);
     let rebased = 0;
-    node.rot = quat.norm(quat.mul(node.rot, delta));
-    for (const k of s.selfKeys) if (k.ch === 'rot') { k.key.v = quat.norm(quat.mul(k.key.v, delta)); rebased++; R.clips.add(k.clip.id); }
-    // Children are rebased by the node's ACTUAL world-rotation change after
-    // re-evaluation (IK may absorb part of the intended change); for plain
-    // FK nodes this equals Δ exactly.
+    node.rot = quat.norm(quat.mul(node.rot, dRot));
+    node.pos = v3.add(node.pos, dPos);
+    node.rotE = newLocal.rotE ? newLocal.rotE.slice() : quat.eulerNear(node.rot, s.self.rotE);
+    for (const k of s.selfKeys) {
+      k.key.v = k.ch === 'rot' ? quat.norm(quat.mul(k.key.v, dRot)) : v3.add(k.key.v, dPos);
+      if (k.ch === 'rot' && k.key.e) k.key.e = quat.eulerNear(k.key.v, k.key.e);
+      rebased++; R.clips.add(k.clip.id);
+    }
+    // Descendants are rebased by the node's ACTUAL world change after
+    // re-evaluation (IK may absorb part of the intended change); for plain FK
+    // nodes this equals the requested delta exactly.
     this.invalidate();
     const wNew = this.pose().world.get(id);
-    const actual = wNew ? quat.norm(quat.mul(quat.conj(s.startWorld), wNew.rot)) : delta;
-    const invActual = quat.conj(actual);
-    void inv;
+    const M = wNew ? xf.localOf(s.startWorld, wNew) : { pos: [0, 0, 0], rot: [0, 0, 0, 1] };
     for (const c of s.children) {
-      c.node.rot = quat.norm(quat.mul(invActual, c.node.rot));
-      c.node.pos = quat.rotate(invActual, c.node.pos);
+      const nl = xf.compose(M, { pos: c.node.pos, rot: c.node.rot });
+      c.node.rot = nl.rot; c.node.pos = nl.pos;
+      if (c.base.rotE) c.node.rotE = quat.eulerNear(c.node.rot, c.base.rotE);
       for (const k of c.keys) {
-        k.key.v = k.ch === 'rot' ? quat.norm(quat.mul(invActual, k.key.v)) : quat.rotate(invActual, k.key.v);
+        k.key.v = k.ch === 'rot' ? quat.norm(quat.mul(M.rot, k.key.v)) : v3.add(M.pos, quat.rotate(M.rot, k.key.v));
+        if (k.ch === 'rot' && k.key.e) k.key.e = quat.eulerNear(k.key.v, k.key.e);
         rebased++; R.clips.add(k.clip.id);
       }
     }
     R.rebasedKeys = rebased;
+    if (v3.len(dPos) > 1e-12 || quat.angle(dRot, [0, 0, 0, 1]) > 1e-12) R.moved.add(id); else R.moved.delete(id);
+    if (s.rotAnimated && v3.len(dPos) > 1e-12) R.inexact.add(id); else R.inexact.delete(id);
     this.transient();
   }
   endReorient() {
@@ -675,9 +725,15 @@ export class Editor {
     this.commit(t('hist.reorient'));
     if (R.rebasedKeys) toast(t('toast.reorientRebased', { n: R.rebasedKeys, m: R.clips.size }), 'warn', 4500);
     const ids = [...R.snap.keys()];
-    if (this.project.constraints.some((k) => ids.includes(k.boneId) || ids.some((id) => chainBones(this.project, k).some((b) => b.id === id)))) toast(t('toast.reorientIK'), 'info', 3500);
+    // a descendant driven by IK is re-solved from the new rest transform: say so instead of looking broken
+    const ik = this.project.constraints.some((k) => k.enabled !== false && (ids.includes(k.boneId) || ids.some((id) => chainBones(this.project, k).some((b) => b.id === id || isAncestor(this.project, id, b.id)))));
+    if (ik) toast(t('toast.reorientIK'), 'info', 3500);
+    if (R.inexact.size) toast(t('toast.reorientInexact', { names: [...R.inexact].map((id) => getNode(this.project, id)?.name).join(', ') }), 'warn', 6000);
+    this.lastRigEdit = { rebasedKeys: R.rebasedKeys, clips: R.clips.size, ik, moved: [...R.moved], inexact: [...R.inexact] };
   }
-  reorientOnce(id, newLocalRot) { this.beginReorient([id]); this.applyReorient(id, newLocalRot); this.endReorient(); }
+  // true when moving this node in preserve mode cannot keep descendants fixed at every frame
+  moveRebaseInexact(id) { return this.project.clips.some((c) => c.tracks[id]?.rot.length > 1); }
+  reorientOnce(id, newLocal) { this.beginReorient([id]); this.applyReorient(id, newLocal); this.endReorient(); }
   setTimeDisplay(v) { this.timeDisplay = v; updatePrefs({ timeDisplay: v }); this.emit('time'); }
   setHint(s) { this.hint = s; this.emit('hint'); }
 
@@ -709,6 +765,7 @@ export class Editor {
     let res;
     try { res = importGia(bytes, name); }
     catch (e) { console.error(e); toast(t('toast.importFailed', { err: e.message }), 'error', 4000); return false; }
+    this.beginProjectSwitch();
     this.project = res.project;
     this.giaBytes = bytes;
     this.giaName = name;
@@ -731,6 +788,7 @@ export class Editor {
     return true;
   }
   newProject() {
+    this.beginProjectSwitch();
     this.project = createProject();
     this.giaBytes = null; this.giaName = null; this.importInfo = null;
     this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.playing = false;
@@ -758,6 +816,7 @@ export class Editor {
   openProjectFile(text) {
     const data = JSON.parse(text);
     if (data.app !== 'miliastra-animator' || !data.project) throw new Error('not a project file');
+    this.beginProjectSwitch();
     this.project = { ...createProject(), ...data.project };
     this.project.settings = { ...createProject().settings, ...(data.project.settings || {}) };
     if (data.gia) { const bin = atob(data.gia); const u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); this.giaBytes = u8; } else this.giaBytes = null;
@@ -849,21 +908,27 @@ export class Editor {
     const n = getNode(this.project, id);
     if (!n) return null;
     const p = this.pose().poses.get(id);
-    return { pos: (p?.pos || n.pos).slice(), rot: (p?.rot || n.rot).slice() };
+    const rot = (p?.rot || n.rot).slice();
+    const rotE = p?.rot ? (p.rotE || quat.toEulerDeg(p.rot)) : (n.rotE || quat.toEulerDeg(n.rot));
+    return { pos: (p?.pos || n.pos).slice(), rot, rotE: rotE.slice() };
   }
   channelKeyed(id, channel) { const c = activeClip(this.project); const tr = c && track(c, id); return !!(tr && tr[channel].length); }
   hasKeyAt(id, channel, time = this.time) { const c = activeClip(this.project); const tr = c && track(c, id); return !!(tr && tr[channel].some((k) => Math.abs(k.t - time) < 1e-6)); }
   // Apply a new local pos/rot. With Auto Key (and a clip) this keys the channel;
   // otherwise it edits the base transform, or the key under the playhead.
-  setNodeLocal(id, { pos, rot }, { commit = true, label = t('hist.transform'), forceKey = false } = {}) {
+  setNodeLocal(id, { pos, rot, rotE = null }, { commit = true, label = t('hist.transform'), forceKey = false } = {}) {
     const n = getNode(this.project, id);
     if (!n) return;
     if (this.playing) this.pause(); // interactive edits pause playback (playhead stays)
-    // "Keep children" rotation mode: rig/rest edit that leaves descendants in place
-    if (rot && this.rotateMode === 'preserve') {
-      if (this._reorient?.snap.has(id)) { this.applyReorient(id, rot); if (commit) this.endReorient(); }
-      else this.reorientOnce(id, rot);
-      if (pos) this.setNodeLocal(id, { pos }, { commit, label, forceKey });
+    // authored angles: typed values are kept verbatim (450°, -720° …); gizmo / world-space
+    // edits unwrap the new orientation next to the previous angles so turns accumulate
+    if (rot && !rotE) rotE = quat.eulerNear(rot, this.currentLocal(id).rotE);
+    // Preserve child world transforms: a rig/rest edit (move and/or rotate) that leaves
+    // every descendant in place and never creates keyframes
+    if ((rot || pos) && this.rotateMode === 'preserve') {
+      const local = { pos, rot: isPositionOnly(n) ? null : rot, rotE };
+      if (this._reorient?.snap.has(id)) { this.applyReorient(id, local); if (commit) this.endReorient(); }
+      else this.reorientOnce(id, local);
       return;
     }
     const clip = activeClip(this.project);
@@ -874,14 +939,15 @@ export class Editor {
       if (!val) continue;
       const keyed = clip && this.channelKeyed(id, ch);
       if (clip && (autoKey || forceKey || (keyed && this.hasKeyAt(id, ch)))) {
-        insertKey(clip, id, ch, this.time, val, this.defaultInterp(clip, id, ch));
+        insertKey(clip, id, ch, this.time, val, this.defaultInterp(clip, id, ch), ch === 'rot' ? rotE : null);
         this.clearPoseOverrides([id], [ch]);
       } else if (keyed) {
         // animated channel, no key at this frame, Auto Key off: temporary pose edit
-        this.setPoseOverride(id, ch, val);
+        this.setPoseOverride(id, ch, val, ch === 'rot' ? rotE : null);
         if (!hinted) { hinted = true; this.setHint(t('hint.unkeyedPose')); }
       } else {
         n[ch] = val.slice();
+        if (ch === 'rot') n.rotE = rotE.slice();
       }
     }
     if (commit) this.commit(label); else this.transient();
@@ -897,11 +963,8 @@ export class Editor {
     const n = getNode(this.project, id);
     if (!n) return;
     const world = this.pose().world;
-    const local = xf.localOf(worldT, parentWorld(this.project, n.parent, world));
-    let rot = local.rot;
-    if (n.type === 'object' && n.correction?.some((c) => c)) rot = quat.mul(rot, quat.conj(quat.fromEulerDeg(n.correction)));
-    if (this.rotateMode === 'preserve' && this._reorient?.snap.has(id)) { this.setNodeLocal(id, { rot: quat.norm(rot) }, opts); return; }
-    this.setNodeLocal(id, { pos: local.pos, rot: quat.norm(rot) }, opts);
+    const local = editableLocalFromWorld(this.project, n, worldT, world); // basis + correction stripped
+    this.setNodeLocal(id, { pos: local.pos, rot: local.rot }, opts);
   }
   setCorrection(id, euler) { const n = getNode(this.project, id); if (n?.type === 'object') { n.correction = euler.slice(); this.commit(t('hist.correction')); } }
   resetCorrection(id) { this.setCorrection(id, [0, 0, 0]); }
@@ -911,7 +974,7 @@ export class Editor {
     const pos = n.type === 'object' ? v3.clone(n.filePos) : [0, 0, 0];
     const rot = n.type === 'object' ? quat.clone(n.fileRot) : [0, 0, 0, 1];
     if (n.type === 'object' && n.parent) { /* file transform is world space */ this.setNodeWorld(id, { pos, rot }, { label: t('hist.reset') }); return; }
-    this.setNodeLocal(id, { pos, rot }, { label: t('hist.reset') });
+    this.setNodeLocal(id, { pos, rot, rotE: n.type === 'object' ? null : [0, 0, 0] }, { label: t('hist.reset') });
   }
   setNodeProps(id, patch, label = t('hist.edit')) { const n = getNode(this.project, id); if (!n) return; Object.assign(n, patch); this.commit(label); }
   setGlobalOffset(v) { this.project.settings.globalOffset = v.slice(); this.commit(t('hist.offset')); }
@@ -968,14 +1031,130 @@ export class Editor {
   // Every view-only offset applied on top of the evaluated pose, composed into
   // one rigid transform (output-rotation preview first, then the waypath preview).
   displayOffset() {
-    const a = this.exportPreviewOffset(), b = this.pathOffset();
-    if (!a) return b;
-    if (!b) return a;
+    const offs = [this.orientPreviewOffset(), this.exportPreviewOffset(), this.pathOffset()].filter(Boolean);
+    if (!offs.length) return null;
     // T(p) = pivot + R(p − pivot) + d ; compose b∘a keeping a's pivot
-    const R = quat.norm(quat.mul(b.rot, a.rot));
-    const Ta = this.applyPathOffset({ pos: a.pivot, rot: [0, 0, 0, 1] }, a); // a(pivot_a)
-    const Tb = this.applyPathOffset({ pos: Ta.pos, rot: [0, 0, 0, 1] }, b); // b(a(pivot_a))
-    return { pos: v3.sub(Tb.pos, a.pivot), rot: R, pivot: a.pivot };
+    return offs.reduce((a, b) => {
+      const R = quat.norm(quat.mul(b.rot, a.rot));
+      const Ta = this.applyPathOffset({ pos: a.pivot, rot: [0, 0, 0, 1] }, a); // a(pivot_a)
+      const Tb = this.applyPathOffset({ pos: Ta.pos, rot: [0, 0, 0, 1] }, b); // b(a(pivot_a))
+      return { pos: v3.sub(Tb.pos, a.pivot), rot: R, pivot: a.pivot };
+    });
+  }
+  // Reorient Model preview: the whole assembly turned about the model pivot (view only).
+  orientPreviewOffset() {
+    if (!this.orientPreview) return null;
+    return { pos: [0, 0, 0], rot: this.orientPreview, pivot: exportPivot(this.project) };
+  }
+  setOrientPreview(q) { this.orientPreview = q && quat.angle(q, [0, 0, 0, 1]) > 1e-9 ? quat.norm(q) : null; this.invalidate(); this.emit('change', { transient: true }); }
+
+  // ---------- Reorient Model ----------
+  // Turn the COMPLETE model (objects with their decorations, bones, IK targets and
+  // poles, constraints, waypaths, animation keys) as one unit by R about the model
+  // pivot (the global offset), then freeze the turn into the rest basis: root bones
+  // absorb it in their frozen basis so their editable rotation values stay as they
+  // were (typically 0), root objects take it into their placement. Internal shape,
+  // spacing and rig relationships are untouched; every clip is rebased with
+  // quaternion composition (its motion turns with the model), so exporting applies
+  // the correction exactly once through the ordinary world transforms.
+  reorientModel(R, { label = null } = {}) {
+    R = quat.norm(R);
+    if (quat.angle(R, [0, 0, 0, 1]) < 1e-9) return false;
+    this.finishInteraction();
+    this._reorient = null;
+    this.setOrientPreview(null);
+    this.clearPoseOverrides();
+    const rotP = (p) => quat.rotate(R, p); // root-local space: the pivot is the origin (world = globalOffset + local)
+    const roots = rootNodes(this.project);
+    for (const n of roots) {
+      if (n.type === 'bone') {
+        const B = n.basis || { pos: [0, 0, 0], rot: [0, 0, 0, 1] };
+        n.basis = { pos: rotP(B.pos), rot: quat.norm(quat.mul(R, B.rot)) };
+        n.pos = rotP(n.pos);
+      } else {
+        n.pos = rotP(n.pos);
+        n.rot = quat.norm(quat.mul(R, n.rot));
+        n.rotE = quat.eulerNear(n.rot, n.rotE);
+        if (n.filePos) n.filePos = rotP(n.filePos);
+        if (n.fileRot) n.fileRot = quat.norm(quat.mul(R, n.fileRot));
+      }
+      for (const clip of this.project.clips) {
+        const tr = clip.tracks[n.id];
+        if (!tr) continue;
+        for (const k of tr.pos) k.v = rotP(k.v);
+        if (n.type !== 'bone') for (const k of tr.rot) { k.v = quat.norm(quat.mul(R, k.v)); if (k.e) k.e = quat.eulerNear(k.v, k.e); }
+      }
+    }
+    for (const wp of this.project.waypaths) {
+      if (wp.direction) wp.direction = rotP(wp.direction);
+      if (wp.points) wp.points = wp.points.map((p) => rotP(p));
+    }
+    this.invalidate();
+    this.commit(label || t('hist.reorientModel'));
+    return true;
+  }
+  // ---------- Scale Entire Model ----------
+  // Uniform scale S of the complete model about the model pivot (the global offset), baked
+  // into the editable state as if a temporary common root had been scaled and removed:
+  // every local position (objects, bones, IK targets, poles), bone length, frozen basis
+  // offset, the parent object's own scale (zoom), display root offset, proxy size, position
+  // key, waypath and path distance is multiplied by S; rotations, rotation keys, timing and
+  // constraint weights are untouched. Decorations are never rewritten: their transforms are
+  // relative to the parent object and follow its scale in the game, so only the parent's
+  // zoom changes (the exporter writes just that). Nothing remains to be applied again:
+  // export, IK and retargeting simply see a model of the new size.
+  scaleModel(S, { label = null } = {}) {
+    if (!Number.isFinite(S) || S <= 0 || Math.abs(S - 1) < 1e-12) return false;
+    this.finishInteraction();
+    this._reorient = null;
+    this.clearPoseOverrides();
+    for (const n of this.project.nodes) {
+      n.pos = v3.scale(n.pos, S);
+      if (n.basis) n.basis = { pos: v3.scale(n.basis.pos, S), rot: n.basis.rot };
+      if (n.type === 'bone') n.length = (n.length || 0.25) * S;
+      if (n.type === 'object') {
+        n.zoom = (n.zoom || [1, 1, 1]).map((z) => z * S);
+        if (n.filePos) n.filePos = v3.scale(n.filePos, S);
+        if (n.display?.pos) n.display.pos = v3.scale(n.display.pos, S); // display root offset lives outside the zoom
+      }
+      if (n.type === 'proxy' && n.size) n.size = n.size.map((v) => v * S);
+      for (const clip of this.project.clips) {
+        const tr = clip.tracks[n.id];
+        if (tr) for (const k of tr.pos) k.v = v3.scale(k.v, S);
+      }
+    }
+    for (const wp of this.project.waypaths) {
+      if (wp.points) wp.points = wp.points.map((p) => v3.scale(p, S));
+      if (wp.velocity != null) wp.velocity *= S; // distances scale, timing stays
+      if (wp.distance != null) wp.distance *= S;
+    }
+    this.project.modelScale = +(((this.project.modelScale || 1) * S).toPrecision(12)); // diagnostics only, never re-applied
+    this.invalidate();
+    this.commit(label || t('hist.scaleModel'));
+    return true;
+  }
+  // Objects whose scale would exceed the Miliastra limit after scaling by S (warn before committing).
+  predictObjectScales(S) {
+    return this.project.nodes.filter((n) => n.type === 'object').map((n) => { const z = (n.zoom || [1, 1, 1]).map((v) => Math.abs(v) * S); const value = Math.max(...z); return { nodeId: n.id, guid: n.guid, name: n.name, value, axes: ['X', 'Y', 'Z'].filter((_, i) => z[i] > MAX_OBJECT_SCALE + 1e-9), over: value > MAX_OBJECT_SCALE + 1e-9 }; });
+  }
+  objectScaleViolations() { return objectScaleViolations(this.project); }
+  // size of the assembled model (world-space extent of object pivots), for the Scale dialog
+  modelExtent() {
+    const w = worldTransforms(this.project, null);
+    let min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+    for (const n of this.project.nodes) { if (n.type !== 'object') continue; const p = w.get(n.id)?.pos; if (!p) continue; min = min.map((v, i) => Math.min(v, p[i])); max = max.map((v, i) => Math.max(v, p[i])); }
+    return Number.isFinite(min[0]) ? max.map((v, i) => v - min[i]) : [0, 0, 0];
+  }
+  // ---------- Root Motion (per clip, non-destructive) ----------
+  clipHasRootMotion(clip) { return clipHasRootMotion(this.project, clip); }
+  clipRootNode(clip) { return rootMotionNode(this.project, clip); }
+  setClipRootMotion(id, on) {
+    const c = getClip(this.project, id);
+    if (!c) return;
+    c.rootMotion = !!on;
+    this.invalidate();
+    this.commit(t(on ? 'hist.rootMotionOn' : 'hist.rootMotionOff'));
+    this.emit('time');
   }
   displayWorld() {
     const world = this.pose().world;
@@ -987,10 +1166,20 @@ export class Editor {
   }
 
   // ---------- clips & playback ----------
+  // Create a new clip (works from the zero-animation state: nothing is derived from an
+  // existing or active clip). Unnamed clips are "Animation 1", "Animation 2", …
   createClip(name) {
-    const clip = createClip(this.project, uniqueClipName(this.project, name || t('clip.default')), 2);
+    this.finishInteraction();
+    if (!Array.isArray(this.project.clips)) this.project.clips = [];
+    let clipName;
+    if (name) clipName = uniqueClipName(this.project, name);
+    else { const base = t('clip.default'); const used = new Set(this.project.clips.map((c) => c.name)); let n = 1; while (used.has(`${base} ${n}`)) n++; clipName = `${base} ${n}`; }
+    const clip = createClip(this.project, clipName, 2);
+    clip.playhead = 0;
     this.project.activeClipId = clip.id;
-    if ((this.project.exportConfig.slots || []).length < MAX_DEVICES_PER_OBJECT) this.project.exportConfig.slots.push({ clipId: clip.id, name: clip.name, outputYaw: 0 });
+    this.selectedKeys = new Set();
+    this.playing = false;
+    if (this.slots.length < MAX_DEVICES_PER_OBJECT) this.slots.push({ clipId: clip.id, name: clip.name, outputYaw: 0 });
     this.commit(t('hist.newClip'));
     this.emit('time');
     return clip;
@@ -1063,7 +1252,7 @@ export class Editor {
       const local = this.currentLocal(id);
       if (!local) continue;
       const chs = isPositionOnly(getNode(this.project, id)) ? channels.filter((c) => c === 'pos') : channels;
-      for (const ch of chs) { insertKey(clip, id, ch, this.time, local[ch], this.defaultInterp(clip, id, ch)); n++; }
+      for (const ch of chs) { insertKey(clip, id, ch, this.time, local[ch], this.defaultInterp(clip, id, ch), ch === 'rot' ? local.rotE : null); n++; }
     }
     this.clearPoseOverrides(ids, channels);
     this.commit(t('hist.insertKey'));
@@ -1183,11 +1372,37 @@ export class Editor {
   moveSlot(i, dir) { const j = i + dir; if (j < 0 || j >= this.slots.length) return; const [s] = this.slots.splice(i, 1); this.slots.splice(j, 0, s); this.commit(t('hist.slot')); }
   setExportOption(patch) { Object.assign(this.project.exportConfig, patch); this.commit(t('hist.exportOption')); }
   validate() { return validateProject(this.project, this.giaBytes, this.importInfo); }
-  exportFile() {
+  // The full export plan (final path points per object and animation); null when nothing can be exported.
+  exportPlan() {
+    if (!this.giaBytes || !exportSlots(this.project).length) return null;
+    try { return buildExportPlan(this.project, this.giaBytes); } catch (e) { console.error(e); return null; }
+  }
+  // Hook for the UI: given the plan and its over-limit devices, return { plan, remember } to export or null to cancel.
+  resolvePathLimit = null;
+  // Per-slot auto-compression (persisted, undoable). Applies on every export of that slot.
+  setSlotCompression(indices, on) {
+    let changed = false;
+    for (const i of indices) if (this.slots[i] && !!this.slots[i].compress !== !!on) { this.slots[i].compress = !!on; changed = true; }
+    if (changed) this.commit(t('hist.exportCompress'));
+  }
+  async exportFile() {
     const issues = this.validate();
     if (hasErrors(issues)) { toast(t('toast.exportBlocked'), 'error'); return null; }
     try {
-      const { bytes, report } = exportGia(this.project, this.giaBytes);
+      // 1-5: evaluate, bake, apply output rotation / per-slot compression → final points; 6: validate ≤ limit; 7: serialize
+      let plan = buildExportPlan(this.project, this.giaBytes);
+      const over = pathLimitViolations(plan, MAX_PATH_POINTS);
+      const oversized = plan.scaleIssues || [];
+      if (oversized.length) { toast(t('toast.exportObjectScale', { n: oversized.length, max: MAX_OBJECT_SCALE, names: oversized.slice(0, 3).map((o) => `${o.name} ${o.axes.join('/')} ${o.value.toFixed(2)}`).join(', ') }), 'error', 8000); this.select(oversized.map((o) => o.nodeId)); return null; }
+      if (over.length) {
+        if (!this.resolvePathLimit) { toast(t('toast.exportPathLimit', { n: over.length, max: MAX_PATH_POINTS }), 'error', 6000); return null; }
+        const choice = await this.resolvePathLimit(plan, over);
+        if (!choice) { this.setExportPathPreview(null); return null; } // cancel: the project is untouched
+        plan = choice.plan;
+        if (choice.remember) this.setSlotCompression([...new Set(over.map((o) => o.slotIndex))], true);
+      }
+      this.setExportPathPreview(null);
+      const { bytes, report } = exportGia(this.project, this.giaBytes, { plan });
       this.lastReport = report;
       const base = (this.giaName || 'model.gia').replace(/\.gia$/i, '');
       downloadBytes(bytes, `${base} Animated.gia`);
@@ -1196,13 +1411,112 @@ export class Editor {
       return report;
     } catch (e) {
       console.error(e);
+      this.setExportPathPreview(null);
       toast(t('toast.exportFailed', { err: e.message }), 'error', 5000);
       return null;
     }
   }
+  // Viewport preview of compressed export paths (world-space polylines); null clears it.
+  setExportPathPreview(preview) { this.exportPathPreview = preview || null; this.emit('change', { transient: true }); }
+  // ---------- Freeze Transform ----------
+  // Redefine a bone's current transform as its new rest: the visible pose (and every
+  // descendant, attached object and IK result) stays exactly where it is, while the
+  // editable local values become 0 / identity. The old values are folded into node.basis
+  // (position = basis.pos + local pos, rotation = basis.rot ∘ local rot); keys and unkeyed
+  // pose edits are rebased with quaternion composition, so existing animation is visually
+  // identical and freezing rotation never disturbs the position values.
+  freezeTransform(id, { pos = true, rot = true } = {}) {
+    const n = getNode(this.project, id);
+    if (!n || n.type !== 'bone' || (!pos && !rot)) return null;
+    this.finishInteraction();
+    this._reorient = null;
+    const cur = this.currentLocal(id); // what the panel shows right now (keyed value, override or base)
+    const R = rot ? quat.clone(cur.rot) : [0, 0, 0, 1];
+    const P = pos ? v3.clone(cur.pos) : [0, 0, 0];
+    // already frozen at this pose: identity orientation, no offset AND canonical zero angles
+    // (a bone showing 360° or 359.999999° is the identity too, yet must still be zeroed)
+    const anglesZero = !rot || cur.rotE.every((a) => Math.abs(a) < 1e-6);
+    if (quat.angle(R, [0, 0, 0, 1]) < 1e-12 && v3.len(P) < 1e-12 && anglesZero) return null;
+    const B = n.basis || xf.identity();
+    const nb = { pos: v3.add(B.pos, P), rot: quat.norm(quat.mul(B.rot, R)) };
+    const Rinv = quat.conj(R);
+    const mapPos = (p) => v3.sub(p, P);
+    const mapRot = (q) => quat.norm(quat.mul(Rinv, q));
+    // Authored angles after the freeze: the frozen orientation is the new canonical zero.
+    // Every angle set is anchored at (previous angles − angles being frozen), so a key that
+    // equals the frozen pose reads exactly (0, 0, 0) — never 360 or -0.000001 — while keys
+    // elsewhere keep their turns relative to it (a 0→360 spin frozen at 360 becomes -360→0).
+    const eF = rot ? cur.rotE : [0, 0, 0];
+    const mapE = (q, e) => canonicalEuler(q, e ? v3.sub(e, eF) : null);
+    n.pos = mapPos(n.pos); n.rot = mapRot(n.rot); n.rotE = mapE(n.rot, n.rotE || quat.toEulerDeg(quat.mul(R, n.rot)));
+    let rebased = 0;
+    for (const clip of this.project.clips) {
+      const tr = clip.tracks[id];
+      if (!tr) continue;
+      for (const k of tr.pos) { k.v = mapPos(k.v); rebased++; }
+      for (const k of tr.rot) { const eOld = k.e; k.v = mapRot(k.v); if (eOld) k.e = mapE(k.v, eOld); rebased++; }
+    }
+    const o = this.poseOverrides.get(id);
+    if (o) { if (o.pos) o.pos = mapPos(o.pos); if (o.rot) { const eOld = o.rotE; o.rot = mapRot(o.rot); if (eOld) o.rotE = mapE(o.rot, eOld); } this._overrideVer++; }
+    if (v3.len(nb.pos) < 1e-12 && quat.angle(nb.rot, [0, 0, 0, 1]) < 1e-12) delete n.basis; else n.basis = { pos: nb.pos, rot: quat.norm(nb.rot) };
+    this.invalidate();
+    this.commit(t(pos && rot ? 'hist.freeze' : rot ? 'hist.freezeRot' : 'hist.freezePos'));
+    const ik = this.project.constraints.some((k) => k.enabled !== false && (k.boneId === id || chainBones(this.project, k).some((b) => b.id === id)));
+    if (ik) toast(t('toast.freezeIK'), 'info', 3500);
+    if (rebased) toast(t('toast.freezeRebased', { n: rebased }), 'info', 3500);
+    this.lastFreeze = { rebased, ik };
+    return this.lastFreeze;
+  }
+  // Fold the frozen basis back into the editable values (visible pose unchanged).
+  unfreezeTransform(id) {
+    const n = getNode(this.project, id);
+    if (!n || !n.basis) return false;
+    this.finishInteraction();
+    this._reorient = null;
+    const B = n.basis;
+    const mapPos = (p) => v3.add(B.pos, p);
+    const mapRot = (q) => quat.norm(quat.mul(B.rot, q));
+    n.pos = mapPos(n.pos); n.rot = mapRot(n.rot); n.rotE = quat.eulerNear(n.rot, n.rotE);
+    for (const clip of this.project.clips) {
+      const tr = clip.tracks[id];
+      if (!tr) continue;
+      for (const k of tr.pos) k.v = mapPos(k.v);
+      for (const k of tr.rot) { k.v = mapRot(k.v); if (k.e) k.e = quat.eulerNear(k.v, k.e); }
+    }
+    const o = this.poseOverrides.get(id);
+    if (o) { if (o.pos) o.pos = mapPos(o.pos); if (o.rot) { o.rot = mapRot(o.rot); if (o.rotE) o.rotE = quat.eulerNear(o.rot, o.rotE); } this._overrideVer++; }
+    delete n.basis;
+    this.invalidate();
+    this.commit(t('hist.unfreeze'));
+    return true;
+  }
+  // Manual waypath simplification (undoable).
+  simplifyWaypath(id, tolerance) {
+    const wp = this.project.waypaths.find((w) => w.id === id);
+    if (!wp || wp.kind !== 'manual') return null;
+    const r = simplifyPolyline(wp.points, tolerance);
+    if (r.after === wp.points.length) return r;
+    wp.points = r.points;
+    this.pathPointSel = null;
+    this.commit(t('hist.simplifyPath'));
+    this.emit('selection');
+    return r;
+  }
+}
+
+// Euler angles of q nearest to `anchor`, with floating-point dust removed: components within
+// 1e-6° of a whole degree snap to it, and an orientation that IS the identity with an anchor at
+// (or within noise of) zero becomes exactly [0, 0, 0]. Used for freeze / rest zeroing only — it
+// never touches authored animation values such as 720°.
+export function canonicalEuler(q, anchor = null) {
+  const e = quat.eulerNear(q, anchor).map((v) => { const r = Math.round(v); return Math.abs(v - r) < 1e-6 ? r : v; }).map((v) => (v === 0 ? 0 : v));
+  const identity = quat.angle(q, [0, 0, 0, 1]) < 1e-7;
+  if (identity && (!anchor || anchor.every((a) => Math.abs(a) < 1e-4))) return [0, 0, 0];
+  return e;
 }
 
 export function downloadBytes(bytes, name, type = 'application/octet-stream') {
+  if (typeof document === 'undefined') return; // headless (tests): nothing to download to
   const blob = new Blob([bytes], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

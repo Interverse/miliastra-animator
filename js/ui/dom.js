@@ -56,9 +56,14 @@ export function vec3Row(label, values, onChange, { step = 0.01, precision = 3, c
     inp.classList.add('axis-' + ax);
     if (classes && classes[i]) inp.classList.add(classes[i]);
     inp.title = ax.toUpperCase();
+    inp.setAttribute('aria-label', `${label} ${ax.toUpperCase()}`);
     return inp;
   });
-  const r = h('div', { class: 'row-triple', title: tip || null }, h('span', { text: label }), ...inputs);
+  // Each field sits in a <label> with its axis letter: the letter is hidden in the
+  // compact one-line layout and shown when the sidebar is too narrow and the
+  // row reflows to two columns / one column (CSS container query on the rail).
+  const cells = inputs.map((inp, i) => h('label', { class: 'ax ax-' + 'xyz'[i] }, h('b', { text: 'XYZ'[i] }), inp));
+  const r = h('div', { class: 'row-triple', title: tip || null }, h('span', { class: 'label', text: label }), ...cells);
   r.inputs = inputs;
   return r;
 }

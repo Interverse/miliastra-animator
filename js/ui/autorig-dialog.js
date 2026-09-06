@@ -3,7 +3,7 @@
 import { t } from '../i18n/i18n.js';
 import { h, button, btnRow, hint, selectInput, checkbox } from './dom.js';
 import { customDialog, toast } from './dialogs.js';
-import { RIG_TYPES } from '../rig/autorig.js';
+import { RIG_TYPES, BASE_POSES, DEFAULT_POSE } from '../rig/autorig.js';
 import { getNode } from '../scene/scene.js';
 
 export async function showAutoRigDialog(editor) {
@@ -11,16 +11,23 @@ export async function showAutoRigDialog(editor) {
   if (!objects.length) { toast(t('autorig.noObjects'), 'warn'); return; }
   const selObjs = editor.selectedNodes().filter((n) => n.type === 'object');
   const scope = selObjs.length > 1 ? selObjs.map((n) => n.id) : null; // several selected objects → rig those; else the whole model
-  let type = 'auto', ik = false;
-  let proposal = editor.proposeAutoRig({ objectIds: scope, type, ik });
+  let type = 'auto', ik = false, pose = null; // pose null = template default (T-pose for humanoids)
+  let proposal = editor.proposeAutoRig({ objectIds: scope, type, ik, pose });
   const body = h('div', { class: 'autorig' });
   const summary = h('div');
   const list = h('div', { class: 'autorig-list' });
   const unassigned = h('div');
   const rebuild = () => {
-    proposal = editor.proposeAutoRig({ objectIds: scope, type, ik });
+    proposal = editor.proposeAutoRig({ objectIds: scope, type, ik, pose });
     editor.setRigPreview(proposal);
     render();
+  };
+  const poseRow = h('div', { class: 'row' });
+  const renderPose = () => {
+    poseRow.innerHTML = '';
+    const poses = BASE_POSES[proposal.type] || ['detected'];
+    const current = pose && poses.includes(pose) ? pose : (DEFAULT_POSE[proposal.type] || 'detected');
+    poseRow.append(h('span', { class: 'label', text: t('autorig.basePose') }), selectInput(poses.map((k) => ({ value: k, label: t('autorig.pose.' + k) })), current, (v) => { pose = v; rebuild(); }));
   };
   const render = () => {
     summary.innerHTML = '';
@@ -33,6 +40,8 @@ export async function showAutoRigDialog(editor) {
       ),
     );
     if (proposal.confidence < 0.5 && type === 'auto') summary.append(hint(t('autorig.lowConfidence'), 'warn'));
+    renderPose();
+    summary.append(hint(t(proposal.pose === 'detected' ? 'autorig.poseKeep' : 'autorig.poseInfo', { pose: t('autorig.pose.' + proposal.pose) })));
     if (proposal.existingBones) summary.append(hint(t('autorig.existingRig', { n: proposal.existingBones }), 'warn'));
     list.innerHTML = '';
     if (!proposal.bones.length) list.append(h('div', { class: 'empty', text: t('autorig.noBones') }));
@@ -55,7 +64,7 @@ export async function showAutoRigDialog(editor) {
   };
   const typeSel = selectInput(RIG_TYPES.map((k) => ({ value: k, label: t('autorig.type.' + k) })), type, (v) => { type = v; rebuild(); });
   const ikBox = checkbox(t('autorig.ik'), ik, (v) => { ik = v; rebuild(); }, t('tip.autorig.ik'));
-  body.append(h('div', { class: 'hint warn' }, t('autorig.experimental')), summary, h('div', { class: 'row' }, h('span', { class: 'label', text: t('autorig.modelType') }), typeSel), ikBox, h('div', { class: 'subhead-inline', text: t('autorig.proposed') }), list, unassigned, hint(t('autorig.notes')));
+  body.append(h('div', { class: 'hint warn' }, t('autorig.experimental')), summary, h('div', { class: 'row' }, h('span', { class: 'label', text: t('autorig.modelType') }), typeSel), poseRow, ikBox, h('div', { class: 'subhead-inline', text: t('autorig.proposed') }), list, unassigned, hint(t('autorig.notes')));
   editor.setRigPreview(proposal);
   render();
   const r = await customDialog({ title: t('autorig.title'), body, buttons: [

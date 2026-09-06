@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Remarques seulement.",
   "export.levels": "✕ bloque l'export · ⚠ peut être imprécis · ℹ remarque",
   "export.download": "Exporter le .gia animé",
+
+  "limit.title": "Limite de points de trajectoire",
+
+  "limit.message": "Cette trajectoire contient plus que le maximum sûr de {max} points de déplacement. La limite de {game} points du jeu est actuellement peu fiable, cet éditeur limite donc les trajectoires exportées à {max} points.",
+
+  "limit.colAnimation": "Animation",
+
+  "limit.colObject": "Objet / trajectoire",
+
+  "limit.colPoints": "Points",
+
+  "limit.colStatus": "État",
+
+  "limit.over": "au-dessus de la limite",
+
+  "limit.choices": "Compresser automatiquement retire les points redondants (colinéaires, quasi doublons, échantillons intermédiaires du baking) en préservant la forme, le début/fin, les virages, les changements de hauteur, le timing, les changements de vitesse et d'orientation. Annuler revient à l'éditeur sans modifier le projet ni enregistrer de fichier.",
+
+  "limit.compress": "Compresser automatiquement",
+
+  "limit.cancelExport": "Annuler l'export",
+
+  "limit.previewTitle": "Aperçu de la compression",
+
+  "limit.previewOk": "Toutes les trajectoires concernées tiennent désormais en {max} points. La vue 3D montre l'original en gris et la version compressée en ambre.",
+
+  "limit.previewFail": "La compression automatique n'a pas pu ramener toutes les trajectoires à {max} points sans modifier visiblement le mouvement. Rien n'a été exporté ; simplifiez l'animation (moins de clés, précision plus faible ou découpage) puis réessayez.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "écart max {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "écart trop grand : {pos} cm / {rot}°",
+
+  "limit.notReached": "limite inatteignable",
+
+  "limit.previewHint": "Les trajectoires compressées ne servent qu'à cet export ; le projet garde son animation d'origine.",
+
+  "limit.remember": "Compresser aussi automatiquement ces animations lors des prochains exports (réglage du projet, annulable)",
+
+  "tip.limit.remember": "Active « Compression automatique » pour les emplacements d'export concernés. L'animation éditable n'est pas modifiée.",
+
+  "limit.useCompressed": "Utiliser la trajectoire compressée et exporter",
+
+  "export.pathPoints": "Points de trajectoire : jusqu'à {n} sur {max} par objet ({objs} objet(s) en mouvement)",
+
+  "export.pathPointsCompressed": "compressé automatiquement depuis {from}",
+
+  "export.pathPointsOver": "Dépasse la limite de {max} points : l'export proposera une compression automatique.",
+
+  "export.autoCompress": "Compresser automatiquement à {max} points à l'export",
+
+  "tip.export.autoCompress": "Compresse les trajectoires de cette animation à la limite Miliastra à chaque export (l'animation éditable reste intacte)",
+
+  "export.autoCompressFailed": "{n} trajectoire(s) ne peuvent pas être compressées automatiquement en sécurité ; l'export s'arrêtera et l'expliquera.",
+
+  "export.limitSummary": "{n} trajectoire(s) dépassent la limite de {max} points. L'export proposera la compression automatique ou l'annulation.",
+
+  "toast.exportPathLimit": "Export arrêté : {n} trajectoire(s) dépassent la limite de {max} points",
+
+  "hist.exportCompress": "Compression auto à l'export",
+
+  "hist.simplifyPath": "Simplifier la trajectoire",
+
+  "path.simplify": "Simplifier la trajectoire…",
+
+  "tip.path.simplify": "Retire les points redondants dans une tolérance (compte en direct)",
+
+  "path.simplifyIntro": "Retire les points dont l'absence déplace la trajectoire de moins que la tolérance. Début, fin et angles sont conservés.",
+
+  "path.simplifyTolerance": "Tolérance",
+
+  "path.simplifyResult": "{before} → {after} points (écart max {err} cm)",
+
+  "path.simplifyApply": "Simplifier",
   "export.report": "Dernier export",
   "export.reportParts": "Objets animés",
   "export.reportDevices": "Dispositifs de mouvement",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Clé position",
   "props.keyRot": "Clé rotation",
   "props.reset": "Réinitialiser",
+
+  "scale.button": "Mettre le modèle entier à l'échelle…",
+
+  "tip.scale.button": "Redimensionne le modèle complet (objets, rig, distances d'animation) autour de son pivot et fige la nouvelle taille",
+
+  "scale.title": "Mettre le modèle entier à l'échelle",
+
+  "scale.explain": "L'assemblage complet est mis à l'échelle uniformément autour du pivot du modèle : distances entre les pièces, positions et longueurs des os, cibles et pôles IK, géométrie d'affichage, clés de translation, root motion et trajectoires. Rotations et timing sont inchangés. La nouvelle taille devient le modèle éditable ; rien ne reste à appliquer deux fois.",
+
+  "scale.presets": "Préréglages",
+
+  "scale.factorLabel": "Facteur d'échelle (×)",
+
+  "scale.percent": "Pourcentage (%)",
+
+  "scale.factor": "Facteur",
+
+  "scale.extent": "Étendue du modèle",
+
+  "scale.largest": "Plus grande échelle d'objet",
+
+  "scale.max": "max {max}",
+
+  "scale.overWarning": "{n} objet(s) dépasseraient l'échelle maximale Miliastra de {max}. Le modèle peut quand même être mis à l'échelle, mais il ne pourra pas être exporté avant d'être dans la limite.",
+
+  "scale.axis": "axe {axis}",
+
+  "scale.more": "… et {n} de plus",
+
+  "scale.overHint": "Choisissez un facteur plus petit, ou appliquez quand même et réduisez plus tard (Annuler restaure exactement la taille d'origine).",
+
+  "scale.bakeNote": "Une étape d'annulation. Le résultat est enregistré avec le projet comme sa taille normale.",
+
+  "scale.apply": "Mettre à l'échelle",
+
+  "scale.applyAnyway": "Appliquer quand même",
+
+  "scale.noop": "Le facteur 1× ne change rien.",
+
+  "scale.applied": "Modèle mis à l'échelle {f}×. Rig, animations et trajectoires ont été redimensionnés avec lui.",
+
+  "scale.appliedOver": "Modèle mis à l'échelle {f}×. {n} objet(s) dépassent maintenant l'échelle maximale de {max} : l'export est bloqué jusqu'à leur réduction.",
+
+  "hist.scaleModel": "Mettre le modèle entier à l'échelle",
+
+  "val.objectScale": "Objet {name} ({guid}) — échelle {axis} : {value} dépasse l'échelle maximale d'objet Miliastra de {max}.",
+
+  "toast.exportObjectScale": "Export arrêté : {n} objet(s) dépassent l'échelle maximale de {max} ({names})",
+
+  "orient.section": "Orientation et échelle du modèle",
+
+  "orient.intro": "Si le modèle regarde dans la mauvaise direction (par ex. +X au lieu de +Z), tournez l'assemblage entier — objets, os, IK, animation — d'un bloc et faites-en le nouveau repos.",
+
+  "orient.button": "Réorienter le modèle…",
+
+  "tip.orient.button": "Tourne le modèle complet autour de son pivot et fige le résultat dans la base de repos",
+
+  "orient.title": "Réorienter le modèle",
+
+  "orient.explain": "Le modèle entier (objets et décorations, os, cibles et pôles IK, contraintes, trajectoires et chaque animation) tourne ensemble autour du pivot du modèle. Rien ne bouge relativement au reste.",
+
+  "orient.detected": "Détecté depuis le rig : le modèle regarde actuellement vers {fwd}.",
+
+  "orient.notDetected": "Aucun rig humanoïde pour détecter la direction actuelle ; choisissez-la ci-dessous ou utilisez une rotation personnalisée.",
+
+  "orient.current": "Le modèle regarde vers",
+
+  "orient.target": "Doit regarder vers",
+
+  "orient.dir.pZ": "+Z (avant de l'éditeur / glTF / FBX)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Rotations rapides autour de Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "X/Y/Z° personnalisé",
+
+  "tip.orient.custom": "Toute rotation en degrés ; Y est la correction habituelle pour un modèle de côté",
+
+  "orient.preview": "Aperçu dans la vue 3D",
+
+  "orient.result": "Rotation X {x}°, Y {y}°, Z {z}° → le modèle regardera vers {fwd}.",
+
+  "orient.freezeNote": "La rotation est figée dans la base de repos : les os racines gardent leurs valeurs de rotation (généralement 0), les animations sont rebasées pour jouer pareil dans la nouvelle direction et l'export l'applique exactement une fois.",
+
+  "orient.apply": "Réorienter le modèle",
+
+  "orient.noop": "Aucune rotation à appliquer.",
+
+  "orient.applied": "Modèle réorienté de Y {deg}° ; il regarde maintenant vers {fwd}. La nouvelle orientation est la pose de repos.",
+
+  "orient.mismatchTitle": "Directions avant différentes",
+
+  "orient.mismatch": "Le squelette importé regarde vers {src} mais votre modèle vers {model} (écart de {deg}° autour de Y). Retargeter sur un modèle de côté tord chaque os et envoie le root motion dans la mauvaise direction.",
+
+  "orient.mismatchHint": "« Réorienter le modèle » tourne tout le modèle (rig et animations compris) pour qu'il regarde comme le squelette importé et fige cela comme nouveau repos ; possible aussi plus tard via Rigging → Orientation du modèle. Continuer laisse le modèle tel quel.",
+
+  "orient.continueAnyway": "Continuer sans réorienter",
+
+  "orient.reorientNow": "Réorienter le modèle (Y {deg}°)",
+
+  "hist.reorientModel": "Réorienter le modèle",
+
+  "clip.rootMotion": "Root motion (déplace {node})",
+
+  "tip.clip.rootMotion": "Activé : l'animation se déplace dans la scène et le déplacement est exporté. Désactivé : le même clip joue sur place ; les clés de déplacement sont conservées.",
+
+  "clip.rootOn": "root motion",
+
+  "clip.rootOff": "sur place",
+
+  "clip.rootMotionOnHint": "Root motion activé : le personnage se déplace dans la scène et le mouvement est intégré à la trajectoire exportée.",
+
+  "clip.rootMotionOffHint": "Root motion désactivé : le déplacement horizontal est ignoré pour l'aperçu et l'export (le vertical reste). Les clés ne sont pas modifiées.",
+
+  "hist.rootMotionOn": "Root motion activé",
+
+  "hist.rootMotionOff": "Root motion désactivé",
+
+  "props.freeze": "Figer",
+
+  "props.freezeRot": "Figer la rotation",
+
+  "props.freezePos": "Figer la position",
+
+  "props.freezeBoth": "Figer position et rotation",
+
+  "props.unfreeze": "Défiger (restaurer les valeurs locales)",
+
+  "tip.props.freeze": "Garde l'os exactement en place et fait de sa transformation actuelle le nouveau repos : les valeurs locales deviennent 0. Descendants, objets, IK et clés existantes restent visuellement inchangés.",
+
+  "props.frozenInfo": "Base figée : rotation {rot}°, position {pos}. Les valeurs locales lui sont relatives ; Réinitialiser y revient.",
+
+  "hist.freeze": "Figer la transformation",
+
+  "hist.freezeRot": "Figer la rotation",
+
+  "hist.freezePos": "Figer la position",
+
+  "hist.unfreeze": "Défiger la transformation",
+
+  "toast.freezeIK": "Cet os fait partie d'une chaîne IK : elle est résolue à nouveau depuis la nouvelle base de repos et montre la même pose.",
+
+  "toast.freezeRebased": "{n} image(s) clé(s) rebasée(s) dans la nouvelle base de repos ; l'animation est visuellement inchangée.",
   "tip.props.keyPos": "Insérer une image clé de position au temps courant",
   "tip.props.keyRot": "Insérer une image clé de rotation au temps courant",
   "tip.props.reset": "Revenir à la transformation du fichier (objets) ou à l'identité",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Pas d'aimantation en rotation (°)",
   "view.frameSelected": "Cadrer la sélection",
   "view.frameAll": "Tout cadrer",
+
+  "view.validate": "Vérifier l'état de la vue 3D",
+
+  "toast.viewportOk": "La vue 3D correspond au projet : {n} entités, {s} objets de scène",
+
+  "toast.viewportIssues": "Vue 3D désynchronisée : {n} problème(s) ({kinds}) — voir la console",
   "tip.view.frameSelected": "Centrer la vue sur la sélection ({k})",
   "tip.view.frameAll": "Faire tenir tout dans la vue ({k})",
   "view.views": "Vue",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Inverser l'orbite verticale",
   "tip.display.reverseOrbit": "N'affecte que l'orbite par glissement dans la vue 3D ; panoramique, zoom et gizmo de navigation sont inchangés",
   "rotmode.normal": "Enfants suivent",
-  "rotmode.preserve": "Garder enfants",
-  "tip.rotmode": "Mode de rotation. Enfants suivent : les descendants héritent de la rotation. Garder enfants : réoriente l'os/objet tandis que tous les descendants restent exactement en place (édition du repos/rig ; les images clés sont rebasées pour conserver l'animation).",
-  "props.rotModeHint": "Garder enfants est actif : les modifications de rotation réorientent les axes de cet élément ; les enfants restent en place et les images clés sont rebasées au lieu d'être créées.",
-  "hist.reorient": "Réorienter (garder enfants)",
+  "rotmode.preserve": "Préserver les transformations monde des enfants",
+  "tip.rotmode": "Déplacer ou tourner cet os en gardant ses descendants visuellement fixes dans l'espace monde. Enfants suivent : les descendants bougent et tournent avec lui. Préserver : édition de rig/repos — les transformations locales des descendants sont recalculées, les images clés sont rebasées (animation inchangée) et aucune clé n'est créée.",
+  "props.rotModeHint": "Préserver les transformations des enfants est actif : les modifications de position et de rotation déplacent la transformation de repos de cet élément ; les descendants restent exactement en place et les images clés sont rebasées au lieu d'être créées.",
+  "hist.reorient": "Transformer (préserver enfants)",
   "toast.reorientRebased": "Réorienté : {n} image(s) clé(s) dans {m} clip(s) ont été rebasées pour que l'animation visible reste identique",
   "toast.reorientIK": "Cet os fait partie d'une chaîne IK ; le résultat IK est recalculé à partir de la nouvelle orientation de repos",
+
+  "toast.reorientInexact": "La rotation de {names} est animée : en le déplaçant, les descendants ne restent exactement fixes qu'à l'image actuelle. Annulez si ce n'est pas voulu.",
+
+  "props.rotModeMoveWarn": "La rotation de cet élément est animée : le déplacer ne garde les descendants fixes qu'à l'image actuelle (le tourner reste exact).",
   "project.name": "Projet",
   "project.state": "État",
   "project.untitled": "Projet sans titre",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Importez d'abord un modèle",
   "autorig.noBones": "Aucun os n'a pu être proposé pour cette disposition",
   "hist.autoRig": "Auto-Rig",
+  "autorig.basePose": "Pose de base",
+  "autorig.pose.tpose": "T-pose",
+  "autorig.pose.apose": "A-pose",
+  "autorig.pose.standing": "Debout (neutre)",
+  "autorig.pose.spread": "Ailes déployées",
+  "autorig.pose.straight": "Chaîne droite",
+  "autorig.pose.detected": "Garder la pose importée",
+  "autorig.poseInfo": "Le rig est créé en {pose} ; les pièces du modèle suivent leurs os dans cette pose (annulable, géométrie intacte).",
+  "autorig.poseKeep": "Le rig suit la pose importée telle quelle.",
+  "retarget.button": "Importer une animation…",
+  "tip.retarget.button": "Importer une animation FBX / BVH / glTF / GLB / VRM / DAE et la retargeter sur ce rig",
+  "retarget.title": "Importer une animation (retarget)",
+  "retarget.needRig": "Ajoutez d'abord des os (Auto-Rig ou Ajouter un os) : l'animation importée est retargetée sur le rig.",
+  "retarget.parsing": "Analyse de {name}…",
+  "retarget.intro": "Animation seule : les maillages du fichier sont ignorés. Associez les os source à votre rig, prévisualisez, puis appliquez comme clips normaux (une étape d'annulation).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Clips",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Options",
+  "retarget.mapping": "Correspondance des os (cible ← source)",
+  "retarget.preview": "Aperçu",
+  "retarget.rootMotion": "Mouvement racine",
+  "retarget.root.inPlace": "Désactivé — jouer sur place (déplacement importé, activable par clip)",
+  "retarget.root.keep": "Activé — le personnage se déplace (à l'échelle de sa taille)",
+  "retarget.root.none": "Ne pas importer la translation racine",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Auto-associer",
+  "retarget.clearMap": "Effacer",
+  "retarget.savePreset": "Enregistrer le préréglage",
+  "retarget.loadPreset": "Charger un préréglage",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Aperçu",
+  "retarget.stop": "Arrêter l'aperçu",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Appliquer",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Importer une animation",
 };

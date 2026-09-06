@@ -107,7 +107,8 @@ export function solveConstraint(project, k, poses, world) {
     let localRot = quat.norm(quat.mul(quat.conj(parentW.rot), newRot));
     if (infl < 1) localRot = quat.slerp(local.rot, localRot, infl);
     const prev = poses.get(bone.id) || {};
-    poses.set(bone.id, { ...prev, rot: localRot });
+    // the solved rotation is an effective local rotation; strip a frozen basis for the pose store
+    poses.set(bone.id, { ...prev, rot: bone.basis ? quat.norm(quat.mul(quat.conj(bone.basis.rot), localRot)) : localRot });
     parentW = xf.compose(parentW, { pos: local.pos, rot: localRot });
   }
   return true;

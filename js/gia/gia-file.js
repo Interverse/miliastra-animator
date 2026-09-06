@@ -313,13 +313,14 @@ export function setObjectName(entry, name) {
 }
 
 // pos/rot in GAME coordinates (metres / degrees). Zoom is left untouched.
-export function setObjectTransform(entry, pos, rot) {
+export function setObjectTransform(entry, pos, rot, zoom = null) {
   editBody(entry, (body, lay) => {
     const c = findComponent(body, lay.entity, 1);
     if (!c) return;
     editMsg(c.fields, 11, (b) => {
       setField(b, fMsg(1, vec3Fields(pos, true)));
       setField(b, fMsg(2, vec3Fields(rot, true)));
+      if (zoom) setField(b, fMsg(3, vec3Fields(zoom, true))); // object scale (whole-model scaling changes it)
     });
     c.fl.v = encode(c.fields);
   });

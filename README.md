@@ -69,15 +69,23 @@ exporter only edits the messages it has to.
   angle is the pointer's angle around the gizmo centre on screen, applied to
   the transform captured at drag start (no per-frame accumulation), in World
   or Local axes, with optional snapping. One drag is one undo step.
-* **Rotation mode** (toolbar, next to World/Local): *Children follow* is
-  ordinary hierarchical rotation; *Keep children* reorients the selected
-  bone/object while every descendant keeps its world transform. It is a rest /
-  rig edit: the delta is post-multiplied onto the node's base rotation and its
-  rotation keys in every clip, and its inverse (measured from the node's actual
-  world change, so IK is respected) is pre-multiplied onto the direct
-  children's base transforms and keys, keeping the authored animation visually
-  identical. Works with the gizmo, numeric fields, snapping, Local/World axes;
-  one drag or field edit is one undo step, and a toast reports rebased keys.
+* **Preserve child world transforms** (toolbar, next to World/Local; the other
+  state is *Children follow*, ordinary hierarchical transforms): move and/or
+  rotate the selected bone/object while every descendant (child bones,
+  grandchildren, attached objects with their decorations) keeps its world
+  transform. It is a rest / rig edit for cleaning up after Auto-Rig or manual
+  placement: the local delta is applied to the node's base transform and its
+  keys in every clip, and the node's actual world change (measured after
+  re-evaluation, so IK is respected) is used to recompute the direct children's
+  base transforms and keys with rigid transforms (no Euler subtraction, no
+  scale/shear: the hierarchy carries no scale). Works with the Move and Rotate
+  gizmos, numeric fields, snapping, Local/World axes and multi-selection
+  (descendants of a selected ancestor are compensated once); one drag or field
+  edit is one undo step, no keyframes are created, and a toast reports rebased
+  keys and IK chains that are re-solved. Rotation edits are always exact;
+  moving a bone whose rotation is keyed cannot keep descendants fixed at every
+  frame (their offset depends on the bone's rotation at each time), so the
+  panel warns beforehand and the edit is exact at the current frame only.
 * **Space** toggles Move / Rotate while the viewport has focus; playback is
   Shift+Space or K (rebindable in the shortcuts dialog). Space in the timeline
   still plays.
@@ -167,6 +175,190 @@ The Display panel's brightness slider shades **display geometry only** (model de
 - The dialog previews the proposed bones in the viewport (green lines) and lists names, parents, assigned objects and per-bone confidence; untick bones to drop them, rename inline, optionally add leg / arm IK chains with pole targets. Objects it cannot assign confidently are listed and left alone. An existing rig is reported and never overwritten.
 - Applying is one undo step: bones are created with their Y axis along the detected limb direction and objects are re-parented preserving their world transforms; nothing in the geometry, animation or `.gia` data changes (the export is byte-identical until you animate). Templates live in `js/rig/autorig.js` so more body plans can be added.
 - Tests: `node tools/test-autorig.mjs` (Pantalone humanoid, a nameless quadruped, a segment chain, a bird, apply/undo exactness).
+
+## Scale entire model (and the per-object scale limit of 50)
+
+Rigging → Model orientation & scale → **Scale entire model…** resizes the
+complete assembly uniformly about the model pivot (the global offset), as if a
+temporary common root had been scaled and removed (`scaleModel` in
+`js/ui/editor.js`): every local position of objects, bones, IK targets and
+poles, bone lengths, frozen basis offsets, the parent object's own scale
+(`zoom`) — decoration transforms inside the object are NOT touched, they stay
+exactly as in the file and follow the parent in the game — display root
+offsets, proxy sizes,
+translation keys (so root motion travels S times as far), waypath points and
+speeds. Rotations, rotation keys, timing and constraint weights are untouched,
+so IK solves to the same relative pose at the new size and animations look
+identical relative to the resized model. The result is the editable model:
+nothing remains to be applied again by export, IK or retargeting (a
+`modelScale` field is kept for diagnostics only). Presets 0.25× / 0.5× / 1× /
+2×, a factor and a percentage input; the dialog shows the model extent and the
+largest resulting object scale. The exporter now writes each object's scale to
+the `.gia`. Miliastra's maximum object scale is **50** per axis: the dialog
+warns before committing (Cancel / Apply anyway, listing object, GUID, value and
+axis), validation reports every oversized object as an error with a link that
+selects it, and `exportGia` refuses to serialize such a project — nothing is
+clamped silently. `node tools/test-scale.mjs` (0.25× … 10× and a decimal
+factor on a rigged model with IK, poles, animation, root motion, waypath,
+global offset, corrective rotation and output rotation; unrigged model with
+display offsets and proxies; the 49.99 / 50 / 50.01 boundaries; warn-before-
+commit at 25 × 3; blocked export).
+
+## Model orientation, Root Motion, multi-turn rotations
+
+- **Reorient model** (Rigging → Model orientation, and offered during animation
+  import when the imported skeleton faces a different way than the rig). The
+  complete assembly — objects with decorations, bones, IK targets and poles,
+  constraints, waypaths and every clip — turns as one unit about the model
+  pivot (the global offset); nothing moves relative to anything else. Presets
+  say which way the model faces now and which way it should (+Z is the
+  editor / glTF / FBX forward), quick Y turns and a custom X/Y/Z rotation are
+  available, and the viewport previews the result live. The turn is frozen into
+  the rest basis (`reorientModel` in `js/ui/editor.js`): root bones absorb it in
+  their frozen `basis` so their editable rotation stays as it was (usually 0),
+  root objects take it into their placement, root position keys turn with the
+  model (root motion follows the new forward), waypaths turn too. Export uses
+  the ordinary world transforms, so the correction is applied exactly once.
+  The current forward is detected from the rig's thighs/arms
+  (`js/anim/orient.js`). `node tools/test-orient.mjs`.
+- **Root Motion per clip** (Clips panel, for clips whose root node has
+  horizontal travel; retargeted clips set it from the import option): On plays
+  and exports the travel; Off holds the root's X/Z at its first key for preview
+  and export while vertical motion and all keys stay untouched, so it can be
+  turned back on. Stored on the clip (`rootMotion`, `rootNodeId`) and saved with
+  the project.
+- **Rotations beyond ±360°**: rotation keys carry the authored, unwrapped Euler
+  angles (`key.e`; `node.rotE` for base values) next to the quaternion. Between
+  two keys that both carry angles the evaluator interpolates the angles, so
+  `0 → 720` plays two turns and `0 → -270` turns the long way; quaternion-only
+  keys (IK, retargeting, baked data) still slerp. Typed values are kept verbatim
+  (450, 1080 …), gizmo and world-space edits unwrap the new orientation next to
+  the previous angles so a continuous drag accumulates past 360°, and copy /
+  paste / move / duplicate / save / undo preserve the angles. The baker splits
+  any segment that turns more than 150° and path compression never merges
+  across more than 150° of performed rotation, so exported paths keep every
+  revolution and its direction. `node tools/test-rotation.mjs`.
+
+## Freeze Transform, first animation, robust dialogs, orbit default
+
+- **Freeze Transform** (Properties → *Freeze ▾* on a bone: rotation, position, or
+  both; *Unfreeze* folds it back). The bone stays exactly where it is and its
+  current transform becomes the new rest: the editable values read 0 / identity.
+  Implementation: `node.basis = { pos, rot }` with position = basis.pos + local
+  pos (parent frame) and rotation = basis.rot ∘ local rot (`localTransform` /
+  `editableLocal` in `js/scene/scene.js`); the IK solver, world-space gizmo edits,
+  reparenting, retargeting and Preserve Child World Transforms all read and write
+  editable values through those helpers. Keys and unkeyed pose edits of the bone
+  are rebased with quaternion composition (exact, so the animation is visually
+  identical), descendants need no change because the bone's world pose does not
+  change, IK re-solves to the same pose, Auto Key never fires, and it is one
+  undo step. *Reset* on a frozen bone returns to the frozen rest.
+  `node tools/test-freeze.mjs`.
+- **Add Animation with zero animations** always works (Clips *New*, the timeline
+  empty state and Export *+ Add animation*): the first clip is "Animation 1",
+  becomes active with an empty timeline at frame 0 and an export slot, and
+  undo returns to the zero-animation state; projects saved without an export
+  slot array no longer break creation.
+- **Dialogs never close on a drag release**: backdrop closing needs a genuine
+  pointerdown + pointerup on the backdrop (`js/ui/backdrop-guard.js`), and is
+  blocked while a file drag is in progress or after pointercancel / lost
+  capture / blur / tab switch. The Import Animation dialog accepts a dropped
+  animation file (it replaces the source); a drag that leaves the window only
+  resets the highlight. The window-level file drop handler defers to an open
+  dialog.
+- **Vertical orbit default** corrected: the direction that used to require
+  *Reverse vertical orbit* is now the default and the checkbox reverses it
+  (`orbitSigns` in `js/viewport/camera.js`). Navigation preferences are
+  versioned (`migrateNavPrefs`, v2): existing users keep their physical orbit
+  direction (their flag is inverted under the new meaning), new users get the
+  corrected default. Horizontal orbit, pan and zoom are unchanged.
+  `node tools/test-editor-misc.mjs`.
+
+## 49-point path limit on export
+
+Miliastra advertises 50 path movement points per Linear Motion Device path,
+but its in-game limit check is unreliable at exactly 50, so the editor treats
+**49** as the safe maximum: 1–49 final points export normally, 50 or more stop
+the export (`MAX_PATH_POINTS` in `js/anim/path-compress.js`). The exporter now works from an *export plan* (`buildExportPlan` in
+`js/gia/gia-export.js`): evaluate → bake → output rotation / start snap →
+per-slot auto-compression → final point lists per object and animation. The
+plan is validated (`pathLimitViolations`) and only then serialized; an
+over-limit plan never reaches the file (`exportGia` throws `pathLimit`). The
+Export panel shows each animation's final point count against the limit while
+it is open. Clicking Export with an over-limit path opens a warning listing
+every affected animation / object with its count and the maximum, offering
+**Compress automatically** or **Cancel export** (nothing is ever exported
+unchanged or silently truncated). Compression (`js/anim/path-compress.js`)
+removes points greedily by least error, where the error of dropping a point is
+the largest deviation of every original sample it covered from the merged
+segment *at the same time*: shape, start/end, turns, height changes, timing,
+speed changes, pauses and orientation changes all survive while collinear,
+near-duplicate and baked intermediate samples go first; removed durations merge
+into the retained segment so the total duration is unchanged. The preview
+dialog shows `84 → 43` per path with the largest deviation (the viewport draws
+the original path in grey and the compressed one in amber); **Use compressed
+path & export** applies it to the export copy only. If a path cannot reach 49
+points within 5 cm / 10° the export stops and says so. An optional checkbox
+turns on *Auto-compress* for the affected export slots (an undoable project
+setting, also available per slot in the Export panel); the editable animation
+is never modified. Manual waypaths have **Simplify path…** with a tolerance
+slider and a live `41 → 3 points` count (undoable). `node
+tools/test-path-limit.mjs` covers 1 / 48 / 49 / 50 / 51 / 120 points, hundreds of baked
+points, straight lines, curves, sharp turns, vertical movement with pauses,
+variable speed, orientation changes, multiple paths where only some exceed the
+limit, successful and unsafe compression, cancel leaving the project untouched,
+the persisted auto-compress setting and manual simplification.
+
+## Viewport lifecycle (no ghosting)
+
+The project is the only source of truth for what the 3D viewport shows. Every
+rendered node (object, proxy, bone, IK target, pole) is registered under its
+state id in an `EntityRegistry` (`js/viewport/scene-model.js`) and reconciled
+every frame with the entity list derived from the project: missing state →
+dispose, missing visual → create (objects may be deferred for the progressive
+build), changed signature → rebuild, otherwise update. Constraint / parent
+lines, Auto-Rig previews, waypaths and gizmos are derived from state each frame
+and own no registry entries. The Three.js scene has three roots: `env` (lights,
+grid, axes: survives projects), `projectRoot` (nodes + waypath visuals:
+disposed and replaced wholesale on New / Open / Recent / Import / Recover) and
+`overlay` (editor-only visuals). A project switch first cancels the active
+interaction, stops playback, drops previews and prunes selection, then emits
+`project:teardown` so the viewport disposes the old root before the new state is
+shown; undo/redo finish the active interaction, restore the snapshot and prune
+selection/display-part/path-point references so the gizmo never stays attached
+to a removed object. Per-node materials and instanced buffers are disposed with
+their entity; shared primitive geometries live in a cache and are never
+disposed. *View ▾ → Validate viewport state* (also `window.validateViewport()`)
+reports orphaned or missing render entities, stray scene children and stale
+gizmo/selection references; with `localStorage.debugViewport = '1'` the check
+runs automatically after undo, redo and project changes.
+`node tools/test-viewport-sync.mjs` drives the real editor through undo/redo of
+every entity kind, undo after animation at several playhead positions, New
+Project, project switching, progressive builds, mid-drag undo and a 40-cycle
+stress run against a headless double built on the same registry and validator.
+
+## Responsive transform fields
+
+XYZ rows (`vec3Row` in `js/ui/dom.js`: position, rotation, scale, display
+part offsets, correction, global offset, waypath points) are a CSS grid whose
+breakpoints follow the sidebar's own width (`@container rail` queries on
+`.rail-scroll`): one line at wide widths, label above the three fields with
+X/Y/Z letters at the default width, two columns (X Y / Z) below ~270 px of
+rail width, one column when narrower still. Inputs never drop below ~64 px,
+nothing overlaps or leaves the rail, and rows with extra controls wrap.
+Double-clicking a sidebar resize handle restores the default width.
+
+## Animation import and retargeting
+
+- Clips panel, *Import animation*. Supported formats: **.fbx** (binary and ASCII), **.bvh**, **.gltf** (self-contained) / **.glb** / **.vrm** (VRM humanoid bone maps are used automatically), **.dae** (browser only), and Unity **.anim** clips with generic transform curves. Unity *Humanoid* `.anim` clips store muscle-space curves, not bone transforms; they are rejected with an explanation (export them as FBX or glTF). Meshes in the file are ignored. Parsing uses the Three.js loaders on the main thread with yields between stages (the CDN import map cannot be used inside a Web Worker); a 500 KB Mixamo FBX parses in about 40 ms.
+- **Mapping**: bone names are normalised (`mixamorig:`, `Bip01`, `DEF-`, `J_Bip_C_` prefixes; `L`/`R`, `Left`/`Right`, `.L`/`_L` conventions) and matched to roles (hips, spine, chest, neck, head, shoulder / upper arm / forearm / hand, thigh / shin / foot / toe per side); hierarchy depth breaks ties. The dialog shows *target ← source* for every rig bone, with Auto-map, Clear, and mapping presets saved per source skeleton (`js/retarget/bone-map.js`). Duplicate or missing major mappings, missing hips, high sampling rates, unit anomalies and NaN samples are flagged.
+- **Rest-pose aware transfer** (`js/retarget/retarget.js`): for each mapped bone the animated world rotation delta from the source rest pose is rotated by the minimal correction that takes the source bone's rest direction onto the target bone's rest direction, then applied to the target rest world rotation and converted to local rotations through the target hierarchy. Only rotations travel, so proportions differ freely; an A-pose source drives a T-pose target with no offset at frame 0. Hips translation is root motion: *In place* (vertical only, default), *Keep* (scaled by target height / source height) or *Ignore*; unit scale (cm) is detected.
+- Optional IK: FK feet/hands are baked onto existing IK targets. Keys are reduced within a tolerance (0.2°–1.5°, or keep all) and never closer than 0.03 s; stepped motion is kept. Multiple clips can be selected and renamed. Preview builds a temporary clip and plays it; Cancel restores the project, Apply adds the clips (and export slots) as one undo step and records the mapping and options in the project.
+- Tests: `node tools/test-retarget.mjs` (Mixamo FBX, a synthetic 60 fps BVH with `L_/R_` names, A-pose → T-pose, root-motion modes, glTF with two clips, partial skeletons, key reduction, Unity muscle rejection, Motion Device export of the imported clip). The Node tests use the `three` dev dependency; the browser uses the CDN import map.
+
+## Auto-Rig base poses
+
+Auto-Rig now builds the rig in a standard pose: humanoids in a **T-pose** (default) or **A-pose**, quadrupeds standing with legs under the body and the head forward, birds with wings spread, segmented creatures straightened; *Keep imported pose* is always available. Bone heads chain from their parents, lengths come from the detected geometry, and each bone's objects are moved rigidly with it (undoable, geometry and `.gia` data untouched), so animation starts from a predictable rest pose.
 
 ## IK targets and poles as animation controls
 

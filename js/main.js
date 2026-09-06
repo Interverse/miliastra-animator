@@ -20,6 +20,7 @@ async function main() {
   window.editor = editor; // handy for debugging
   const viewport = new Viewport(editor, document.getElementById('viewport'));
   window.viewport = viewport;
+  window.validateViewport = (opts) => viewport.validate({ warn: true, afterSync: true, ...opts }); // dev diagnostics: reports render entities with no state entity
   const timeline = new Timeline(editor, document.getElementById('timeline'));
   initLeftPanels(editor, viewport);
   initRightPanels(editor, viewport);
@@ -106,6 +107,8 @@ function setupToolbar(editor, viewport) {
         ...['front', 'back', 'right', 'left', 'top', 'bottom'].map((v) => ({ label: t('view.' + v), action: () => viewport.setView(v) })),
         { sep: true },
         { label: t('view.toggleProjection'), action: () => { viewport.cam.toggleProjection(); viewport.nav.syncBtn(); } },
+        { sep: true },
+        { label: t('view.validate'), action: () => { const r = viewport.validate({ warn: true, afterSync: true }); toast(r.ok ? t('toast.viewportOk', { n: r.entities, s: r.sceneObjects }) : t('toast.viewportIssues', { n: r.issues.length, kinds: [...new Set(r.issues.map((i) => i.kind))].join(', ') }), r.ok ? 'success' : 'error', r.ok ? 3000 : 8000); } },
       ])),
     );
     const add = h('div', { class: 'tb-group' },
@@ -209,6 +212,9 @@ function setupLayout(editor) {
   };
   drag(document.getElementById('resize-left'), (e) => { left.style.width = Math.max(240, Math.min(480, e.clientX - left.getBoundingClientRect().left)) + 'px'; }, () => updatePrefs({ leftW: left.offsetWidth }));
   drag(document.getElementById('resize-right'), (e) => { right.style.width = Math.max(220, Math.min(460, right.getBoundingClientRect().right - e.clientX)) + 'px'; }, () => updatePrefs({ rightW: right.offsetWidth }));
+  // double-click a handle: back to the stylesheet's default width
+  document.getElementById('resize-left').addEventListener('dblclick', () => { left.style.width = ''; updatePrefs({ leftW: null }); });
+  document.getElementById('resize-right').addEventListener('dblclick', () => { right.style.width = ''; updatePrefs({ rightW: null }); });
   drag(document.getElementById('timeline-resize'), (e) => { tl.classList.remove('collapsed'); tl.style.height = Math.max(90, Math.min(window.innerHeight * 0.6, tl.getBoundingClientRect().bottom - e.clientY)) + 'px'; }, () => updatePrefs({ tlH: tl.offsetHeight }));
   // remember collapsed panels
   for (const d of document.querySelectorAll('details.panel')) {
@@ -224,8 +230,10 @@ function setupDrop(editor) {
   window.addEventListener('dragenter', (e) => { if ([...e.dataTransfer.types].includes('Files')) { depth++; vp.classList.add('dragover'); } });
   window.addEventListener('dragleave', () => { if (--depth <= 0) { depth = 0; vp.classList.remove('dragover'); } });
   window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('blur', () => { depth = 0; vp.classList.remove('dragover'); });
   window.addEventListener('drop', (e) => {
     e.preventDefault(); depth = 0; vp.classList.remove('dragover');
+    if (document.querySelector('dialog[open]')) return; // an open dialog owns file drops (it never closes on them)
     const f = e.dataTransfer.files[0];
     if (!f) return;
     if (/\.json$/i.test(f.name)) f.text().then((txt) => { try { editor.openProjectFile(txt); toast(t('toast.projectOpened')); } catch { toast(t('toast.projectOpenFailed'), 'error'); } });

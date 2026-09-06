@@ -25,7 +25,7 @@ const ang = (a, b) => quat.angle(a, b) * 180 / Math.PI;
   check('features: bounds per object from display parts', feats.length === 16 && feats.every((f) => f.size.every((s) => s > 0)));
   const cls = classify(feats);
   check('classified as humanoid with usable confidence', cls.type === 'humanoid' && cls.confidence > 0.5, `${cls.type} ${cls.confidence.toFixed(2)} ${JSON.stringify(cls.scores)}`);
-  const prop = ed.proposeAutoRig({ ik: true });
+  const prop = ed.proposeAutoRig({ ik: true, pose: 'detected' }); // keep the imported pose for the transform-preservation checks
   const keys = prop.bones.map((b) => b.key);
   const expect = ['hips', 'chest', 'neck', 'head', 'upperArmL', 'forearmL', 'handL', 'upperArmR', 'forearmR', 'handR', 'thighL', 'shinL', 'footL', 'thighR', 'shinR', 'footR'];
   check('humanoid regions found', expect.every((k) => keys.includes(k)), `missing: ${expect.filter((k) => !keys.includes(k)).join(',') || 'none'}`);
@@ -60,6 +60,38 @@ const ang = (a, b) => quat.angle(a, b) * 180 / Math.PI;
   check('undo restores the exact previous project', JSON.stringify(ed.snapshotState()) === before);
   ed.redo();
   check('redo restores the rig', ed.project.nodes.filter((n) => n.type === 'bone').length === prop.bones.length);
+  // ---------- standard base pose (T-pose default) ----------
+  ed.undo();
+  const tprop = ed.proposeAutoRig({ ik: false });
+  check('humanoid default base pose is the T-pose', tprop.pose === 'tpose');
+  const dirOf = (k) => { const b = tprop.bones.find((x) => x.key === k); return v3.norm(v3.sub(b.tail, b.head)); };
+  check('T-pose: arms straight out along ±X, legs straight down, spine up', dirOf('upperArmL')[0] > 0.99 && dirOf('forearmR')[0] < -0.99 && dirOf('thighL')[1] < -0.99 && dirOf('shinR')[1] < -0.99 && dirOf('chest')[1] > 0.99);
+  check('bones chain head-to-tail in the standard pose', v3.dist(tprop.bones.find((b) => b.key === 'forearmL').head, tprop.bones.find((b) => b.key === 'upperArmL').tail) < 1e-9);
+  check('every bone keeps its detected length', tprop.bones.every((b) => Math.abs(v3.dist(b.head, b.tail) - v3.dist(b.detected.head, b.detected.tail)) < 1e-9));
+  const beforeT = JSON.stringify(ed.snapshotState());
+  const worldT0 = worldTransforms(ed.project, null);
+  ed.applyAutoRig(tprop);
+  const wT = worldTransforms(ed.project, null);
+  const upperT = ed.project.nodes.find((n) => n.type === 'bone' && n.name === 'Upper Arm.L');
+  check('applied T-pose: upper arm bone Y axis points along +X', quat.rotate(wT.get(upperT.id).rot, [0, 1, 0])[0] > 0.99);
+  // objects follow their bones rigidly: the object's transform relative to its bone equals detected-relative
+  let rigidOk = true;
+  for (const b of tprop.bones) {
+    if (!b.repose || !b.objects.length) continue;
+    for (const oid of b.objects) {
+      const o0 = worldT0.get(oid), o1 = wT.get(oid);
+      const expected = { pos: v3.add(b.repose.to, quat.rotate(b.repose.R, v3.sub(o0.pos, b.repose.from))), rot: quat.norm(quat.mul(b.repose.R, o0.rot)) };
+      if (v3.dist(o1.pos, expected.pos) > 1e-6 || ang(o1.rot, expected.rot) > 1e-3) rigidOk = false;
+    }
+  }
+  check('model pieces move rigidly with their bones into the T-pose', rigidOk);
+  const armObj = ed.project.nodes.find((n) => n.name === 'hand_L');
+  check('the left hand now sits out to the side (T-pose) rather than below the shoulder', wT.get(armObj.id).pos[1] > worldT0.get(armObj.id).pos[1] + 0.2);
+  check('T-pose apply is one undo step that restores the imported pose exactly', (ed.undo(), JSON.stringify(ed.snapshotState()) === beforeT));
+  const aprop = ed.proposeAutoRig({ pose: 'apose' });
+  const ad = (() => { const b = aprop.bones.find((x) => x.key === 'upperArmL'); return v3.norm(v3.sub(b.tail, b.head)); })();
+  check('A-pose lowers the arms about 35° below horizontal', ad[0] > 0.7 && ad[1] < -0.4);
+  ed.redo();
   // existing rig warning + FK-only proposal
   const again = ed.proposeAutoRig({});
   check('a rigged model reports its existing bones and proposes nothing new for parented objects', again.existingBones === prop.bones.length && again.bones.length === 0);
@@ -80,6 +112,7 @@ const ang = (a, b) => quat.angle(a, b) * 180 / Math.PI;
   check('nameless quadruped classified as quadruped', cls.type === 'quadruped', `${cls.type} ${JSON.stringify(cls.scores)}`);
   const prop = proposeRig(p, { ik: true });
   const keys = prop.bones.map((b) => b.key);
+  check('quadruped standing pose: legs straight down, head forward', prop.pose === 'standing' && prop.bones.filter((b) => /^(upper|lower)/.test(b.key)).every((b) => v3.norm(v3.sub(b.tail, b.head))[1] < -0.99) && Math.abs(v3.norm(v3.sub(prop.bones.find((b) => b.key === 'head').tail, prop.bones.find((b) => b.key === 'head').head))[1]) < 1e-6);
   check('quadruped regions: root, neck, head, tail, four legs', ['root', 'neck', 'head', 'tail', 'upperFrontL', 'upperFrontR', 'upperBackL', 'upperBackR', 'lowerFrontL', 'lowerBackR'].every((k) => keys.includes(k)), keys.join());
   check('head object assigned to the head bone at the front', prop.bones.find((b) => b.key === 'head').objects.length === 1 && getNode(p, prop.bones.find((b) => b.key === 'head').objects[0]).name === 'o2');
   check('four leg IK chains suggested', prop.ik.length === 4);
@@ -93,6 +126,7 @@ const ang = (a, b) => quat.angle(a, b) * 180 / Math.PI;
   for (let i = 0; i < 5; i++) seg(i);
   const prop = proposeRig(p, {});
   check('a chain of segments becomes a bone chain', prop.type === 'segmented' && prop.bones.length === 5 && prop.bones[4].parentKey === 'seg4');
+  check('segmented straight pose: all segments share one direction', prop.bones.every((b) => v3.dist(v3.norm(v3.sub(b.tail, b.head)), v3.norm(v3.sub(prop.bones[0].tail, prop.bones[0].head))) < 1e-6));
   const b = createProject();
   const mk = (name, pos, size) => { const n = createNode(b, 'object', { name, pos, guid: Math.floor(Math.random() * 1e9), zoom: [1, 1, 1] }); n.decorations = [{ guid: 1, name: 'd', modelId: 1, pos: [0, 0, 0], rot: [0, 0, 0, 1], scale: size, argb: 0xffffffff }]; return n; };
   mk('body', [0, 0.5, 0], [0.4, 0.3, 0.6]); mk('head', [0, 0.8, 0.4], [0.2, 0.2, 0.2]);
@@ -100,6 +134,7 @@ const ang = (a, b) => quat.angle(a, b) * 180 / Math.PI;
   mk('leg', [0.1, 0.15, 0], [0.05, 0.3, 0.05]); mk('leg', [-0.1, 0.15, 0], [0.05, 0.3, 0.05]);
   const bp = proposeRig(b, { type: 'bird' });
   check('bird template: body, head, two wings, two legs', ['root', 'head', 'wingL', 'wingR', 'legL', 'legR'].every((k) => bp.bones.some((x) => x.key === k)));
+  check('bird spread pose: wings symmetric along ±X', bp.pose === 'spread' && v3.norm(v3.sub(bp.bones.find((x) => x.key === 'wingL').tail, bp.bones.find((x) => x.key === 'wingL').head))[0] > 0.99 && v3.norm(v3.sub(bp.bones.find((x) => x.key === 'wingR').tail, bp.bones.find((x) => x.key === 'wingR').head))[0] < -0.99);
   check('wings detected as the widest pair', classify(objectFeatures(b)).type === 'bird');
 }
 

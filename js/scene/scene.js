@@ -115,13 +115,17 @@ export function depthOf(project, id) {
 }
 
 // Effective local transform: base pose (or override) with the object's
-// corrective rotation applied in its own frame.
+// corrective rotation applied in its own frame, then the node's frozen basis
+// (Freeze Transform): position = basis.pos + editable pos (parent frame),
+// rotation = basis.rot ∘ editable rot. The two parts are independent, so
+// freezing the rotation leaves the position values untouched and vice versa.
 export function localTransform(node, pose) {
   const pos = pose?.pos || node.pos;
   let rot = pose?.rot || node.rot;
   if (node.type === 'object' && node.correction && (node.correction[0] || node.correction[1] || node.correction[2])) {
     rot = quat.mul(rot, quat.fromEulerDeg(node.correction));
   }
+  if (node.basis) return { pos: v3.add(node.basis.pos, pos), rot: quat.norm(quat.mul(node.basis.rot, rot)) };
   return { pos, rot };
 }
 
@@ -153,16 +157,25 @@ export function parentWorld(project, parentId, world) {
   return world.get(parentId) || xf.identity();
 }
 
-// Set a node's base transform from a desired world transform (keeps the
-// correction: base rot = worldLocalRot ∘ correction⁻¹).
-export function setWorldTransform(project, node, worldT, world = worldTransforms(project)) {
-  const local = xf.localOf(worldT, parentWorld(project, node.parent, world));
-  node.pos = local.pos;
-  let rot = local.rot;
+// Editable local values (what the Properties panel shows and keys store) from an
+// effective local transform: undo the frozen basis, then the correction.
+export function editableLocal(node, eff) {
+  let { pos, rot } = eff;
+  if (node.basis) { pos = v3.sub(pos, node.basis.pos); rot = quat.mul(quat.conj(node.basis.rot), rot); }
   if (node.type === 'object' && node.correction && (node.correction[0] || node.correction[1] || node.correction[2])) {
     rot = quat.mul(rot, quat.conj(quat.fromEulerDeg(node.correction)));
   }
-  node.rot = quat.norm(rot);
+  return { pos: v3.clone(pos), rot: quat.norm(rot) };
+}
+export function editableLocalFromWorld(project, node, worldT, world) {
+  return editableLocal(node, xf.localOf(worldT, parentWorld(project, node.parent, world)));
+}
+// Set a node's base transform from a desired world transform (keeps the
+// correction and the frozen basis).
+export function setWorldTransform(project, node, worldT, world = worldTransforms(project)) {
+  const local = editableLocalFromWorld(project, node, worldT, world);
+  node.pos = local.pos;
+  node.rot = local.rot;
 }
 
 // Re-parent while preserving the world transform of the node.

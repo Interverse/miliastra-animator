@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Только заметки.",
   "export.levels": "✕ блокирует экспорт · ⚠ возможна неточность · ℹ заметка",
   "export.download": "Экспортировать анимированный .gia",
+
+  "limit.title": "Лимит точек пути",
+
+  "limit.message": "Этот путь содержит больше безопасного максимума в {max} точек движения. Игровой лимит в {game} точек сейчас работает ненадёжно, поэтому редактор ограничивает экспортируемые пути {max} точками.",
+
+  "limit.colAnimation": "Анимация",
+
+  "limit.colObject": "Объект / путь",
+
+  "limit.colPoints": "Точки",
+
+  "limit.colStatus": "Статус",
+
+  "limit.over": "превышен лимит",
+
+  "limit.choices": "Автосжатие удаляет избыточные точки (коллинеарные, почти дублирующие, промежуточные сэмплы запекания), сохраняя форму, начало/конец, повороты, изменения высоты, тайминг, изменения скорости и ориентации. Отмена возвращает в редактор без изменения проекта и без сохранения файла.",
+
+  "limit.compress": "Сжать автоматически",
+
+  "limit.cancelExport": "Отменить экспорт",
+
+  "limit.previewTitle": "Предпросмотр сжатия",
+
+  "limit.previewOk": "Все затронутые пути теперь укладываются в {max} точек. Во вьюпорте исходный путь показан серым, сжатый — янтарным.",
+
+  "limit.previewFail": "Автосжатие не смогло привести все пути к {max} точкам без заметного изменения движения. Ничего не экспортировано; упростите анимацию (меньше ключей, ниже точность или разделите её) и попробуйте снова.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "макс. отклонение {pos} см / {rot}°",
+
+  "limit.errorTooBig": "отклонение слишком велико: {pos} см / {rot}°",
+
+  "limit.notReached": "лимит недостижим",
+
+  "limit.previewHint": "Сжатые пути используются только для этого экспорта; проект сохраняет исходную анимацию.",
+
+  "limit.remember": "Также автоматически сжимать эти анимации при будущих экспортах (настройка проекта, можно отменить)",
+
+  "tip.limit.remember": "Включает «Автосжатие» для затронутых слотов экспорта. Редактируемая анимация не меняется.",
+
+  "limit.useCompressed": "Использовать сжатый путь и экспортировать",
+
+  "export.pathPoints": "Точки пути: до {n} из {max} на объект (движущихся объектов: {objs})",
+
+  "export.pathPointsCompressed": "автосжатие с {from}",
+
+  "export.pathPointsOver": "Превышает лимит в {max} точек: при экспорте будет предложено автосжатие.",
+
+  "export.autoCompress": "Автоматически сжимать до {max} точек при экспорте",
+
+  "tip.export.autoCompress": "Сжимает пути этой анимации до лимита Miliastra при каждом экспорте (редактируемая анимация не меняется)",
+
+  "export.autoCompressFailed": "{n} путь(ей) нельзя безопасно сжать автоматически; экспорт остановится и объяснит причину.",
+
+  "export.limitSummary": "{n} путь(ей) превышают лимит в {max} точек. При экспорте будет предложено автосжатие или отмена.",
+
+  "toast.exportPathLimit": "Экспорт остановлен: {n} путь(ей) превышают лимит в {max} точек",
+
+  "hist.exportCompress": "Автосжатие при экспорте",
+
+  "hist.simplifyPath": "Упростить путь",
+
+  "path.simplify": "Упростить путь…",
+
+  "tip.path.simplify": "Удалить избыточные точки в пределах допуска (счётчик в реальном времени)",
+
+  "path.simplifyIntro": "Удаляет точки, без которых путь смещается меньше допуска. Начало, конец и углы сохраняются.",
+
+  "path.simplifyTolerance": "Допуск",
+
+  "path.simplifyResult": "{before} → {after} точек (макс. отклонение {err} см)",
+
+  "path.simplifyApply": "Упростить",
   "export.report": "Последний экспорт",
   "export.reportParts": "Анимированные объекты",
   "export.reportDevices": "Устройства движения",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Ключ позиции",
   "props.keyRot": "Ключ поворота",
   "props.reset": "Сбросить",
+
+  "scale.button": "Масштабировать всю модель…",
+
+  "tip.scale.button": "Изменить размер всей модели (объекты, риг, дистанции анимации) относительно её опорной точки и запечь новый размер",
+
+  "scale.title": "Масштабировать всю модель",
+
+  "scale.explain": "Вся сборка масштабируется равномерно относительно опорной точки модели: расстояния между частями, позиции и длины костей, IK-цели и полюса, отображаемая геометрия, ключи перемещения, root motion и пути. Вращения и тайминг не меняются. Новый размер становится редактируемой моделью — ничего не применяется дважды.",
+
+  "scale.presets": "Пресеты",
+
+  "scale.factorLabel": "Коэффициент (×)",
+
+  "scale.percent": "Процент (%)",
+
+  "scale.factor": "Коэффициент",
+
+  "scale.extent": "Размер модели",
+
+  "scale.largest": "Наибольший масштаб объекта",
+
+  "scale.max": "макс. {max}",
+
+  "scale.overWarning": "{n} объект(ов) превысят максимальный масштаб Miliastra {max}. Модель всё же можно масштабировать, но экспорт будет невозможен, пока они не окажутся в пределах лимита.",
+
+  "scale.axis": "ось {axis}",
+
+  "scale.more": "… и ещё {n}",
+
+  "scale.overHint": "Выберите меньший коэффициент или примените и уменьшите позже (Отмена точно восстанавливает исходный размер).",
+
+  "scale.bakeNote": "Один шаг отмены. Результат сохраняется с проектом как его обычный размер.",
+
+  "scale.apply": "Масштабировать модель",
+
+  "scale.applyAnyway": "Применить всё равно",
+
+  "scale.noop": "Коэффициент 1× ничего не меняет.",
+
+  "scale.applied": "Модель масштабирована в {f}×. Риг, анимации и пути изменены вместе с ней.",
+
+  "scale.appliedOver": "Модель масштабирована в {f}×. {n} объект(ов) теперь превышают максимальный масштаб {max}: экспорт заблокирован до их уменьшения.",
+
+  "hist.scaleModel": "Масштабировать всю модель",
+
+  "val.objectScale": "Объект {name} ({guid}) — масштаб {axis}: {value} превышает максимальный масштаб объекта Miliastra {max}.",
+
+  "toast.exportObjectScale": "Экспорт остановлен: {n} объект(ов) превышают максимальный масштаб {max} ({names})",
+
+  "orient.section": "Ориентация и масштаб модели",
+
+  "orient.intro": "Если модель смотрит не туда (например, в +X вместо +Z), поверните всю сборку — объекты, кости, IK, анимацию — как единое целое и сделайте это новым покоем.",
+
+  "orient.button": "Переориентировать модель…",
+
+  "tip.orient.button": "Повернуть модель целиком вокруг её опорной точки и заморозить результат в базис покоя",
+
+  "orient.title": "Переориентировать модель",
+
+  "orient.explain": "Вся модель (объекты с декорациями, кости, IK-цели и полюса, ограничения, пути и все анимации) поворачивается вместе вокруг опорной точки модели. Ничто не смещается относительно остального.",
+
+  "orient.detected": "Определено по ригу: модель сейчас смотрит в {fwd}.",
+
+  "orient.notDetected": "Нет гуманоидного рига для определения текущего направления; выберите его ниже или задайте свой поворот.",
+
+  "orient.current": "Модель смотрит в",
+
+  "orient.target": "Должна смотреть в",
+
+  "orient.dir.pZ": "+Z (вперёд в редакторе / glTF / FBX)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Быстрые повороты вокруг Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "Свой X/Y/Z°",
+
+  "tip.orient.custom": "Любой поворот в градусах; Y — обычное исправление для модели, смотрящей вбок",
+
+  "orient.preview": "Предпросмотр во вьюпорте",
+
+  "orient.result": "Поворот X {x}°, Y {y}°, Z {z}° → модель будет смотреть в {fwd}.",
+
+  "orient.freezeNote": "Поворот замораживается в базис покоя: корневые кости сохраняют значения вращения (обычно 0), анимации перебазируются и играют так же в новом направлении, а экспорт применяет его ровно один раз.",
+
+  "orient.apply": "Переориентировать модель",
+
+  "orient.noop": "Нет поворота для применения.",
+
+  "orient.applied": "Модель повёрнута на Y {deg}°; теперь она смотрит в {fwd}. Новая ориентация — поза покоя.",
+
+  "orient.mismatchTitle": "Несовпадение направления вперёд",
+
+  "orient.mismatch": "Импортированный скелет смотрит в {src}, а ваша модель — в {model} (разница {deg}° вокруг Y). Ретаргетинг на повёрнутую боком модель скрутит каждую кость и направит root motion не туда.",
+
+  "orient.mismatchHint": "«Переориентировать модель» поворачивает всю модель (с ригом и анимациями) в направление импортированного скелета и замораживает это как новый покой; это можно сделать и позже в Риг → Ориентация модели. «Продолжить» оставит модель как есть.",
+
+  "orient.continueAnyway": "Продолжить без переориентации",
+
+  "orient.reorientNow": "Переориентировать модель (Y {deg}°)",
+
+  "hist.reorientModel": "Переориентировать модель",
+
+  "clip.rootMotion": "Root motion (двигает {node})",
+
+  "tip.clip.rootMotion": "Вкл: анимация перемещается по сцене, и перемещение экспортируется. Выкл: тот же клип играет на месте; ключи перемещения сохраняются.",
+
+  "clip.rootOn": "root motion",
+
+  "clip.rootOff": "на месте",
+
+  "clip.rootMotionOnHint": "Root motion включён: персонаж перемещается по сцене, и движение запекается в экспортируемый путь.",
+
+  "clip.rootMotionOffHint": "Root motion выключен: горизонтальное перемещение игнорируется при предпросмотре и экспорте (вертикальное остаётся). Ключи не меняются.",
+
+  "hist.rootMotionOn": "Root motion вкл",
+
+  "hist.rootMotionOff": "Root motion выкл",
+
+  "props.freeze": "Заморозить",
+
+  "props.freezeRot": "Заморозить вращение",
+
+  "props.freezePos": "Заморозить позицию",
+
+  "props.freezeBoth": "Заморозить позицию и вращение",
+
+  "props.unfreeze": "Разморозить (вернуть локальные значения)",
+
+  "tip.props.freeze": "Оставляет кость ровно на месте и делает её текущую трансформацию новым покоем: локальные значения становятся 0. Потомки, объекты, IK и ключи визуально не меняются.",
+
+  "props.frozenInfo": "Замороженный базис: вращение {rot}°, позиция {pos}. Локальные значения относительны ему; Сброс возвращает к нему.",
+
+  "hist.freeze": "Заморозить трансформацию",
+
+  "hist.freezeRot": "Заморозить вращение",
+
+  "hist.freezePos": "Заморозить позицию",
+
+  "hist.unfreeze": "Разморозить трансформацию",
+
+  "toast.freezeIK": "Эта кость входит в IK-цепочку: цепочка пересчитывается от нового базиса покоя и показывает ту же позу.",
+
+  "toast.freezeRebased": "{n} ключ(ей) перебазированы в новый базис покоя; анимация визуально не изменилась.",
   "tip.props.keyPos": "Вставить ключ позиции в текущий момент",
   "tip.props.keyRot": "Вставить ключ поворота в текущий момент",
   "tip.props.reset": "Сбросить к трансформации из файла (объекты) или к нулевой",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Шаг привязки поворота (°)",
   "view.frameSelected": "Показать выделенное",
   "view.frameAll": "Показать всё",
+
+  "view.validate": "Проверить состояние вьюпорта",
+
+  "toast.viewportOk": "Вьюпорт соответствует проекту: {n} сущностей, {s} объектов сцены",
+
+  "toast.viewportIssues": "Вьюпорт рассинхронизирован: {n} проблем(ы) ({kinds}) — см. консоль",
   "tip.view.frameSelected": "Центрировать вид на выделении ({k})",
   "tip.view.frameAll": "Вместить всё в вид ({k})",
   "view.views": "Вид",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Инвертировать вертикальную орбиту",
   "tip.display.reverseOrbit": "Влияет только на орбиту перетаскиванием во вьюпорте; панорама, масштаб и навигационный гизмо не меняются",
   "rotmode.normal": "Дети следуют",
-  "rotmode.preserve": "Сохранять детей",
-  "tip.rotmode": "Режим поворота. Дети следуют: потомки наследуют поворот. Сохранять детей: переориентировать кость/объект, при этом все потомки остаются на месте (правка покоя/рига; ключи перебазируются, чтобы сохранить анимацию).",
-  "props.rotModeHint": "Включено «Сохранять детей»: правки поворота переориентируют оси этого элемента; дети остаются на месте, а ключи перебазируются вместо создания новых.",
-  "hist.reorient": "Переориентировать (сохранить детей)",
+  "rotmode.preserve": "Сохранять мировые трансформации потомков",
+  "tip.rotmode": "Перемещайте или вращайте кость, при этом все потомки визуально остаются на месте в мировом пространстве. Дети следуют: потомки двигаются и вращаются вместе с ней. Сохранять: правка рига/покоя — локальные трансформации потомков пересчитываются, ключи перебазируются (анимация не меняется), новые ключи не создаются.",
+  "props.rotModeHint": "Режим сохранения трансформаций потомков включён: изменения позиции и вращения двигают трансформацию покоя этого элемента; потомки остаются ровно на месте, а ключи перебазируются, а не создаются.",
+  "hist.reorient": "Трансформация (сохранить потомков)",
   "toast.reorientRebased": "Переориентировано: перебазировано ключей: {n} в клипах: {m}; видимая анимация не изменилась",
   "toast.reorientIK": "Эта кость входит в цепочку IK; результат IK пересчитывается от новой ориентации покоя",
+
+  "toast.reorientInexact": "Вращение {names} анимировано: при перемещении потомки остаются точно на месте только в текущем кадре. Отмените, если это не нужно.",
+
+  "props.rotModeMoveWarn": "Вращение этого элемента анимировано: перемещение удерживает потомков только в текущем кадре (вращение остаётся точным).",
   "project.name": "Проект",
   "project.state": "Состояние",
   "project.untitled": "Проект без названия",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Сначала импортируйте модель",
   "autorig.noBones": "Для этой компоновки кости предложить не удалось",
   "hist.autoRig": "Авто-риг",
+  "autorig.basePose": "Базовая поза",
+  "autorig.pose.tpose": "T-поза",
+  "autorig.pose.apose": "A-поза",
+  "autorig.pose.standing": "Стоя (нейтральная)",
+  "autorig.pose.spread": "Крылья расправлены",
+  "autorig.pose.straight": "Прямая цепочка",
+  "autorig.pose.detected": "Сохранить импортированную позу",
+  "autorig.poseInfo": "Риг создаётся в позе «{pose}»; детали модели перемещаются вместе с костями (отменяемо, геометрия не меняется).",
+  "autorig.poseKeep": "Риг повторяет импортированную позу как есть.",
+  "retarget.button": "Импорт анимации…",
+  "tip.retarget.button": "Импортировать анимацию FBX / BVH / glTF / GLB / VRM / DAE и перенести на этот риг",
+  "retarget.title": "Импорт анимации (ретаргетинг)",
+  "retarget.needRig": "Сначала добавьте кости (авто-риг или «Добавить кость»): импортированная анимация переносится на риг.",
+  "retarget.parsing": "Разбор {name}…",
+  "retarget.intro": "Только анимация: меши из файла игнорируются. Сопоставьте кости источника с ригом, просмотрите и примените как обычные клипы (один шаг отмены).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Клипы",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Параметры",
+  "retarget.mapping": "Сопоставление костей (цель ← источник)",
+  "retarget.preview": "Просмотр",
+  "retarget.rootMotion": "Движение корня",
+  "retarget.root.inPlace": "Выкл — играть на месте (перемещение импортируется, включается для каждого клипа)",
+  "retarget.root.keep": "Вкл — персонаж перемещается (в масштабе его роста)",
+  "retarget.root.none": "Не импортировать перемещение корня",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Автосопоставление",
+  "retarget.clearMap": "Очистить",
+  "retarget.savePreset": "Сохранить пресет",
+  "retarget.loadPreset": "Загрузить пресет",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Просмотр",
+  "retarget.stop": "Остановить просмотр",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Применить",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Импорт анимации",
 };

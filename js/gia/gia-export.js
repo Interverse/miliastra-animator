@@ -15,6 +15,21 @@ import { bakeClip, PRECISION } from '../anim/bake.js';
 import { restWorld, evaluatePose } from '../anim/evaluate.js';
 import { getClip } from '../anim/clips.js';
 import { v3, quat, displayToGamePos, displayQuatToGameEuler, gameEulerToDisplayQuat } from '../core/math.js';
+import { compressPath, MAX_PATH_POINTS, GAME_PATH_POINTS, ACCEPTABLE_ERROR } from '../anim/path-compress.js';
+export { MAX_PATH_POINTS, GAME_PATH_POINTS };
+// Miliastra's maximum scale per object (any axis). Never clamped silently: the editor warns
+// when a whole-model scale would exceed it and the export refuses to serialize such objects.
+export const MAX_OBJECT_SCALE = 50;
+export function objectScaleViolations(project, max = MAX_OBJECT_SCALE) {
+  const out = [];
+  for (const n of project.nodes) {
+    if (n.type !== 'object') continue;
+    const z = n.zoom || [1, 1, 1];
+    const axes = ['X', 'Y', 'Z'].filter((_, i) => Math.abs(z[i]) > max + 1e-9);
+    if (axes.length) out.push({ nodeId: n.id, guid: n.guid, name: n.name, zoom: z.slice(), axes, value: Math.max(...z.map(Math.abs)), max });
+  }
+  return out;
+}
 
 // ---------- Output rotation ----------
 // A slot's output rotation is a rigid transform of the COMPLETE assembled model:
@@ -108,11 +123,84 @@ export function bakeAll(project) {
   return { slots: out, warnings, rest };
 }
 
-export function exportGia(project, giaBytes) {
+// ---------- Export plan ----------
+// Everything that will be serialized, computed BEFORE any bytes are written:
+// per participating object and export slot the final list of path points in
+// display space (evaluated animation → baked segments → output rotation start
+// snap → per-slot auto-compression). Validation (the 49-point safe limit) and
+// export-time compression operate on this plan, so the counts always reflect
+// the real number of points that reach the file. Building a plan never
+// modifies the project.
+export function buildExportPlan(project, giaBytes) {
   const doc = parseGia(giaBytes);
-  const report = { warnings: [], parts: [], slots: [], devices: 0 };
   const objects = collectObjects(doc);
   const entryByGuid = new Map(objects.map((o) => [o.guid, o.entry]));
+  const rest = exportPlacement(project);
+  const objectNodes = project.nodes.filter((n) => n.type === 'object' && n.guid != null && entryByGuid.has(n.guid));
+  const { slots, warnings } = bakeAll(project);
+  const pivot = exportPivot(project);
+  const refYaw = referenceYaw(project);
+  const anyRotated = slots.some((s) => yawOf(s.slot) !== refYaw);
+  const participating = new Set();
+  for (const s of slots) for (const node of objectNodes) if (anyRotated || s.baked.points.get(node.id)?.moves) participating.add(node.id);
+  const tol = PRECISION[project.exportConfig.precision || 'normal'] || PRECISION.normal;
+  const slotNames = slots.map((s) => s.slot.name || s.clip.name);
+  const devices = [];
+  for (const node of objectNodes) {
+    if (!participating.has(node.id)) continue;
+    slots.forEach((s, i) => {
+      const b = s.baked.points.get(node.id);
+      const restW = rest.get(node.id);
+      const yaw = yawOf(s.slot);
+      // this slot's (rotated) start pose vs. the resting placement: only a real
+      // difference gets a 30 ms snap point, so the reference animation starts
+      // exactly where the model rests
+      const w0 = s.baked.frame0.get(node.id);
+      const w0r = yaw ? rotateAboutPivot(w0, outputRotation(yaw), pivot) : w0;
+      const startsOff = v3.dist(w0r.pos, restW.pos) > tol.pos * 0.5 || quat.angle(w0r.rot, restW.rot) > tol.rot * 0.5 * Math.PI / 180;
+      let points = b && b.moves ? b.points.filter((p) => !p.snap).map((p) => ({ ...p })) : [];
+      if (startsOff || !points.length) points.unshift({ t: 0, pos: w0.pos, rot: w0.rot, duration: MIN_POINT_DURATION, snap: true });
+      const dev = { nodeId: node.id, guid: node.guid, objectName: node.name, slotIndex: i, slotName: slotNames[i], clipId: s.clip.id, clipName: s.clip.name, loop: !!s.clip.loop, yaw, points, rawCount: points.length, compression: null };
+      // a slot the user chose to auto-compress (persisted, undoable project setting)
+      if (s.slot.compress && points.length > MAX_PATH_POINTS) {
+        const r = compressPath(points, { maxPoints: MAX_PATH_POINTS });
+        dev.compression = { before: r.before, after: r.after, maxError: r.maxError, ok: r.ok, auto: true };
+        if (r.ok) dev.points = r.points;
+      }
+      devices.push(dev);
+    });
+  }
+  return { doc, objects, entryByGuid, rest, objectNodes, participating, slots, slotNames, warnings, devices, frame: project.settings.relativeFrame || 'world', pivot, scaleIssues: objectScaleViolations(project) };
+}
+// Devices whose final path exceeds the Miliastra limit.
+export function pathLimitViolations(plan, max = MAX_PATH_POINTS) {
+  return plan.devices.filter((d) => d.points.length > max).map((d) => ({ nodeId: d.nodeId, objectName: d.objectName, slotIndex: d.slotIndex, slotName: d.slotName, clipName: d.clipName, count: d.points.length, max }));
+}
+// Non-destructive: a copy of the plan in which every over-limit device (or the
+// given ones) is compressed. Each result reports before/after counts, the
+// largest deviation from the original motion and whether that is acceptable.
+export function compressPlan(plan, { max = MAX_PATH_POINTS, acceptable = ACCEPTABLE_ERROR, only = null } = {}) {
+  const results = [];
+  const devices = plan.devices.map((d) => {
+    const wanted = only ? only.some((o) => o.nodeId === d.nodeId && o.slotIndex === d.slotIndex) : d.points.length > max;
+    if (!wanted) return d;
+    const r = compressPath(d.points, { maxPoints: max, acceptable });
+    const res = { nodeId: d.nodeId, objectName: d.objectName, slotIndex: d.slotIndex, slotName: d.slotName, clipName: d.clipName, before: r.before, after: r.after, maxError: r.maxError, reached: r.reached, ok: r.ok, max };
+    results.push(res);
+    return { ...d, points: r.points, compression: { ...res, auto: false } };
+  });
+  return { plan: { ...plan, devices }, results, ok: results.every((r) => r.ok) };
+}
+
+export function exportGia(project, giaBytes, { plan = null, enforceLimit = true } = {}) {
+  plan = plan || buildExportPlan(project, giaBytes);
+  // the limit is enforced at serialization time as well: an over-limit plan never reaches the file
+  const over = pathLimitViolations(plan);
+  if (enforceLimit && over.length) { const err = new Error(`path point limit exceeded: ${over.map((o) => `${o.objectName}/${o.slotName} ${o.count}`).join(', ')}`); err.code = 'pathLimit'; err.violations = over; throw err; }
+  const oversized = plan.scaleIssues || objectScaleViolations(project);
+  if (enforceLimit && oversized.length) { const err = new Error(`object scale exceeds ${MAX_OBJECT_SCALE}: ${oversized.map((o) => `${o.name} ${o.axes.join('/')} ${o.value.toFixed(2)}`).join(', ')}`); err.code = 'objectScale'; err.violations = oversized; throw err; }
+  const { doc, objects, entryByGuid, rest, objectNodes, participating, slots, slotNames, frame, pivot } = plan;
+  const report = { warnings: [], parts: [], slots: [], devices: 0, compressed: plan.devices.filter((d) => d.compression && d.points.length < d.rawCount).map((d) => d.compression) };
 
   // 1. drop a controller/graph from a previous export of this tool
   for (const o of objects) {
@@ -126,8 +214,6 @@ export function exportGia(project, giaBytes) {
 
   // 2. names + placement (frame-0 pose of the initial animation, turned by its output
   //    rotation) of every imported object
-  const rest = exportPlacement(project);
-  const objectNodes = project.nodes.filter((n) => n.type === 'object' && n.guid != null && entryByGuid.has(n.guid));
   for (const node of objectNodes) {
     const entry = entryByGuid.get(node.guid);
     if (entry.name !== node.name) setObjectName(entry, node.name);
@@ -135,23 +221,12 @@ export function exportGia(project, giaBytes) {
     const pos = displayToGamePos(w.pos);
     const rot = displayQuatToGameEuler(w.rot);
     const clean = (v) => (Math.abs(v) < 1e-7 ? 0 : v);
-    setObjectTransform(entry, { x: clean(pos.x), y: clean(pos.y), z: clean(pos.z) }, { x: clean(rot.x), y: clean(rot.y), z: clean(rot.z) });
+    const z = node.zoom || [1, 1, 1];
+    setObjectTransform(entry, { x: clean(pos.x), y: clean(pos.y), z: clean(pos.z) }, { x: clean(rot.x), y: clean(rot.y), z: clean(rot.z) }, { x: z[0], y: z[1], z: z[2] });
   }
 
-  // 3. bake animations
-  const { slots, warnings } = bakeAll(project);
-  report.warnings.push(...warnings);
-  const frame = project.settings.relativeFrame || 'world';
-  const pivot = exportPivot(project);
-  // a slot whose output rotation differs from the resting arrangement moves every
-  // object of the model, so all of them need a device record even when static
-  const refYaw = referenceYaw(project);
-  const anyRotated = slots.some((s) => yawOf(s.slot) !== refYaw);
-  const participating = new Set();
-  for (const s of slots) for (const node of objectNodes) if (anyRotated || s.baked.points.get(node.id)?.moves) participating.add(node.id);
-  const tol = PRECISION[project.exportConfig.precision || 'normal'] || PRECISION.normal;
-
-  const slotNames = slots.map((s) => s.slot.name || s.clip.name);
+  // 3. motion devices from the plan
+  report.warnings.push(...plan.warnings);
   for (const node of objectNodes) {
     const entry = entryByGuid.get(node.guid);
     if (!participating.has(node.id)) {
@@ -160,25 +235,18 @@ export function exportGia(project, giaBytes) {
       continue;
     }
     const records = [];
+    const counts = [];
     slots.forEach((s, i) => {
-      const b = s.baked.points.get(node.id);
+      const dev = plan.devices.find((d) => d.nodeId === node.id && d.slotIndex === i);
       const restW = rest.get(node.id);
-      const yaw = yawOf(s.slot);
-      // this slot's (rotated) start pose vs. the resting placement: only a real
-      // difference gets a 30 ms snap point, so the reference animation starts
-      // exactly where the model rests
-      const w0 = s.baked.frame0.get(node.id);
-      const w0r = yaw ? rotateAboutPivot(w0, outputRotation(yaw), pivot) : w0;
-      const startsOff = v3.dist(w0r.pos, restW.pos) > tol.pos * 0.5 || quat.angle(w0r.rot, restW.rot) > tol.rot * 0.5 * Math.PI / 180;
-      const src = b && b.moves ? b.points.filter((p) => !p.snap) : [];
-      if (startsOff || !src.length) src.unshift({ t: 0, pos: w0.pos, rot: w0.rot, duration: MIN_POINT_DURATION, snap: true });
-      const points = src.map((p) => toWaypoint(p, restW, yaw, frame, pivot));
+      const points = dev.points.map((p) => toWaypoint(p, restW, dev.yaw, frame, pivot));
       records.push(motionDeviceFields({ name: slotNames[i], motionType: s.clip.loop ? MOTION_CYCLIC : MOTION_ONE_WAY, points }));
+      counts.push(points.length);
       report.devices++;
     });
     makeDynamic(entry);
     setMotionDevices(entry, records);
-    report.parts.push({ nodeId: node.id, guid: node.guid, name: node.name, points: slots.map((s) => s.baked.points.get(node.id)?.points?.length || 1) });
+    report.parts.push({ nodeId: node.id, guid: node.guid, name: node.name, points: counts });
   }
   report.slots = slots.map((s, i) => ({ name: slotNames[i], clip: s.clip.name, loop: s.clip.loop, duration: s.baked.duration }));
 

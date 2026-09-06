@@ -9,6 +9,9 @@ import { MAX_DEVICES_PER_OBJECT } from '../gia/motion-device.js';
 import { hasErrors } from '../validation.js';
 import { primaryKeyLabel } from './shortcuts.js';
 import { downloadBytes } from './editor.js';
+import { showRetargetDialog } from './retarget-dialog.js';
+import { showPathLimitFlow } from './export-dialogs.js';
+import { pathLimitViolations, MAX_PATH_POINTS } from '../gia/gia-export.js';
 
 const ICONS = { object: '▣', bone: '⌇', proxy: '◇', target: '⊕', pole: '◎', decoration: '·' };
 
@@ -24,6 +27,7 @@ export function initLeftPanels(editor, viewport) {
     clips: document.querySelector('#panel-clips .count'),
   };
   let validation = [];
+  let exportPlan = null; // final path points per object/animation (rebuilt with the validation while the Export panel is open)
   let validationTimer = null;
 
   // ---------- Project ----------
@@ -134,16 +138,47 @@ export function initLeftPanels(editor, viewport) {
     list.addEventListener('dragover', (e) => { if (dragIds) { e.preventDefault(); } });
     list.addEventListener('drop', (e) => { e.preventDefault(); if (dragIds) { editor.reparentNodes(dragIds, null); dragIds = null; } });
     body.append(list);
+    const footer = h('div', { class: 'outliner-footer' });
+    renderOutlinerFooter(footer);
+    body.append(footer);
+    body.append(hint(t('outliner.dragHint')));
+  }
+  // selection-dependent buttons live in their own container so a selection change
+  // never rebuilds (and never scrolls) the tree itself
+  function renderOutlinerFooter(footer) {
+    const p = editor.project;
+    footer.innerHTML = '';
     const sel = [...editor.selection];
     const act = editor.activeNode();
     const selObjects = sel.filter((id) => getNode(p, id)?.type === 'object').length;
-    body.append(btnRow(button(t('add.bonesForSelected'), () => editor.addBonesForSelected(), { disabled: !selObjects, tip: t('tip.add.bonesForSelected') })));
-    body.append(btnRow(
+    footer.append(btnRow(button(t('add.bonesForSelected'), () => editor.addBonesForSelected(), { disabled: !selObjects, tip: t('tip.add.bonesForSelected') })));
+    footer.append(btnRow(
       button(t('outliner.parent'), () => editor.reparentNodes(sel.filter((id) => id !== editor.active), editor.active), { disabled: sel.length < 2 || !act, tip: t('tip.outliner.parent', { k: primaryKeyLabel('edit.parent') }) }),
       button(t('outliner.unparent'), () => editor.reparentNodes(sel, null), { disabled: !sel.some((id) => getNode(p, id)?.parent), tip: t('tip.outliner.unparent', { k: primaryKeyLabel('edit.unparent') }) }),
       button(t('btn.delete'), () => deleteSelected(), { disabled: !sel.length, cls: 'mini danger', tip: t('tip.outliner.delete') }),
     ));
-    body.append(hint(t('outliner.dragHint')));
+  }
+  // Selection change: toggle classes on the existing rows, keep the scroll position, and
+  // only nudge the active row into view (minimal movement) when it is out of sight.
+  function syncOutlinerSelection() {
+    const list = bodies.outliner.querySelector('.outliner-list');
+    if (!list) { renderAll(['outliner']); return; }
+    for (const row of list.querySelectorAll('.list-row[data-id]')) {
+      const id = row.dataset.id;
+      row.classList.toggle('selected', editor.selection.has(id));
+      row.classList.toggle('active', editor.active === id);
+    }
+    const footer = bodies.outliner.querySelector('.outliner-footer');
+    if (footer) renderOutlinerFooter(footer);
+    if (editor.active) {
+      const row = list.querySelector(`.list-row[data-id="${CSS.escape(editor.active)}"]`);
+      if (row) {
+        const lr = list.getBoundingClientRect(), rr = row.getBoundingClientRect();
+        const scroller = list.scrollHeight > list.clientHeight ? list : list.closest('.rail-scroll');
+        const sr = scroller ? scroller.getBoundingClientRect() : lr;
+        if (rr.top < sr.top || rr.bottom > sr.bottom) row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    }
   }
   async function deleteSelected() {
     const ids = [...editor.selection];
@@ -188,6 +223,7 @@ export function initLeftPanels(editor, viewport) {
       button(t('clip.new'), () => editor.createClip(), { tip: t('tip.clip.new') }),
       button(t('clip.duplicate'), () => active && editor.duplicateClip(active.id), { disabled: !active, tip: t('tip.clip.duplicate') }),
       button(t('clip.rename'), async () => { if (!active) return; const v = await textPrompt({ title: t('clip.rename'), value: active.name }); if (v) editor.renameClip(active.id, v); }, { disabled: !active }),
+      button(t('retarget.button'), () => showRetargetDialog(editor), { tip: t('tip.retarget.button') }),
       button(t('btn.delete'), async () => { if (!active) return; if (await confirmDialog({ title: t('btn.delete'), message: t('clip.deleteConfirm', { name: active.name }), danger: true })) editor.deleteClip(active.id); }, { disabled: !active, cls: 'mini danger' }),
     ));
     if (!p.clips.length) { body.append(empty(t('clip.empty'))); return; }
@@ -199,6 +235,7 @@ export function initLeftPanels(editor, viewport) {
         h('span', { class: 'name', text: c.name, title: c.name }),
         h('span', { class: 'meta', text: fmt(clipEnd(c), 2) + 's · ' + keys + '◆' }),
         c.loop ? h('span', { class: 'chip loop', text: t('clip.loop') }) : null,
+        editor.clipHasRootMotion(c) ? h('span', { class: 'chip' + (c.rootMotion === false ? '' : ' loop'), text: t(c.rootMotion === false ? 'clip.rootOff' : 'clip.rootOn'), title: t('tip.clip.rootMotion') }) : null,
       );
       r.addEventListener('click', () => editor.setActiveClip(c.id));
       r.addEventListener('dblclick', async () => { const v = await textPrompt({ title: t('clip.rename'), value: c.name }); if (v) editor.renameClip(c.id, v); });
@@ -208,6 +245,11 @@ export function initLeftPanels(editor, viewport) {
     if (active) {
       body.append(row(t('clip.duration'), numInput(active.duration, (v) => editor.setClipProps(active.id, { duration: Math.max(0.03, v) }), { step: 0.1, min: 0.03, precision: 2 }), t('tip.clip.duration')));
       body.append(checkbox(t('clip.loopPlayback'), active.loop, (v) => editor.setClipProps(active.id, { loop: v }), t('tip.clip.loop')));
+      if (editor.clipHasRootMotion(active)) {
+        const rootName = getNode(p, editor.clipRootNode(active))?.name || '?';
+        body.append(checkbox(t('clip.rootMotion', { node: rootName }), active.rootMotion !== false, (v) => editor.setClipRootMotion(active.id, v), t('tip.clip.rootMotion')));
+        body.append(hint(t(active.rootMotion === false ? 'clip.rootMotionOffHint' : 'clip.rootMotionOnHint')));
+      }
     }
     body.append(hint(t('clip.activeHint', { name: active ? active.name : '—' })));
   }
@@ -243,9 +285,21 @@ export function initLeftPanels(editor, viewport) {
       el.append(rotRow);
       if (previewing) el.append(hint(t('export.previewHint', { deg: fmt(s.outputYaw || 0, 2) }), 'warn'));
       if (clip) el.append(hint(t('export.slotInfo', { dur: fmt(clipEnd(clip), 2), loop: clip.loop ? t('clip.loop') : t('clip.once') })));
+      // final path point counts for this animation (from the export plan; the limit is per object path)
+      const devs = exportPlan ? exportPlan.devices.filter((d) => d.slotIndex === i) : [];
+      if (devs.length) {
+        const maxRaw = Math.max(...devs.map((d) => d.rawCount)), maxFinal = Math.max(...devs.map((d) => d.points.length));
+        const over = maxFinal > MAX_PATH_POINTS;
+        el.append(hint(t('export.pathPoints', { n: maxFinal, max: MAX_PATH_POINTS, objs: devs.length }) + (s.compress && maxRaw !== maxFinal ? ' · ' + t('export.pathPointsCompressed', { from: maxRaw }) : ''), over ? 'warn' : ''));
+        if (over) el.append(hint(t('export.pathPointsOver', { max: MAX_PATH_POINTS }), 'warn'));
+        el.append(checkbox(t('export.autoCompress', { max: MAX_PATH_POINTS }), !!s.compress, (v) => editor.setSlotCompression([i], v), t('tip.export.autoCompress')));
+        const failed = devs.filter((d) => d.compression?.auto && !d.compression.ok);
+        if (failed.length) el.append(hint(t('export.autoCompressFailed', { n: failed.length }), 'err'));
+      }
       body.append(el);
     });
-    body.append(btnRow(button(t('export.addAnimation'), () => editor.addSlot(activeClip(p)?.id), { disabled: n >= MAX_DEVICES_PER_OBJECT || !p.clips.length, tip: t('tip.export.add') })));
+    // with no animations yet this creates the first one (which also becomes an export slot)
+    body.append(btnRow(button(t('export.addAnimation'), () => { if (p.clips.length) editor.addSlot(activeClip(p)?.id || p.clips[0].id); else editor.createClip(); }, { disabled: n >= MAX_DEVICES_PER_OBJECT, tip: t(p.clips.length ? 'tip.export.add' : 'tip.clip.new') })));
     if (n) body.append(hint(t('export.initialHint')));
 
     const adv = h('details', null, h('summary', { text: t('export.options'), style: 'font-size:12px;color:#9aa3b0;cursor:pointer;margin:8px 0 4px' }));
@@ -270,6 +324,10 @@ export function initLeftPanels(editor, viewport) {
       body.append(list);
     }
     body.append(hint(t('export.levels')));
+    if (exportPlan) {
+      const over = pathLimitViolations(exportPlan);
+      if (over.length) body.append(hint(t('export.limitSummary', { n: over.length, max: MAX_PATH_POINTS }), 'warn'));
+    }
     const canExport = !!editor.giaBytes && !hasErrors(validation) && n > 0;
     const btn = button(t('export.download'), () => editor.exportFile(), { cls: 'success primary-big', disabled: !canExport, tip: t('tip.export.download') });
     btn.id = 'btn-export';
@@ -290,8 +348,9 @@ export function initLeftPanels(editor, viewport) {
 
   function scheduleValidation() {
     clearTimeout(validationTimer);
-    validationTimer = setTimeout(() => { validation = editor.validate(); rerender(bodies.export, renderExport); scheduleFit(); }, 250);
+    validationTimer = setTimeout(() => { validation = editor.validate(); exportPlan = editor.mode === 'export' ? editor.exportPlan() : null; rerender(bodies.export, renderExport); scheduleFit(); }, 250);
   }
+  editor.resolvePathLimit = (plan, over) => showPathLimitFlow(editor, plan, over);
 
   // ---------- Outliner vertical fit ----------
   // The outliner list takes whatever height the left rail has left after the
@@ -329,17 +388,24 @@ export function initLeftPanels(editor, viewport) {
   new ResizeObserver(scheduleFit).observe(rail);
   window.addEventListener('resize', scheduleFit);
   for (const d of rail.querySelectorAll('details.panel')) d.addEventListener('toggle', scheduleFit);
-  editor.on('mode', () => { scheduleFit(); setTimeout(scheduleFit, 50); });
+  editor.on('mode', () => { scheduleFit(); setTimeout(scheduleFit, 50); scheduleValidation(); });
 
   function renderAll(which = ['project', 'outliner', 'clips', 'export']) {
     if (which.includes('project')) rerender(bodies.project, renderProject);
-    if (which.includes('outliner')) { rerender(bodies.outliner, renderOutliner); counts.outliner.textContent = editor.project.nodes.length ? String(editor.project.nodes.length) : ''; }
+    if (which.includes('outliner')) {
+      const prev = bodies.outliner.querySelector('.outliner-list');
+      const keepScroll = prev ? prev.scrollTop : 0;
+      rerender(bodies.outliner, renderOutliner);
+      const next = bodies.outliner.querySelector('.outliner-list');
+      if (next && keepScroll) { next.scrollTop = keepScroll; requestAnimationFrame(() => { next.scrollTop = keepScroll; }); }
+      counts.outliner.textContent = editor.project.nodes.length ? String(editor.project.nodes.length) : '';
+    }
     if (which.includes('clips')) { rerender(bodies.clips, renderClips); counts.clips.textContent = editor.project.clips.length ? String(editor.project.clips.length) : ''; }
     if (which.includes('export')) scheduleValidation();
     scheduleFit();
   }
   editor.on('change', (d) => { if (d?.transient) return; renderAll(); });
-  editor.on('selection', () => renderAll(['outliner']));
+  editor.on('selection', () => syncOutlinerSelection());
   editor.on('outliner', () => renderAll(['outliner']));
   editor.on('export', () => renderAll(['export']));
   editor.on('preview', () => renderAll(['export']));

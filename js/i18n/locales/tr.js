@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Yalnızca notlar.",
   "export.levels": "✕ dışa aktarmayı engeller · ⚠ hatalı olabilir · ℹ not",
   "export.download": "Animasyonlu .gia dışa aktar",
+
+  "limit.title": "Yol noktası sınırı",
+
+  "limit.message": "Bu yol, güvenli üst sınır olan {max} hareket noktasından fazlasını içeriyor. Oyunun {game} nokta sınırı şu anda güvenilir değil; bu nedenle bu düzenleyici dışa aktarılan yolları {max} noktayla sınırlar.",
+
+  "limit.colAnimation": "Animasyon",
+
+  "limit.colObject": "Nesne / yol",
+
+  "limit.colPoints": "Nokta",
+
+  "limit.colStatus": "Durum",
+
+  "limit.over": "sınırın üzerinde",
+
+  "limit.choices": "Otomatik sıkıştır, şekli, başlangıç/bitişi, dönüşleri, yükseklik değişimlerini, zamanlamayı, hız ve yön değişimlerini koruyarak gereksiz noktaları (doğrusal, neredeyse yinelenen, pişirme ara örnekleri) kaldırır. İptal, projeyi değiştirmeden ve dosya kaydetmeden düzenleyiciye döner.",
+
+  "limit.compress": "Otomatik sıkıştır",
+
+  "limit.cancelExport": "Dışa aktarmayı iptal et",
+
+  "limit.previewTitle": "Sıkıştırma önizlemesi",
+
+  "limit.previewOk": "Etkilenen tüm yollar artık {max} noktaya sığıyor. Görünümde özgün yol gri, sıkıştırılmış yol kehribar renginde gösterilir.",
+
+  "limit.previewFail": "Otomatik sıkıştırma, hareketi belirgin biçimde değiştirmeden tüm yolları {max} noktaya indiremedi. Hiçbir şey dışa aktarılmadı; animasyonu sadeleştirin (daha az anahtar, daha düşük hassasiyet veya bölme) ve yeniden deneyin.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "en fazla sapma {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "sapma çok büyük: {pos} cm / {rot}°",
+
+  "limit.notReached": "sınıra ulaşılamıyor",
+
+  "limit.previewHint": "Sıkıştırılmış yollar yalnızca bu dışa aktarma için kullanılır; proje özgün animasyonu korur.",
+
+  "limit.remember": "Bu animasyonları gelecekteki dışa aktarmalarda da otomatik sıkıştır (proje ayarı, geri alınabilir)",
+
+  "tip.limit.remember": "Etkilenen dışa aktarma yuvaları için \"Otomatik sıkıştır\"ı açar. Düzenlenebilir animasyon değişmez.",
+
+  "limit.useCompressed": "Sıkıştırılmış yolu kullan ve dışa aktar",
+
+  "export.pathPoints": "Yol noktaları: nesne başına en fazla {n} / {max} ({objs} hareketli nesne)",
+
+  "export.pathPointsCompressed": "{from} noktadan otomatik sıkıştırıldı",
+
+  "export.pathPointsOver": "{max} nokta sınırını aşıyor: dışa aktarma otomatik sıkıştırma önerecek.",
+
+  "export.autoCompress": "Dışa aktarırken {max} noktaya otomatik sıkıştır",
+
+  "tip.export.autoCompress": "Her dışa aktarmada bu animasyonun yollarını Miliastra sınırına sıkıştırır (düzenlenebilir animasyon değişmez)",
+
+  "export.autoCompressFailed": "{n} yol güvenle otomatik sıkıştırılamıyor; dışa aktarma duracak ve açıklayacak.",
+
+  "export.limitSummary": "{n} yol {max} nokta sınırını aşıyor. Dışa aktarma otomatik sıkıştırma veya iptal önerecek.",
+
+  "toast.exportPathLimit": "Dışa aktarma durduruldu: {n} yol {max} nokta sınırını aşıyor",
+
+  "hist.exportCompress": "Dışa aktarma otomatik sıkıştırma",
+
+  "hist.simplifyPath": "Yolu sadeleştir",
+
+  "path.simplify": "Yolu sadeleştir…",
+
+  "tip.path.simplify": "Bir tolerans içindeki gereksiz noktaları kaldır (canlı sayım)",
+
+  "path.simplifyIntro": "Yokluğu yolu toleranstan az kaydıran noktaları kaldırır. Başlangıç, bitiş ve köşeler korunur.",
+
+  "path.simplifyTolerance": "Tolerans",
+
+  "path.simplifyResult": "{before} → {after} nokta (en fazla sapma {err} cm)",
+
+  "path.simplifyApply": "Sadeleştir",
   "export.report": "Son dışa aktarma",
   "export.reportParts": "Animasyonlu nesneler",
   "export.reportDevices": "Hareket cihazları",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Konumu anahtarla",
   "props.keyRot": "Dönüşü anahtarla",
   "props.reset": "Sıfırla",
+
+  "scale.button": "Tüm modeli ölçekle…",
+
+  "tip.scale.button": "Modelin tamamını (nesneler, rig, animasyon mesafeleri) pivotu etrafında boyutlandırır ve yeni boyutu pişirir",
+
+  "scale.title": "Tüm modeli ölçekle",
+
+  "scale.explain": "Tüm montaj model pivotu etrafında eşit olarak ölçeklenir: parçalar arası mesafeler, kemik konumları ve uzunlukları, IK hedefleri ve kutupları, görüntü geometrisi, öteleme anahtarları, kök hareketi ve yollar. Dönüşler ve zamanlama değişmez. Yeni boyut düzenlenebilir model olur — iki kez uygulanacak hiçbir şey kalmaz.",
+
+  "scale.presets": "Ön ayarlar",
+
+  "scale.factorLabel": "Ölçek çarpanı (×)",
+
+  "scale.percent": "Yüzde (%)",
+
+  "scale.factor": "Çarpan",
+
+  "scale.extent": "Model boyutu",
+
+  "scale.largest": "En büyük nesne ölçeği",
+
+  "scale.max": "en fazla {max}",
+
+  "scale.overWarning": "{n} nesne Miliastra'nın en büyük ölçeği {max}'i aşacak. Model yine de ölçeklenebilir, ancak sınıra girmeden dışa aktarılamaz.",
+
+  "scale.axis": "eksen {axis}",
+
+  "scale.more": "… ve {n} daha",
+
+  "scale.overHint": "Daha küçük bir çarpan seçin veya yine de ölçekleyip sonra küçültün (Geri al özgün boyutu tam olarak geri getirir).",
+
+  "scale.bakeNote": "Tek geri alma adımı. Sonuç projeyle normal boyutu olarak kaydedilir.",
+
+  "scale.apply": "Modeli ölçekle",
+
+  "scale.applyAnyway": "Yine de uygula",
+
+  "scale.noop": "1× çarpanı hiçbir şeyi değiştirmez.",
+
+  "scale.applied": "Model {f}× ölçeklendi. Rig, animasyonlar ve yollar onunla birlikte boyutlandırıldı.",
+
+  "scale.appliedOver": "Model {f}× ölçeklendi. {n} nesne artık en büyük ölçek {max}'i aşıyor: küçültülene kadar dışa aktarma engellendi.",
+
+  "hist.scaleModel": "Tüm modeli ölçekle",
+
+  "val.objectScale": "Nesne {name} ({guid}) — ölçek {axis}: {value}, Miliastra'nın en büyük nesne ölçeği {max}'i aşıyor.",
+
+  "toast.exportObjectScale": "Dışa aktarma durduruldu: {n} nesne en büyük ölçek {max}'i aşıyor ({names})",
+
+  "orient.section": "Model yönü ve ölçeği",
+
+  "orient.intro": "Model yanlış yöne bakıyorsa (örn. +Z yerine +X), tüm montajı — nesneler, kemikler, IK, animasyon — tek parça olarak döndürün ve bunu yeni dinlenme yapın.",
+
+  "orient.button": "Modeli yeniden yönlendir…",
+
+  "tip.orient.button": "Modelin tamamını pivotu etrafında döndürür ve sonucu dinlenme tabanına dondurur",
+
+  "orient.title": "Modeli yeniden yönlendir",
+
+  "orient.explain": "Modelin tamamı (nesneler ve süslemeler, kemikler, IK hedefleri ve kutupları, kısıtlar, yollar ve her animasyon) model pivotu etrafında birlikte döner. Hiçbir şey diğerine göre hareket etmez.",
+
+  "orient.detected": "Rigden algılandı: model şu anda {fwd} yönüne bakıyor.",
+
+  "orient.notDetected": "Mevcut ön yönü algılayacak insansı rig yok; aşağıdan seçin veya özel döndürme kullanın.",
+
+  "orient.current": "Model şu anda bakıyor",
+
+  "orient.target": "Bakması gereken yön",
+
+  "orient.dir.pZ": "+Z (düzenleyici / glTF / FBX ön)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Y etrafında hızlı dönüşler",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "Özel X/Y/Z°",
+
+  "tip.orient.custom": "Derece cinsinden herhangi bir döndürme; yana bakan model için olağan düzeltme Y'dir",
+
+  "orient.preview": "Görünümde önizle",
+
+  "orient.result": "Döndürme X {x}°, Y {y}°, Z {z}° → model {fwd} yönüne bakacak.",
+
+  "orient.freezeNote": "Dönüş dinlenme tabanına dondurulur: kök kemikler dönüş değerlerini korur (genellikle 0), animasyonlar yeni yönde aynı oynayacak şekilde yeniden tabanlanır ve dışa aktarma bunu tam olarak bir kez uygular.",
+
+  "orient.apply": "Modeli yeniden yönlendir",
+
+  "orient.noop": "Uygulanacak döndürme yok.",
+
+  "orient.applied": "Model Y {deg}° döndürüldü; artık {fwd} yönüne bakıyor. Yeni yön dinlenme pozudur.",
+
+  "orient.mismatchTitle": "Ön yön uyuşmazlığı",
+
+  "orient.mismatch": "İçe aktarılan iskelet {src} yönüne, modeliniz ise {model} yönüne bakıyor (Y etrafında {deg}° fark). Yana bakan bir modele yeniden hedefleme her kemiği burar ve kök hareketini yanlış yöne gönderir.",
+
+  "orient.mismatchHint": "\"Modeli yeniden yönlendir\", tüm modeli (rig ve animasyonlarıyla) içe aktarılan iskeletle aynı yöne çevirir ve bunu yeni dinlenme olarak dondurur; daha sonra Rig → Model yönü altından da yapılabilir. Devam etmek modeli olduğu gibi bırakır.",
+
+  "orient.continueAnyway": "Yeniden yönlendirmeden devam et",
+
+  "orient.reorientNow": "Modeli yeniden yönlendir (Y {deg}°)",
+
+  "hist.reorientModel": "Modeli yeniden yönlendir",
+
+  "clip.rootMotion": "Kök hareketi ({node} hareket eder)",
+
+  "tip.clip.rootMotion": "Açık: animasyon sahnede ilerler ve ilerleme dışa aktarılır. Kapalı: aynı klip yerinde oynar; ilerleme anahtarları korunur.",
+
+  "clip.rootOn": "kök hareketi",
+
+  "clip.rootOff": "yerinde",
+
+  "clip.rootMotionOnHint": "Kök hareketi açık: karakter sahnede ilerler ve hareket dışa aktarılan yola pişirilir.",
+
+  "clip.rootMotionOffHint": "Kök hareketi kapalı: yatay ilerleme önizleme ve dışa aktarmada yok sayılır (dikey kalır). Anahtarlar değiştirilmez.",
+
+  "hist.rootMotionOn": "Kök hareketi açık",
+
+  "hist.rootMotionOff": "Kök hareketi kapalı",
+
+  "props.freeze": "Dondur",
+
+  "props.freezeRot": "Dönüşü dondur",
+
+  "props.freezePos": "Konumu dondur",
+
+  "props.freezeBoth": "Konum ve dönüşü dondur",
+
+  "props.unfreeze": "Çöz (yerel değerleri geri getir)",
+
+  "tip.props.freeze": "Kemiği tam yerinde tutar ve mevcut dönüşümünü yeni dinlenme yapar: yerel değerler 0 olur. Alt öğeler, nesneler, IK ve mevcut anahtarlar görsel olarak değişmez.",
+
+  "props.frozenInfo": "Dondurulmuş taban: dönüş {rot}°, konum {pos}. Yerel değerler buna görelidir; Sıfırla buna döner.",
+
+  "hist.freeze": "Dönüşümü dondur",
+
+  "hist.freezeRot": "Dönüşü dondur",
+
+  "hist.freezePos": "Konumu dondur",
+
+  "hist.unfreeze": "Dönüşümü çöz",
+
+  "toast.freezeIK": "Bu kemik bir IK zincirinde: zincir yeni dinlenme tabanından yeniden çözülür ve aynı pozu gösterir.",
+
+  "toast.freezeRebased": "{n} anahtar kare yeni dinlenme tabanına yeniden tabanlandı; animasyon görsel olarak değişmedi.",
   "tip.props.keyPos": "Geçerli zamana bir konum anahtar karesi ekle",
   "tip.props.keyRot": "Geçerli zamana bir dönüş anahtar karesi ekle",
   "tip.props.reset": "Dosyadaki dönüşüme (nesneler) veya birim dönüşüme sıfırla",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Dönüş yapıştırma adımı (°)",
   "view.frameSelected": "Seçime odakla",
   "view.frameAll": "Tümüne odakla",
+
+  "view.validate": "Görünüm durumunu doğrula",
+
+  "toast.viewportOk": "Görünüm projeyle eşleşiyor: {n} öğe, {s} sahne nesnesi",
+
+  "toast.viewportIssues": "Görünüm eşitlenmemiş: {n} sorun ({kinds}) — konsola bakın",
   "tip.view.frameSelected": "Görünümü seçime ortala ({k})",
   "tip.view.frameAll": "Her şeyi görünüme sığdır ({k})",
   "view.views": "Görünüm",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Dikey yörüngeyi ters çevir",
   "tip.display.reverseOrbit": "Yalnızca görünümde sürükleyerek yörüngeyi etkiler; kaydırma, yakınlaştırma ve gezinme gizmosu değişmez",
   "rotmode.normal": "Çocuklar izler",
-  "rotmode.preserve": "Çocukları koru",
-  "tip.rotmode": "Dönüş modu. Çocuklar izler: alt öğeler dönüşü devralır. Çocukları koru: kemiği/nesneyi yeniden yönlendirirken tüm alt öğeler tam olarak yerinde kalır (duruş/rig düzenlemesi; animasyonu korumak için anahtar kareler yeniden temellendirilir).",
-  "props.rotModeHint": "Çocukları koru açık: dönüş düzenlemeleri bu öğenin eksenlerini yeniden yönlendirir; çocuklar yerinde kalır ve anahtar kareler oluşturulmak yerine yeniden temellendirilir.",
-  "hist.reorient": "Yeniden yönlendir (çocukları koru)",
+  "rotmode.preserve": "Çocukların dünya dönüşümlerini koru",
+  "tip.rotmode": "Bu kemiği, alt öğeleri dünya uzayında görsel olarak sabit kalacak şekilde taşıyın veya döndürün. Çocuklar izler: alt öğeler onunla birlikte hareket eder ve döner. Koru: rig/dinlenme düzenlemesi — alt öğelerin yerel dönüşümleri yeniden hesaplanır, anahtar kareler yeniden tabanlanır (animasyon değişmez) ve anahtar oluşturulmaz.",
+  "props.rotModeHint": "Çocukların dünya dönüşümlerini koru açık: konum ve dönüş düzenlemeleri bu öğenin dinlenme dönüşümünü taşır; alt öğeler tam yerinde kalır ve anahtar kareler oluşturulmak yerine yeniden tabanlanır.",
+  "hist.reorient": "Dönüştür (çocukları koru)",
   "toast.reorientRebased": "Yeniden yönlendirildi: {m} klipteki {n} anahtar kare, görünen animasyon değişmesin diye yeniden temellendirildi",
   "toast.reorientIK": "Bu kemik bir IK zincirinin parçası; IK sonucu yeni duruş yöneliminden yeniden hesaplanır",
+
+  "toast.reorientInexact": "{names} dönüşü animasyonlu; taşıma alt öğeleri yalnızca geçerli karede tam sabit tutar. İstenmiyorsa geri alın.",
+
+  "props.rotModeMoveWarn": "Bu öğenin dönüşü animasyonlu: taşımak alt öğeleri yalnızca geçerli karede sabit tutar (döndürmek tam kalır).",
   "project.name": "Proje",
   "project.state": "Durum",
   "project.untitled": "Adsız proje",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Önce bir model içe aktarın",
   "autorig.noBones": "Bu düzen için kemik önerilemedi",
   "hist.autoRig": "Otomatik Rig",
+  "autorig.basePose": "Temel poz",
+  "autorig.pose.tpose": "T pozu",
+  "autorig.pose.apose": "A pozu",
+  "autorig.pose.standing": "Ayakta (nötr)",
+  "autorig.pose.spread": "Kanatlar açık",
+  "autorig.pose.straight": "Düz zincir",
+  "autorig.pose.detected": "İçe aktarılan pozu koru",
+  "autorig.poseInfo": "Rig {pose} pozunda oluşturulur; model parçaları kemikleriyle birlikte o poza taşınır (geri alınabilir, geometri değişmez).",
+  "autorig.poseKeep": "Rig içe aktarılan pozu olduğu gibi izler.",
+  "retarget.button": "Animasyon içe aktar…",
+  "tip.retarget.button": "FBX / BVH / glTF / GLB / VRM / DAE animasyonunu içe aktarıp bu rig'e yeniden hedefle",
+  "retarget.title": "Animasyon içe aktar (yeniden hedefleme)",
+  "retarget.needRig": "Önce kemik ekleyin (Otomatik Rig veya Kemik ekle): içe aktarılan animasyon rig'e yeniden hedeflenir.",
+  "retarget.parsing": "{name} ayrıştırılıyor…",
+  "retarget.intro": "Yalnızca animasyon: dosyadaki mesh'ler yok sayılır. Kaynak kemikleri rig'inize eşleyin, önizleyin, sonra normal klipler olarak uygulayın (tek geri alma adımı).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Klipler",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Seçenekler",
+  "retarget.mapping": "Kemik eşleme (hedef ← kaynak)",
+  "retarget.preview": "Önizleme",
+  "retarget.rootMotion": "Kök hareketi",
+  "retarget.root.inPlace": "Kapalı — yerinde oynat (ilerleme içe aktarılır, klip başına açılabilir)",
+  "retarget.root.keep": "Açık — karakter ilerler (boyuna ölçeklenir)",
+  "retarget.root.none": "Kök ötelemesini içe aktarma",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Otomatik eşle",
+  "retarget.clearMap": "Temizle",
+  "retarget.savePreset": "Ön ayarı kaydet",
+  "retarget.loadPreset": "Ön ayar yükle",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Önizle",
+  "retarget.stop": "Önizlemeyi durdur",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Uygula",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Animasyon içe aktar",
 };

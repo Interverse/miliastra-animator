@@ -1,3 +1,4 @@
+import { MAX_OBJECT_SCALE } from './gia/gia-export.js';
 // Pre-export validation. Each issue: { level: 'error'|'warning'|'info', key,
 // params, nodeId?, clipId? }. Errors block export; warnings mean the result
 // may differ from the preview.
@@ -14,6 +15,11 @@ export function validateProject(project, giaBytes, importInfo = null) {
 
   if (!giaBytes) push('error', 'val.noFile');
   if (!objects.length) push('error', 'val.noObjects');
+  for (const o of objects) {
+    const z = o.zoom || [1, 1, 1];
+    const axes = ['X', 'Y', 'Z'].filter((_, i) => Math.abs(z[i]) > MAX_OBJECT_SCALE + 1e-9);
+    if (axes.length) push('error', 'val.objectScale', { name: o.name, guid: o.guid ?? '', axis: axes.join('/'), value: Math.max(...z.map(Math.abs)).toFixed(2), max: MAX_OBJECT_SCALE }, { nodeId: o.id });
+  }
   if (hasCycle(project)) push('error', 'val.cycle');
 
   // parenting sanity

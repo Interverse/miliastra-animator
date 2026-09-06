@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Chỉ có ghi chú.",
   "export.levels": "✕ chặn xuất · ⚠ có thể không chính xác · ℹ ghi chú",
   "export.download": "Xuất .gia có hoạt ảnh",
+
+  "limit.title": "Giới hạn điểm đường đi",
+
+  "limit.message": "Đường này chứa nhiều hơn mức an toàn tối đa {max} điểm di chuyển. Giới hạn {game} điểm trong game hiện không đáng tin cậy, nên trình chỉnh sửa này giới hạn đường xuất ở {max} điểm.",
+
+  "limit.colAnimation": "Hoạt ảnh",
+
+  "limit.colObject": "Đối tượng / đường",
+
+  "limit.colPoints": "Điểm",
+
+  "limit.colStatus": "Trạng thái",
+
+  "limit.over": "vượt giới hạn",
+
+  "limit.choices": "Nén tự động loại bỏ các điểm thừa (thẳng hàng, gần trùng, mẫu trung gian khi bake) trong khi giữ hình dạng, điểm đầu/cuối, chỗ rẽ, thay đổi độ cao, thời gian, thay đổi tốc độ và hướng. Hủy quay về trình chỉnh sửa mà không thay đổi dự án hay lưu tệp.",
+
+  "limit.compress": "Nén tự động",
+
+  "limit.cancelExport": "Hủy xuất",
+
+  "limit.previewTitle": "Xem trước nén",
+
+  "limit.previewOk": "Mọi đường bị ảnh hưởng giờ nằm trong {max} điểm. Khung nhìn hiển thị đường gốc màu xám và đường đã nén màu hổ phách.",
+
+  "limit.previewFail": "Nén tự động không thể đưa mọi đường về {max} điểm mà không thay đổi chuyển động rõ rệt. Chưa xuất gì; hãy đơn giản hóa hoạt ảnh (ít key hơn, độ chính xác thấp hơn hoặc tách) rồi thử lại.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "sai lệch tối đa {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "sai lệch quá lớn: {pos} cm / {rot}°",
+
+  "limit.notReached": "không đạt được giới hạn",
+
+  "limit.previewHint": "Đường đã nén chỉ dùng cho lần xuất này; dự án vẫn giữ hoạt ảnh gốc.",
+
+  "limit.remember": "Cũng tự động nén các hoạt ảnh này ở các lần xuất sau (cài đặt dự án, có thể hoàn tác)",
+
+  "tip.limit.remember": "Bật \"Nén tự động\" cho các ô xuất bị ảnh hưởng. Hoạt ảnh có thể chỉnh sửa không thay đổi.",
+
+  "limit.useCompressed": "Dùng đường đã nén và xuất",
+
+  "export.pathPoints": "Điểm đường: tối đa {n} / {max} mỗi đối tượng ({objs} đối tượng chuyển động)",
+
+  "export.pathPointsCompressed": "tự động nén từ {from}",
+
+  "export.pathPointsOver": "Vượt giới hạn {max} điểm: khi xuất sẽ đề xuất nén tự động.",
+
+  "export.autoCompress": "Tự động nén về {max} điểm khi xuất",
+
+  "tip.export.autoCompress": "Nén các đường của hoạt ảnh này về giới hạn Miliastra mỗi lần xuất (hoạt ảnh có thể chỉnh sửa không đổi)",
+
+  "export.autoCompressFailed": "{n} đường không thể nén tự động an toàn; quá trình xuất sẽ dừng và giải thích.",
+
+  "export.limitSummary": "{n} đường vượt giới hạn {max} điểm. Khi xuất sẽ đề xuất nén tự động hoặc hủy.",
+
+  "toast.exportPathLimit": "Đã dừng xuất: {n} đường vượt giới hạn {max} điểm",
+
+  "hist.exportCompress": "Tự động nén khi xuất",
+
+  "hist.simplifyPath": "Đơn giản hóa đường",
+
+  "path.simplify": "Đơn giản hóa đường…",
+
+  "tip.path.simplify": "Loại bỏ điểm thừa trong dung sai (đếm trực tiếp)",
+
+  "path.simplifyIntro": "Loại bỏ các điểm mà khi thiếu, đường dịch chuyển ít hơn dung sai. Điểm đầu, cuối và góc được giữ.",
+
+  "path.simplifyTolerance": "Dung sai",
+
+  "path.simplifyResult": "{before} → {after} điểm (sai lệch tối đa {err} cm)",
+
+  "path.simplifyApply": "Đơn giản hóa",
   "export.report": "Lần xuất gần nhất",
   "export.reportParts": "Đối tượng có hoạt ảnh",
   "export.reportDevices": "Thiết bị chuyển động",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Khóa vị trí",
   "props.keyRot": "Khóa xoay",
   "props.reset": "Đặt lại",
+
+  "scale.button": "Đổi tỷ lệ toàn bộ mô hình…",
+
+  "tip.scale.button": "Thay đổi kích thước toàn bộ mô hình (đối tượng, rig, khoảng cách hoạt ảnh) quanh trục của nó và bake kích thước mới",
+
+  "scale.title": "Đổi tỷ lệ toàn bộ mô hình",
+
+  "scale.explain": "Toàn bộ cụm được đổi tỷ lệ đều quanh trục mô hình: khoảng cách giữa các phần, vị trí và độ dài xương, mục tiêu và cực IK, hình học hiển thị, key dịch chuyển, root motion và đường đi. Xoay và thời gian không đổi. Kích thước mới trở thành mô hình có thể chỉnh sửa — không còn gì phải áp dụng hai lần.",
+
+  "scale.presets": "Cài đặt sẵn",
+
+  "scale.factorLabel": "Hệ số tỷ lệ (×)",
+
+  "scale.percent": "Phần trăm (%)",
+
+  "scale.factor": "Hệ số",
+
+  "scale.extent": "Kích thước mô hình",
+
+  "scale.largest": "Tỷ lệ đối tượng lớn nhất",
+
+  "scale.max": "tối đa {max}",
+
+  "scale.overWarning": "{n} đối tượng sẽ vượt tỷ lệ tối đa {max} của Miliastra. Vẫn có thể đổi tỷ lệ mô hình, nhưng không thể xuất cho đến khi chúng nằm trong giới hạn.",
+
+  "scale.axis": "trục {axis}",
+
+  "scale.more": "… và {n} nữa",
+
+  "scale.overHint": "Chọn hệ số nhỏ hơn, hoặc vẫn đổi tỷ lệ và giảm sau (Hoàn tác khôi phục chính xác kích thước ban đầu).",
+
+  "scale.bakeNote": "Một bước hoàn tác. Kết quả được lưu cùng dự án như kích thước bình thường.",
+
+  "scale.apply": "Đổi tỷ lệ mô hình",
+
+  "scale.applyAnyway": "Vẫn áp dụng",
+
+  "scale.noop": "Hệ số 1× không thay đổi gì.",
+
+  "scale.applied": "Đã đổi tỷ lệ mô hình {f}×. Rig, hoạt ảnh và đường đi được thay đổi theo.",
+
+  "scale.appliedOver": "Đã đổi tỷ lệ mô hình {f}×. {n} đối tượng hiện vượt tỷ lệ tối đa {max}: xuất bị chặn cho đến khi giảm xuống.",
+
+  "hist.scaleModel": "Đổi tỷ lệ toàn bộ mô hình",
+
+  "val.objectScale": "Đối tượng {name} ({guid}) — tỷ lệ {axis}: {value} vượt tỷ lệ đối tượng tối đa {max} của Miliastra.",
+
+  "toast.exportObjectScale": "Đã dừng xuất: {n} đối tượng vượt tỷ lệ tối đa {max} ({names})",
+
+  "orient.section": "Hướng và tỷ lệ mô hình",
+
+  "orient.intro": "Nếu mô hình quay sai hướng (ví dụ +X thay vì +Z), hãy xoay toàn bộ cụm — đối tượng, xương, IK, hoạt ảnh — như một khối và đặt đó làm tư thế nghỉ mới.",
+
+  "orient.button": "Định hướng lại mô hình…",
+
+  "tip.orient.button": "Xoay toàn bộ mô hình quanh trục của nó và đóng băng kết quả vào cơ sở nghỉ",
+
+  "orient.title": "Định hướng lại mô hình",
+
+  "orient.explain": "Toàn bộ mô hình (đối tượng và trang trí, xương, mục tiêu và cực IK, ràng buộc, đường đi và mọi hoạt ảnh) xoay cùng nhau quanh trục của mô hình. Không có gì dịch chuyển so với phần còn lại.",
+
+  "orient.detected": "Phát hiện từ rig: mô hình hiện quay về {fwd}.",
+
+  "orient.notDetected": "Không có rig hình người để phát hiện hướng hiện tại; chọn bên dưới hoặc dùng xoay tùy chỉnh.",
+
+  "orient.current": "Mô hình hiện quay về",
+
+  "orient.target": "Nên quay về",
+
+  "orient.dir.pZ": "+Z (phía trước của trình chỉnh sửa / glTF / FBX)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Xoay nhanh quanh Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "X/Y/Z° tùy chỉnh",
+
+  "tip.orient.custom": "Xoay bất kỳ theo độ; Y là cách sửa thường dùng cho mô hình quay ngang",
+
+  "orient.preview": "Xem trước trong khung nhìn",
+
+  "orient.result": "Xoay X {x}°, Y {y}°, Z {z}° → mô hình sẽ quay về {fwd}.",
+
+  "orient.freezeNote": "Phép xoay được đóng băng vào cơ sở nghỉ: xương gốc giữ nguyên giá trị xoay (thường là 0), hoạt ảnh được rebase để phát giống nhau theo hướng mới, và xuất áp dụng đúng một lần.",
+
+  "orient.apply": "Định hướng lại mô hình",
+
+  "orient.noop": "Không có phép xoay để áp dụng.",
+
+  "orient.applied": "Đã xoay mô hình Y {deg}°; giờ quay về {fwd}. Hướng mới là tư thế nghỉ.",
+
+  "orient.mismatchTitle": "Hướng phía trước không khớp",
+
+  "orient.mismatch": "Bộ xương nhập vào quay về {src} nhưng mô hình của bạn quay về {model} (chênh {deg}° quanh Y). Retarget lên mô hình quay ngang sẽ vặn mọi xương và đưa root motion sai hướng.",
+
+  "orient.mismatchHint": "\"Định hướng lại mô hình\" xoay toàn bộ mô hình (cùng rig và hoạt ảnh) về cùng hướng với bộ xương nhập vào và đóng băng làm tư thế nghỉ mới; bạn cũng có thể làm sau từ Rigging → Hướng của mô hình. Tiếp tục sẽ giữ nguyên mô hình.",
+
+  "orient.continueAnyway": "Tiếp tục mà không định hướng lại",
+
+  "orient.reorientNow": "Định hướng lại mô hình (Y {deg}°)",
+
+  "hist.reorientModel": "Định hướng lại mô hình",
+
+  "clip.rootMotion": "Root motion (di chuyển {node})",
+
+  "tip.clip.rootMotion": "Bật: hoạt ảnh di chuyển trong cảnh và chuyển động được xuất. Tắt: cùng clip phát tại chỗ; key di chuyển được giữ lại.",
+
+  "clip.rootOn": "root motion",
+
+  "clip.rootOff": "tại chỗ",
+
+  "clip.rootMotionOnHint": "Root motion bật: nhân vật di chuyển trong cảnh và chuyển động được bake vào đường xuất.",
+
+  "clip.rootMotionOffHint": "Root motion tắt: di chuyển ngang bị bỏ qua khi xem trước và xuất (chuyển động dọc giữ nguyên). Key không bị sửa.",
+
+  "hist.rootMotionOn": "Bật root motion",
+
+  "hist.rootMotionOff": "Tắt root motion",
+
+  "props.freeze": "Đóng băng",
+
+  "props.freezeRot": "Đóng băng xoay",
+
+  "props.freezePos": "Đóng băng vị trí",
+
+  "props.freezeBoth": "Đóng băng vị trí & xoay",
+
+  "props.unfreeze": "Bỏ đóng băng (khôi phục giá trị cục bộ)",
+
+  "tip.props.freeze": "Giữ xương đúng tại chỗ và biến biến đổi hiện tại thành tư thế nghỉ mới: giá trị cục bộ trở về 0. Hậu duệ, đối tượng, IK và key hiện có không đổi về mặt hiển thị.",
+
+  "props.frozenInfo": "Cơ sở đóng băng: xoay {rot}°, vị trí {pos}. Giá trị cục bộ tương đối với nó; Đặt lại quay về đó.",
+
+  "hist.freeze": "Đóng băng biến đổi",
+
+  "hist.freezeRot": "Đóng băng xoay",
+
+  "hist.freezePos": "Đóng băng vị trí",
+
+  "hist.unfreeze": "Bỏ đóng băng biến đổi",
+
+  "toast.freezeIK": "Xương này thuộc chuỗi IK: chuỗi được giải lại từ cơ sở nghỉ mới và hiển thị cùng tư thế.",
+
+  "toast.freezeRebased": "{n} keyframe đã được rebase vào cơ sở nghỉ mới; hoạt ảnh không đổi về mặt hiển thị.",
   "tip.props.keyPos": "Chèn khung hình khóa vị trí tại thời điểm hiện tại",
   "tip.props.keyRot": "Chèn khung hình khóa xoay tại thời điểm hiện tại",
   "tip.props.reset": "Đặt lại về biến đổi trong tệp (đối tượng) hoặc giá trị gốc",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Bước bắt dính xoay (°)",
   "view.frameSelected": "Khớp mục đã chọn",
   "view.frameAll": "Khớp tất cả",
+
+  "view.validate": "Kiểm tra trạng thái khung nhìn",
+
+  "toast.viewportOk": "Khung nhìn khớp với dự án: {n} thực thể, {s} đối tượng cảnh",
+
+  "toast.viewportIssues": "Khung nhìn không đồng bộ: {n} vấn đề ({kinds}) — xem console",
   "tip.view.frameSelected": "Căn giữa khung nhìn vào mục đã chọn ({k})",
   "tip.view.frameAll": "Vừa tất cả trong khung nhìn ({k})",
   "view.views": "Góc nhìn",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Đảo chiều xoay dọc",
   "tip.display.reverseOrbit": "Chỉ ảnh hưởng đến xoay quanh bằng cách kéo trong khung nhìn; dịch, thu phóng và gizmo điều hướng không đổi",
   "rotmode.normal": "Con đi theo",
-  "rotmode.preserve": "Giữ con",
-  "tip.rotmode": "Chế độ xoay. Con đi theo: các mục con kế thừa góc xoay. Giữ con: đổi hướng xương/đối tượng trong khi mọi mục con giữ nguyên vị trí (chỉnh tư thế nghỉ/rig; khung hình khóa được quy chiếu lại để giữ hoạt ảnh).",
-  "props.rotModeHint": "Giữ con đang bật: chỉnh sửa xoay sẽ đổi hướng trục của mục này; các mục con giữ nguyên và khung hình khóa được quy chiếu lại thay vì tạo khóa.",
-  "hist.reorient": "Đổi hướng (giữ con)",
+  "rotmode.preserve": "Giữ biến đổi thế giới của con",
+  "tip.rotmode": "Di chuyển hoặc xoay xương này trong khi mọi hậu duệ vẫn đứng yên trong không gian thế giới. Con đi theo: hậu duệ di chuyển và xoay cùng. Giữ: chỉnh rig/tư thế nghỉ — biến đổi cục bộ của hậu duệ được tính lại, keyframe được rebase (hoạt ảnh không đổi) và không tạo key.",
+  "props.rotModeHint": "Giữ biến đổi thế giới của con đang bật: chỉnh vị trí và xoay sẽ dời biến đổi nghỉ của mục này; hậu duệ giữ nguyên chỗ và keyframe được rebase thay vì tạo key.",
+  "hist.reorient": "Biến đổi (giữ con)",
   "toast.reorientRebased": "Đã đổi hướng: {n} khung hình khóa trong {m} clip được quy chiếu lại để hoạt ảnh hiển thị không đổi",
   "toast.reorientIK": "Xương này thuộc chuỗi IK; kết quả IK được tính lại từ hướng nghỉ mới",
+
+  "toast.reorientInexact": "Xoay của {names} có hoạt ảnh nên khi di chuyển, hậu duệ chỉ giữ nguyên chính xác ở khung hình hiện tại. Hoàn tác nếu không mong muốn.",
+
+  "props.rotModeMoveWarn": "Xoay của mục này có hoạt ảnh: di chuyển chỉ giữ hậu duệ cố định ở khung hình hiện tại (xoay vẫn chính xác).",
   "project.name": "Dự án",
   "project.state": "Trạng thái",
   "project.untitled": "Dự án chưa đặt tên",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Hãy nhập mô hình trước",
   "autorig.noBones": "Không thể đề xuất xương cho bố cục này",
   "hist.autoRig": "Auto-Rig",
+  "autorig.basePose": "Tư thế cơ bản",
+  "autorig.pose.tpose": "Tư thế T",
+  "autorig.pose.apose": "Tư thế A",
+  "autorig.pose.standing": "Đứng (trung tính)",
+  "autorig.pose.spread": "Dang cánh",
+  "autorig.pose.straight": "Chuỗi thẳng",
+  "autorig.pose.detected": "Giữ tư thế đã nhập",
+  "autorig.poseInfo": "Rig được tạo ở {pose}; các bộ phận của mô hình di chuyển theo xương vào tư thế đó (có thể hoàn tác, hình học không đổi).",
+  "autorig.poseKeep": "Rig giữ nguyên tư thế đã nhập.",
+  "retarget.button": "Nhập hoạt ảnh…",
+  "tip.retarget.button": "Nhập hoạt ảnh FBX / BVH / glTF / GLB / VRM / DAE và retarget lên rig này",
+  "retarget.title": "Nhập hoạt ảnh (retarget)",
+  "retarget.needRig": "Thêm xương trước (Auto-Rig hoặc Thêm xương): hoạt ảnh nhập sẽ được retarget lên rig.",
+  "retarget.parsing": "Đang phân tích {name}…",
+  "retarget.intro": "Chỉ hoạt ảnh: lưới trong tệp bị bỏ qua. Ánh xạ xương nguồn vào rig, xem trước rồi áp dụng thành clip thường (một bước hoàn tác).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Clip",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Tùy chọn",
+  "retarget.mapping": "Ánh xạ xương (đích ← nguồn)",
+  "retarget.preview": "Xem trước",
+  "retarget.rootMotion": "Chuyển động gốc",
+  "retarget.root.inPlace": "Tắt — phát tại chỗ (đã nhập di chuyển, có thể bật theo từng clip)",
+  "retarget.root.keep": "Bật — nhân vật di chuyển (tỷ lệ theo chiều cao)",
+  "retarget.root.none": "Không nhập dịch chuyển gốc",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Tự ánh xạ",
+  "retarget.clearMap": "Xóa",
+  "retarget.savePreset": "Lưu preset",
+  "retarget.loadPreset": "Tải preset",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Xem trước",
+  "retarget.stop": "Dừng xem trước",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Áp dụng",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Nhập hoạt ảnh",
 };

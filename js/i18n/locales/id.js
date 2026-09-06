@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "Hanya catatan.",
   "export.levels": "✕ menghalangi ekspor · ⚠ mungkin tidak akurat · ℹ catatan",
   "export.download": "Ekspor .gia beranimasi",
+
+  "limit.title": "Batas titik jalur",
+
+  "limit.message": "Jalur ini berisi lebih dari batas aman {max} titik gerakan. Batas {game} titik di dalam game saat ini tidak andal, sehingga editor ini membatasi jalur yang diekspor ke {max} titik.",
+
+  "limit.colAnimation": "Animasi",
+
+  "limit.colObject": "Objek / jalur",
+
+  "limit.colPoints": "Titik",
+
+  "limit.colStatus": "Status",
+
+  "limit.over": "melebihi batas",
+
+  "limit.choices": "Kompres otomatis menghapus titik berlebihan (kolinear, hampir duplikat, sampel antara hasil bake) sambil mempertahankan bentuk, awal/akhir, belokan, perubahan tinggi, timing, perubahan kecepatan dan orientasi. Batal kembali ke editor tanpa mengubah proyek atau menyimpan file.",
+
+  "limit.compress": "Kompres otomatis",
+
+  "limit.cancelExport": "Batalkan ekspor",
+
+  "limit.previewTitle": "Pratinjau kompresi",
+
+  "limit.previewOk": "Semua jalur yang terpengaruh kini muat dalam {max} titik. Viewport menampilkan jalur asli abu-abu dan jalur terkompresi kuning.",
+
+  "limit.previewFail": "Kompresi otomatis tidak dapat membawa semua jalur ke {max} titik tanpa mengubah gerakan secara nyata. Tidak ada yang diekspor; sederhanakan animasi (lebih sedikit key, presisi lebih rendah, atau pisahkan) lalu coba lagi.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "deviasi maks {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "deviasi terlalu besar: {pos} cm / {rot}°",
+
+  "limit.notReached": "batas tidak tercapai",
+
+  "limit.previewHint": "Jalur terkompresi hanya dipakai untuk ekspor ini; proyek tetap menyimpan animasi aslinya.",
+
+  "limit.remember": "Kompres otomatis animasi ini pada ekspor berikutnya (pengaturan proyek, dapat dibatalkan)",
+
+  "tip.limit.remember": "Mengaktifkan \"Kompres otomatis\" untuk slot ekspor yang terpengaruh. Animasi yang dapat diedit tidak berubah.",
+
+  "limit.useCompressed": "Gunakan jalur terkompresi & ekspor",
+
+  "export.pathPoints": "Titik jalur: hingga {n} dari {max} per objek ({objs} objek bergerak)",
+
+  "export.pathPointsCompressed": "dikompres otomatis dari {from}",
+
+  "export.pathPointsOver": "Melebihi batas {max} titik: ekspor akan menawarkan kompresi otomatis.",
+
+  "export.autoCompress": "Kompres otomatis ke {max} titik saat ekspor",
+
+  "tip.export.autoCompress": "Mengompres jalur animasi ini ke batas Miliastra pada setiap ekspor (animasi yang dapat diedit tidak berubah)",
+
+  "export.autoCompressFailed": "{n} jalur tidak dapat dikompres otomatis dengan aman; ekspor akan berhenti dan menjelaskannya.",
+
+  "export.limitSummary": "{n} jalur melebihi batas {max} titik. Ekspor akan menawarkan kompresi otomatis atau batal.",
+
+  "toast.exportPathLimit": "Ekspor dihentikan: {n} jalur melebihi batas {max} titik",
+
+  "hist.exportCompress": "Kompres otomatis ekspor",
+
+  "hist.simplifyPath": "Sederhanakan jalur",
+
+  "path.simplify": "Sederhanakan jalur…",
+
+  "tip.path.simplify": "Hapus titik berlebihan dalam toleransi (hitungan langsung)",
+
+  "path.simplifyIntro": "Menghapus titik yang jika hilang menggeser jalur kurang dari toleransi. Awal, akhir, dan sudut dipertahankan.",
+
+  "path.simplifyTolerance": "Toleransi",
+
+  "path.simplifyResult": "{before} → {after} titik (deviasi maks {err} cm)",
+
+  "path.simplifyApply": "Sederhanakan",
   "export.report": "Ekspor terakhir",
   "export.reportParts": "Objek beranimasi",
   "export.reportDevices": "Motion Device",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "Key posisi",
   "props.keyRot": "Key rotasi",
   "props.reset": "Atur ulang",
+
+  "scale.button": "Skalakan seluruh model…",
+
+  "tip.scale.button": "Ubah ukuran seluruh model (objek, rig, jarak animasi) di sekitar pivotnya dan bake ukuran baru",
+
+  "scale.title": "Skalakan seluruh model",
+
+  "scale.explain": "Seluruh rakitan diskalakan seragam di sekitar pivot model: jarak antar bagian, posisi dan panjang tulang, target dan pole IK, geometri tampilan, key translasi, root motion, dan jalur. Rotasi dan timing tidak berubah. Ukuran baru menjadi model yang dapat diedit — tidak ada yang diterapkan dua kali.",
+
+  "scale.presets": "Preset",
+
+  "scale.factorLabel": "Faktor skala (×)",
+
+  "scale.percent": "Persentase (%)",
+
+  "scale.factor": "Faktor",
+
+  "scale.extent": "Ukuran model",
+
+  "scale.largest": "Skala objek terbesar",
+
+  "scale.max": "maks {max}",
+
+  "scale.overWarning": "{n} objek akan melebihi skala maksimum Miliastra {max}. Model tetap bisa diskalakan, tetapi tidak dapat diekspor sampai semuanya dalam batas.",
+
+  "scale.axis": "sumbu {axis}",
+
+  "scale.more": "… dan {n} lainnya",
+
+  "scale.overHint": "Pilih faktor lebih kecil, atau tetap skalakan dan kecilkan nanti (Undo memulihkan ukuran asli dengan tepat).",
+
+  "scale.bakeNote": "Satu langkah undo. Hasilnya disimpan bersama proyek sebagai ukuran normalnya.",
+
+  "scale.apply": "Skalakan model",
+
+  "scale.applyAnyway": "Terapkan saja",
+
+  "scale.noop": "Faktor 1× tidak mengubah apa pun.",
+
+  "scale.applied": "Model diskalakan {f}×. Rig, animasi, dan jalur ikut diubah ukurannya.",
+
+  "scale.appliedOver": "Model diskalakan {f}×. {n} objek kini melebihi skala maksimum {max}: ekspor diblokir sampai dikurangi.",
+
+  "hist.scaleModel": "Skalakan seluruh model",
+
+  "val.objectScale": "Objek {name} ({guid}) — skala {axis}: {value} melebihi skala objek maksimum Miliastra {max}.",
+
+  "toast.exportObjectScale": "Ekspor dihentikan: {n} objek melebihi skala maksimum {max} ({names})",
+
+  "orient.section": "Orientasi & skala model",
+
+  "orient.intro": "Jika model menghadap arah yang salah (misalnya +X bukan +Z), putar seluruh rakitan — objek, tulang, IK, animasi — sebagai satu unit dan jadikan itu istirahat baru.",
+
+  "orient.button": "Orientasikan ulang model…",
+
+  "tip.orient.button": "Putar seluruh model di sekitar pivotnya dan bekukan hasilnya ke basis istirahat",
+
+  "orient.title": "Orientasikan ulang model",
+
+  "orient.explain": "Seluruh model (objek dan dekorasi, tulang, target dan pole IK, constraint, jalur, dan setiap animasi) berputar bersama di sekitar pivot model. Tidak ada yang bergerak relatif terhadap yang lain.",
+
+  "orient.detected": "Terdeteksi dari rig: model saat ini menghadap {fwd}.",
+
+  "orient.notDetected": "Tidak ada rig humanoid untuk mendeteksi arah depan saat ini; pilih di bawah atau gunakan rotasi kustom.",
+
+  "orient.current": "Model saat ini menghadap",
+
+  "orient.target": "Seharusnya menghadap",
+
+  "orient.dir.pZ": "+Z (depan editor / glTF / FBX)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Putaran cepat di sumbu Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "X/Y/Z° kustom",
+
+  "tip.orient.custom": "Rotasi apa pun dalam derajat; Y adalah perbaikan umum untuk model yang menghadap ke samping",
+
+  "orient.preview": "Pratinjau di viewport",
+
+  "orient.result": "Rotasi X {x}°, Y {y}°, Z {z}° → model akan menghadap {fwd}.",
+
+  "orient.freezeNote": "Putaran dibekukan ke basis istirahat: tulang akar mempertahankan nilai rotasinya (biasanya 0), animasi disesuaikan agar berjalan sama di arah baru, dan ekspor menerapkannya tepat sekali.",
+
+  "orient.apply": "Orientasikan ulang model",
+
+  "orient.noop": "Tidak ada rotasi untuk diterapkan.",
+
+  "orient.applied": "Model diputar Y {deg}°; sekarang menghadap {fwd}. Orientasi baru adalah pose istirahat.",
+
+  "orient.mismatchTitle": "Arah depan tidak cocok",
+
+  "orient.mismatchHint": "\"Orientasikan ulang model\" memutar seluruh model (dengan rig dan animasinya) agar menghadap sama dengan skeleton yang diimpor dan membekukannya sebagai istirahat baru; bisa juga nanti dari Rigging → Orientasi model. Melanjutkan membiarkan model apa adanya.",
+
+  "orient.mismatch": "Skeleton yang diimpor menghadap {src} tetapi model Anda menghadap {model} (selisih {deg}° pada Y). Retargeting ke model yang menyamping memelintir setiap tulang dan mengirim root motion ke arah yang salah.",
+
+  "orient.continueAnyway": "Lanjutkan tanpa mengubah orientasi",
+
+  "orient.reorientNow": "Orientasikan ulang model (Y {deg}°)",
+
+  "hist.reorientModel": "Orientasikan ulang model",
+
+  "clip.rootMotion": "Root motion (menggerakkan {node})",
+
+  "tip.clip.rootMotion": "Aktif: animasi bergerak melalui scene dan pergerakannya diekspor. Nonaktif: klip yang sama diputar di tempat; key pergerakan tetap disimpan.",
+
+  "clip.rootOn": "root motion",
+
+  "clip.rootOff": "di tempat",
+
+  "clip.rootMotionOnHint": "Root motion aktif: karakter bergerak melalui scene dan gerakannya di-bake ke jalur ekspor.",
+
+  "clip.rootMotionOffHint": "Root motion nonaktif: pergerakan horizontal diabaikan untuk pratinjau dan ekspor (gerakan vertikal tetap). Key tidak diubah.",
+
+  "hist.rootMotionOn": "Root motion aktif",
+
+  "hist.rootMotionOff": "Root motion nonaktif",
+
+  "props.freeze": "Bekukan",
+
+  "props.freezeRot": "Bekukan rotasi",
+
+  "props.freezePos": "Bekukan posisi",
+
+  "props.freezeBoth": "Bekukan posisi & rotasi",
+
+  "props.unfreeze": "Cairkan (pulihkan nilai lokal)",
+
+  "tip.props.freeze": "Biarkan tulang tetap di tempatnya dan jadikan transformasi saat ini sebagai istirahat baru: nilai lokal menjadi 0. Keturunan, objek, IK, dan key yang ada tetap tidak berubah secara visual.",
+
+  "props.frozenInfo": "Basis beku: rotasi {rot}°, posisi {pos}. Nilai lokal relatif terhadapnya; Reset kembali ke sana.",
+
+  "hist.freeze": "Bekukan transformasi",
+
+  "hist.freezeRot": "Bekukan rotasi",
+
+  "hist.freezePos": "Bekukan posisi",
+
+  "hist.unfreeze": "Cairkan transformasi",
+
+  "toast.freezeIK": "Tulang ini ada dalam rantai IK: rantai diselesaikan ulang dari basis istirahat baru dan menampilkan pose yang sama.",
+
+  "toast.freezeRebased": "{n} keyframe disesuaikan ke basis istirahat baru; animasi tidak berubah secara visual.",
   "tip.props.keyPos": "Sisipkan keyframe posisi pada waktu saat ini",
   "tip.props.keyRot": "Sisipkan keyframe rotasi pada waktu saat ini",
   "tip.props.reset": "Atur ulang ke transformasi dari file (objek) atau identitas",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "Langkah snap rotasi (°)",
   "view.frameSelected": "Bingkai pilihan",
   "view.frameAll": "Bingkai semua",
+
+  "view.validate": "Validasi status viewport",
+
+  "toast.viewportOk": "Viewport sesuai dengan proyek: {n} entitas, {s} objek scene",
+
+  "toast.viewportIssues": "Viewport tidak sinkron: {n} masalah ({kinds}) — lihat konsol",
   "tip.view.frameSelected": "Pusatkan tampilan pada pilihan ({k})",
   "tip.view.frameAll": "Muat semuanya dalam tampilan ({k})",
   "view.views": "Tampilan",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "Balik orbit vertikal",
   "tip.display.reverseOrbit": "Hanya memengaruhi orbit dengan menyeret di viewport; geser, zoom, dan gizmo navigasi tidak berubah",
   "rotmode.normal": "Anak mengikuti",
-  "rotmode.preserve": "Pertahankan anak",
-  "tip.rotmode": "Mode rotasi. Anak mengikuti: turunan mewarisi rotasi. Pertahankan anak: orientasikan ulang tulang/objek sementara semua turunan tetap persis di tempatnya (pengeditan pose istirahat/rig; keyframe dihitung ulang agar animasi tetap terjaga).",
-  "props.rotModeHint": "Pertahankan anak aktif: pengeditan rotasi mengorientasikan ulang sumbu item ini; anak tetap di tempat dan keyframe dihitung ulang, bukan dibuat.",
-  "hist.reorient": "Orientasi ulang (pertahankan anak)",
+  "rotmode.preserve": "Pertahankan transformasi dunia anak",
+  "tip.rotmode": "Pindahkan atau putar tulang ini sambil menjaga semua keturunannya tetap diam secara visual di ruang dunia. Anak mengikuti: keturunan ikut bergerak dan berputar. Pertahankan: pengeditan rig/pose istirahat — transformasi lokal keturunan dihitung ulang, keyframe disesuaikan agar animasi tidak berubah, dan tidak ada key yang dibuat.",
+  "props.rotModeHint": "Pertahankan transformasi anak aktif: perubahan posisi dan rotasi memindahkan transformasi istirahat item ini; keturunan tetap di tempatnya dan keyframe disesuaikan, bukan dibuat.",
+  "hist.reorient": "Transformasi (pertahankan anak)",
   "toast.reorientRebased": "Diorientasikan ulang: {n} keyframe di {m} klip dihitung ulang sehingga animasi yang terlihat tidak berubah",
   "toast.reorientIK": "Tulang ini bagian dari rantai IK; hasil IK dihitung ulang dari orientasi istirahat yang baru",
+
+  "toast.reorientInexact": "Rotasi {names} dianimasikan; memindahkannya hanya menjaga keturunan tetap diam tepat di frame saat ini. Batalkan jika tidak diinginkan.",
+
+  "props.rotModeMoveWarn": "Rotasi item ini dianimasikan: memindahkannya hanya menjaga keturunan tetap diam di frame saat ini (memutarnya tetap tepat).",
   "project.name": "Proyek",
   "project.state": "Status",
   "project.untitled": "Proyek tanpa judul",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "Impor model terlebih dahulu",
   "autorig.noBones": "Tidak ada tulang yang dapat diusulkan untuk tata letak ini",
   "hist.autoRig": "Auto-Rig",
+  "autorig.basePose": "Pose dasar",
+  "autorig.pose.tpose": "Pose T",
+  "autorig.pose.apose": "Pose A",
+  "autorig.pose.standing": "Berdiri (netral)",
+  "autorig.pose.spread": "Sayap terbentang",
+  "autorig.pose.straight": "Rantai lurus",
+  "autorig.pose.detected": "Pertahankan pose impor",
+  "autorig.poseInfo": "Rig dibuat dalam {pose}; bagian model bergerak bersama tulangnya ke pose itu (dapat dibatalkan, geometri tidak berubah).",
+  "autorig.poseKeep": "Rig mengikuti pose impor apa adanya.",
+  "retarget.button": "Impor animasi…",
+  "tip.retarget.button": "Impor animasi FBX / BVH / glTF / GLB / VRM / DAE dan retarget ke rig ini",
+  "retarget.title": "Impor animasi (retarget)",
+  "retarget.needRig": "Tambahkan tulang dulu (Auto-Rig atau Tambah tulang): animasi impor diretarget ke rig.",
+  "retarget.parsing": "Mengurai {name}…",
+  "retarget.intro": "Hanya animasi: mesh dalam file diabaikan. Petakan tulang sumber ke rig Anda, pratinjau, lalu terapkan sebagai klip biasa (satu langkah batal).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "Klip",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "Opsi",
+  "retarget.mapping": "Pemetaan tulang (target ← sumber)",
+  "retarget.preview": "Pratinjau",
+  "retarget.rootMotion": "Gerak akar",
+  "retarget.root.inPlace": "Nonaktif — putar di tempat (pergerakan diimpor, bisa diaktifkan per klip)",
+  "retarget.root.keep": "Aktif — karakter bergerak (diskalakan ke tingginya)",
+  "retarget.root.none": "Jangan impor translasi akar",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "Petakan otomatis",
+  "retarget.clearMap": "Bersihkan",
+  "retarget.savePreset": "Simpan preset",
+  "retarget.loadPreset": "Muat preset",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "Pratinjau",
+  "retarget.stop": "Hentikan pratinjau",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "Terapkan",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "Impor animasi",
 };

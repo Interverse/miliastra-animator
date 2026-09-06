@@ -131,6 +131,21 @@ export function newProjectId() {
 }
 
 // ---------- small preferences (localStorage) ----------
+// Navigation preference versions. v2 corrected the default vertical orbit
+// direction (the old "reversed" direction became the normal one). Existing
+// users keep the physical direction they had: their stored flag is inverted
+// under the new semantics (an unset flag meant the old default, which is the
+// new reversed direction). Users with no preferences at all are new and get
+// the corrected default.
+export const NAV_PREFS_VERSION = 2;
+export function migrateNavPrefs(prefs) {
+  const p = prefs && typeof prefs === 'object' ? prefs : {};
+  if ((p.navVersion || 1) >= NAV_PREFS_VERSION) return { prefs: p, changed: false };
+  const existingUser = Object.keys(p).length > 0;
+  const view = { ...(p.view || {}) };
+  if (existingUser) view.reverseOrbitY = !view.reverseOrbitY;
+  return { prefs: { ...p, view, navVersion: NAV_PREFS_VERSION }, changed: true, migratedExistingUser: existingUser };
+}
 export function loadPrefs() {
   try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {}; } catch { return {}; }
 }

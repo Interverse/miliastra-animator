@@ -11,6 +11,9 @@ import { displayParts } from '../scene/display-parts.js';
 import { v3, quat, xf } from '../core/math.js';
 
 export const RIG_TYPES = ['auto', 'humanoid', 'quadruped', 'bird', 'segmented'];
+// Standard, deterministic rest poses per template ("detected" keeps the imported pose).
+export const BASE_POSES = { humanoid: ['tpose', 'apose', 'detected'], quadruped: ['standing', 'detected'], bird: ['spread', 'detected'], segmented: ['straight', 'detected'] };
+export const DEFAULT_POSE = { humanoid: 'tpose', quadruped: 'standing', bird: 'spread', segmented: 'straight' };
 
 // ---------- object features ----------
 const NAME_HINTS = [
@@ -121,20 +124,22 @@ function humanoid(feats, B) {
   const central = feats.filter((f) => !paired.has(f.id)).sort((a, b) => a.center[1] - b.center[1]);
   const bones = [], unassigned = [], notes = [];
   // centre column: hips (lowest) … head (highest); hints override order when present
+  // every object belongs to exactly one bone: hinted roles are claimed first, the rest by height
   const byHint = (k) => central.find((f) => f.hint === k);
-  let head = byHint('head') || central[central.length - 1];
-  let hips = byHint('hips') || central[0];
-  if (hips === head && central.length > 1) hips = central[0] === head ? central[1] : central[0];
-  const middle = central.filter((f) => f !== head && f !== hips);
-  const neck = byHint('neck') || (middle.length >= 2 && middle[middle.length - 1].size[1] < 0.12 * H ? middle[middle.length - 1] : null);
-  const chestCands = middle.filter((f) => f !== neck);
-  const chest = byHint('chest') || chestCands[chestCands.length - 1] || null;
+  const head = byHint('head') || central[central.length - 1];
+  const chestHint = byHint('chest'), neckHint = byHint('neck'), hipsHint = byHint('hips');
+  const free = central.filter((f) => f !== head && f !== chestHint && f !== neckHint && f !== hipsHint);
+  const hips = hipsHint || free[0] || null;
+  const rest1 = free.filter((f) => f !== hips);
+  const neck = neckHint || (rest1.length >= 2 && rest1[rest1.length - 1].size[1] < 0.12 * H ? rest1[rest1.length - 1] : null);
+  const chestCands = rest1.filter((f) => f !== neck);
+  const chest = chestHint || chestCands[chestCands.length - 1] || null;
   const spineObjs = chestCands.filter((f) => f !== chest);
-  const hipsPos = hips ? (hips === head ? centerBottom(hips) : hips.center) : B.center;
+  const hipsPos = hips ? hips.center : (chest ? centerBottom(chest) : B.center);
   const chestPos = chest ? chest.center : hips ? centerTop(hips) : v3.add(hipsPos, [0, 0.3 * H, 0]);
   const neckPos = neck ? neck.center : head ? centerBottom(head) : v3.add(chestPos, [0, 0.15 * H, 0]);
   const headTop = head ? centerTop(head) : v3.add(neckPos, [0, 0.15 * H, 0]);
-  if (hips && hips !== head) bones.push(boneSpec('hips', 'Hips', null, hipsPos, spineObjs.length ? spineObjs[0].center : chestPos, [hips], hips.hint === 'hips' ? 0.9 : 0.6));
+  if (hips) bones.push(boneSpec('hips', 'Hips', null, hipsPos, spineObjs.length ? spineObjs[0].center : chestPos, [hips], hips.hint === 'hips' ? 0.9 : 0.6));
   else bones.push(boneSpec('hips', 'Hips', null, hipsPos, chestPos, [], 0.4));
   let last = 'hips';
   spineObjs.forEach((f, i) => { bones.push(boneSpec('spine' + (i + 1), 'Spine' + (spineObjs.length > 1 ? ' ' + (i + 1) : ''), last, f.center, spineObjs[i + 1]?.center || chestPos, [f], 0.6)); last = 'spine' + (i + 1); });
@@ -271,8 +276,88 @@ function segmented(feats, B) {
 
 export const TEMPLATES = { humanoid, quadruped, bird, segmented };
 
+// ---------- standard base poses ----------
+// Canonical direction of a bone in the chosen base pose (null = keep the detected one).
+function canonicalDir(type, pose, key, ctx) {
+  const up = [0, 1, 0], down = [0, -1, 0], fwd = ctx.forward, L = [1, 0, 0], R = [-1, 0, 0];
+  const side = key.endsWith('L') ? L : key.endsWith('R') ? R : null;
+  if (type === 'humanoid') {
+    if (/^(hips|spine\d*|chest|neck|head)$/.test(key)) return up;
+    if (/^shoulder/.test(key)) return side;
+    if (/^(upperArm|forearm|hand)/.test(key)) return pose === 'apose' ? v3.norm(v3.add(side, [0, -0.7, 0])) : side;
+    if (/^(thigh|shin)/.test(key)) return down;
+    if (/^foot/.test(key)) return fwd;
+    return null;
+  }
+  if (type === 'quadruped') {
+    if (key === 'root') return fwd;
+    if (key === 'neck') return v3.norm(v3.add(fwd, [0, 0.8, 0]));
+    if (key === 'head') return fwd;
+    if (key === 'tail') return v3.norm(v3.add(v3.scale(fwd, -1), [0, -0.3, 0]));
+    if (/^(upper|lower)/.test(key)) return down;
+    if (/^foot/.test(key)) return fwd;
+    return null;
+  }
+  if (type === 'bird') {
+    if (key === 'root') return v3.norm(v3.add(fwd, [0, 0.4, 0]));
+    if (key === 'head') return up;
+    if (/^wing/.test(key)) return side;
+    if (/^leg/.test(key)) return down;
+    return null;
+  }
+  if (type === 'segmented') return ctx.axisDir;
+  return null;
+}
+// Re-pose the proposal into a standard base pose: bone heads chain from their parents
+// (attachment offsets rotate with the parent), directions become canonical, lengths are
+// kept, and every bone records the rigid transform (detected → standard) that
+// applyRig later applies to its objects so the model follows the rig.
+export function reposeProposal(proposal, pose) {
+  const type = proposal.type;
+  if (!pose || pose === 'detected' || !proposal.bones.length) { for (const b of proposal.bones) b.repose = null; proposal.pose = 'detected'; return proposal; }
+  const bones = proposal.bones;
+  const byKey = new Map(bones.map((b) => [b.key, b]));
+  const detected = new Map(bones.map((b) => [b.key, { head: b.head.slice(), tail: b.tail.slice(), dir: v3.norm(v3.sub(b.tail, b.head)), len: v3.dist(b.head, b.tail) }]));
+  // forward: quadruped/bird body axis from the root bone, humanoid feet (toe) direction, else -Z
+  let forward = [0, 0, -1];
+  const rootLike = byKey.get('root') || byKey.get('hips');
+  if (type === 'quadruped' || type === 'bird') { const d = detected.get(rootLike?.key); if (d) { const h = [d.dir[0], 0, d.dir[2]]; if (v3.len(h) > 1e-6) forward = v3.norm(h); } }
+  else if (type === 'humanoid') { const f = detected.get('footL') || detected.get('footR'); if (f) { const h = [f.dir[0], 0, f.dir[2]]; if (v3.len(h) > 1e-6) forward = v3.norm(h); } }
+  const axisDir = detected.get(bones[0].key)?.dir || [1, 0, 0];
+  const ctx = { forward, axisDir };
+  const standard = new Map();
+  const rot = new Map(); // key → R (detected dir → standard dir), applied to attached objects
+  const done = new Set();
+  const place = (b) => {
+    if (done.has(b.key)) return;
+    const D = detected.get(b.key);
+    let head, parentR = [0, 0, 0, 1];
+    if (b.parentKey && byKey.has(b.parentKey)) {
+      const pb = byKey.get(b.parentKey); place(pb);
+      const PS = standard.get(pb.key), PD = detected.get(pb.key);
+      parentR = rot.get(pb.key);
+      head = v3.add(PS.tail, quat.rotate(parentR, v3.sub(D.head, PD.tail)));
+    } else head = D.head.slice();
+    const canon = canonicalDir(type, pose, b.key, ctx);
+    const dir = canon ? v3.norm(canon) : v3.norm(quat.rotate(parentR, D.dir));
+    const R = quat.fromUnitVectors(D.dir, dir);
+    standard.set(b.key, { head, tail: v3.add(head, v3.scale(dir, D.len)) });
+    rot.set(b.key, R);
+    done.add(b.key);
+  };
+  for (const b of bones) place(b);
+  for (const b of bones) {
+    const S = standard.get(b.key), D = detected.get(b.key);
+    b.detected = { head: D.head, tail: D.tail };
+    b.head = S.head; b.tail = S.tail;
+    b.repose = { R: rot.get(b.key), from: D.head, to: S.head };
+  }
+  proposal.pose = pose;
+  return proposal;
+}
+
 // ---------- proposal ----------
-export function proposeRig(project, { objectIds = null, type = 'auto', ik = false } = {}) {
+export function proposeRig(project, { objectIds = null, type = 'auto', ik = false, pose = null } = {}) {
   const feats = objectFeatures(project, objectIds).filter((f) => !f.parentBone || objectIds);
   if (!feats.length) return { type: 'segmented', detected: 'segmented', confidence: 0, bones: [], unassigned: [], notes: ['noObjects'], ik: [], feats: [], existingBones: project.nodes.filter((n) => n.type === 'bone').length };
   const cls = classify(feats);
@@ -282,18 +367,20 @@ export function proposeRig(project, { objectIds = null, type = 'auto', ik = fals
   const res = tpl(feats, B);
   // drop bones that collapsed to zero length, fix parents
   const keys = new Set(res.bones.map((b) => b.key));
-  const bones = res.bones.filter((b) => v3.dist(b.head, b.tail) > 1e-4).map((b) => ({ ...b, parentKey: b.parentKey && keys.has(b.parentKey) ? b.parentKey : null }));
+  const claimed = new Set();
+  const bones = res.bones.filter((b) => v3.dist(b.head, b.tail) > 1e-4).map((b) => ({ ...b, parentKey: b.parentKey && keys.has(b.parentKey) ? b.parentKey : null, objects: b.objects.filter((id) => !claimed.has(id) && claimed.add(id)) }));
   const assigned = new Set(bones.flatMap((b) => b.objects));
   const unassigned = [...new Set([...res.unassigned, ...feats.map((f) => f.id).filter((id) => !assigned.has(id))])];
   const ikList = ik ? res.ik.filter((k) => bones.some((b) => b.key === k.boneKey)) : [];
   const existingBones = project.nodes.filter((n) => n.type === 'bone').length;
-  return { type: chosen, detected: cls.type, confidence: type === 'auto' ? cls.confidence : 0.95, scores: cls.scores, bones, unassigned, notes: res.notes, ik: ikList, feats, existingBones };
+  const proposal = { type: chosen, detected: cls.type, confidence: type === 'auto' ? cls.confidence : 0.95, scores: cls.scores, bones, unassigned, notes: res.notes, ik: ikList, feats, existingBones };
+  return reposeProposal(proposal, pose || DEFAULT_POSE[chosen] || 'detected');
 }
 
 // Apply a (possibly user-edited) proposal to the project: creates bones (world
 // head → tail orientation, Y along the bone), parents objects preserving their
 // world transforms, and optionally adds IK targets / poles. Returns created ids.
-export function applyRig(project, proposal, { createNode, createConstraint, reparent }) {
+export function applyRig(project, proposal, { createNode, createConstraint, reparent, setWorldTransform = null }) {
   const created = { bones: [], targets: [], poles: [], constraints: [] };
   const byKey = new Map();
   const world = new Map();
@@ -320,6 +407,20 @@ export function applyRig(project, proposal, { createNode, createConstraint, repa
     world.set(bone.id, { pos: b.head.slice(), rot });
     created.bones.push(bone.id);
     for (const oid of b.objects) reparent(project, oid, bone.id);
+  }
+  // base pose: move each bone's objects with the rigid transform detected → standard
+  if (setWorldTransform) {
+    for (const b of ordered) {
+      if (!b.repose || !b.objects.length) continue;
+      const { R, from, to } = b.repose;
+      const wt = worldTransforms(project, null);
+      for (const oid of b.objects) {
+        const o = getNode(project, oid), w = wt.get(oid);
+        if (!o || !w) continue;
+        const nw = { pos: v3.add(to, quat.rotate(R, v3.sub(w.pos, from))), rot: quat.norm(quat.mul(R, w.rot)) };
+        setWorldTransform(project, o, nw, worldTransforms(project, null));
+      }
+    }
   }
   for (const k of proposal.ik || []) {
     const boneId = byKey.get(k.boneKey);

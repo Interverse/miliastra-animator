@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "มีเพียงหมายเหตุ",
   "export.levels": "✕ ขัดขวางการส่งออก · ⚠ อาจไม่แม่นยำ · ℹ หมายเหตุ",
   "export.download": "ส่งออก .gia แบบแอนิเมชัน",
+
+  "limit.title": "ขีดจำกัดจุดเส้นทาง",
+
+  "limit.message": "เส้นทางนี้มีจุดเคลื่อนที่มากกว่าค่าสูงสุดที่ปลอดภัย {max} จุด ขีดจำกัด {game} จุดในเกมยังไม่น่าเชื่อถือ ตัวแก้ไขนี้จึงจำกัดเส้นทางที่ส่งออกไว้ที่ {max} จุด",
+
+  "limit.colAnimation": "แอนิเมชัน",
+
+  "limit.colObject": "วัตถุ / เส้นทาง",
+
+  "limit.colPoints": "จุด",
+
+  "limit.colStatus": "สถานะ",
+
+  "limit.over": "เกินขีดจำกัด",
+
+  "limit.choices": "บีบอัดอัตโนมัติจะลบจุดที่ซ้ำซ้อน (อยู่ในแนวเดียวกัน ใกล้กันมาก ตัวอย่างระหว่างกลางจากการเบก) โดยคงรูปร่าง จุดเริ่ม/จุดจบ การเลี้ยว การเปลี่ยนความสูง จังหวะเวลา การเปลี่ยนความเร็วและทิศทาง ยกเลิกจะกลับสู่ตัวแก้ไขโดยไม่เปลี่ยนโปรเจกต์หรือบันทึกไฟล์",
+
+  "limit.compress": "บีบอัดอัตโนมัติ",
+
+  "limit.cancelExport": "ยกเลิกการส่งออก",
+
+  "limit.previewTitle": "ตัวอย่างการบีบอัด",
+
+  "limit.previewOk": "เส้นทางที่ได้รับผลกระทบทั้งหมดอยู่ใน {max} จุดแล้ว วิวพอร์ตแสดงเส้นทางเดิมเป็นสีเทาและเส้นทางที่บีบอัดเป็นสีอำพัน",
+
+  "limit.previewFail": "การบีบอัดอัตโนมัติไม่สามารถลดทุกเส้นทางเหลือ {max} จุดโดยไม่เปลี่ยนการเคลื่อนไหวอย่างเห็นได้ชัด ไม่มีการส่งออก โปรดลดความซับซ้อนของแอนิเมชัน (ลดคีย์ ลดความแม่นยำ หรือแบ่ง) แล้วลองใหม่",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "ค่าเบี่ยงเบนสูงสุด {pos} ซม. / {rot}°",
+
+  "limit.errorTooBig": "ค่าเบี่ยงเบนมากเกินไป: {pos} ซม. / {rot}°",
+
+  "limit.notReached": "ไม่สามารถถึงขีดจำกัด",
+
+  "limit.previewHint": "เส้นทางที่บีบอัดใช้กับการส่งออกครั้งนี้เท่านั้น โปรเจกต์ยังคงแอนิเมชันเดิม",
+
+  "limit.remember": "บีบอัดแอนิเมชันเหล่านี้อัตโนมัติในการส่งออกครั้งต่อไปด้วย (การตั้งค่าโปรเจกต์ เลิกทำได้)",
+
+  "tip.limit.remember": "เปิด \"บีบอัดอัตโนมัติ\" สำหรับช่องส่งออกที่ได้รับผลกระทบ แอนิเมชันที่แก้ไขได้ไม่เปลี่ยน",
+
+  "limit.useCompressed": "ใช้เส้นทางที่บีบอัดและส่งออก",
+
+  "export.pathPoints": "จุดเส้นทาง: สูงสุด {n} จาก {max} ต่อวัตถุ (วัตถุเคลื่อนที่ {objs} ชิ้น)",
+
+  "export.pathPointsCompressed": "บีบอัดอัตโนมัติจาก {from}",
+
+  "export.pathPointsOver": "เกินขีดจำกัด {max} จุด: การส่งออกจะเสนอการบีบอัดอัตโนมัติ",
+
+  "export.autoCompress": "บีบอัดอัตโนมัติเป็น {max} จุดเมื่อส่งออก",
+
+  "tip.export.autoCompress": "บีบอัดเส้นทางของแอนิเมชันนี้ให้อยู่ในขีดจำกัดของ Miliastra ทุกครั้งที่ส่งออก (แอนิเมชันที่แก้ไขได้ไม่เปลี่ยน)",
+
+  "export.autoCompressFailed": "{n} เส้นทางไม่สามารถบีบอัดอัตโนมัติได้อย่างปลอดภัย การส่งออกจะหยุดและอธิบาย",
+
+  "export.limitSummary": "{n} เส้นทางเกินขีดจำกัด {max} จุด การส่งออกจะเสนอการบีบอัดอัตโนมัติหรือยกเลิก",
+
+  "toast.exportPathLimit": "หยุดการส่งออก: {n} เส้นทางเกินขีดจำกัด {max} จุด",
+
+  "hist.exportCompress": "บีบอัดอัตโนมัติเมื่อส่งออก",
+
+  "hist.simplifyPath": "ลดความซับซ้อนของเส้นทาง",
+
+  "path.simplify": "ลดความซับซ้อนของเส้นทาง…",
+
+  "tip.path.simplify": "ลบจุดซ้ำซ้อนภายในค่าความคลาดเคลื่อน (แสดงจำนวนสด)",
+
+  "path.simplifyIntro": "ลบจุดที่เมื่อไม่มีแล้วเส้นทางเลื่อนน้อยกว่าค่าความคลาดเคลื่อน จุดเริ่ม จุดจบ และมุมจะถูกคงไว้",
+
+  "path.simplifyTolerance": "ค่าความคลาดเคลื่อน",
+
+  "path.simplifyResult": "{before} → {after} จุด (ค่าเบี่ยงเบนสูงสุด {err} ซม.)",
+
+  "path.simplifyApply": "ลดความซับซ้อน",
   "export.report": "การส่งออกล่าสุด",
   "export.reportParts": "วัตถุที่มีแอนิเมชัน",
   "export.reportDevices": "อุปกรณ์เคลื่อนที่",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "คีย์ตำแหน่ง",
   "props.keyRot": "คีย์การหมุน",
   "props.reset": "รีเซ็ต",
+
+  "scale.button": "สเกลโมเดลทั้งหมด…",
+
+  "tip.scale.button": "ปรับขนาดโมเดลทั้งหมด (วัตถุ ริก ระยะแอนิเมชัน) รอบจุดหมุนและเบกขนาดใหม่",
+
+  "scale.title": "สเกลโมเดลทั้งหมด",
+
+  "scale.explain": "ทั้งชุดถูกสเกลอย่างสม่ำเสมอรอบจุดหมุนของโมเดล: ระยะระหว่างชิ้นส่วน ตำแหน่งและความยาวกระดูก เป้าหมายและโพล IK เรขาคณิตแสดงผล คีย์การเลื่อน รูทโมชัน และเส้นทาง การหมุนและเวลาไม่เปลี่ยน ขนาดใหม่กลายเป็นโมเดลที่แก้ไขได้ — ไม่มีอะไรถูกใช้ซ้ำสองครั้ง",
+
+  "scale.presets": "ค่าตั้งล่วงหน้า",
+
+  "scale.factorLabel": "ตัวคูณสเกล (×)",
+
+  "scale.percent": "เปอร์เซ็นต์ (%)",
+
+  "scale.factor": "ตัวคูณ",
+
+  "scale.extent": "ขนาดโมเดล",
+
+  "scale.largest": "สเกลวัตถุที่ใหญ่ที่สุด",
+
+  "scale.max": "สูงสุด {max}",
+
+  "scale.overWarning": "{n} วัตถุจะเกินสเกลสูงสุดของ Miliastra ที่ {max} ยังสเกลโมเดลได้ แต่จะส่งออกไม่ได้จนกว่าจะอยู่ในขีดจำกัด",
+
+  "scale.axis": "แกน {axis}",
+
+  "scale.more": "… และอีก {n}",
+
+  "scale.overHint": "เลือกตัวคูณที่เล็กกว่า หรือสเกลต่อไปแล้วลดภายหลัง (เลิกทำจะคืนขนาดเดิมอย่างแม่นยำ)",
+
+  "scale.bakeNote": "เลิกทำได้ในหนึ่งขั้น ผลลัพธ์ถูกบันทึกกับโปรเจกต์เป็นขนาดปกติ",
+
+  "scale.apply": "สเกลโมเดล",
+
+  "scale.applyAnyway": "ใช้ต่อไป",
+
+  "scale.noop": "ตัวคูณ 1× ไม่เปลี่ยนอะไร",
+
+  "scale.applied": "สเกลโมเดล {f}× แล้ว ริก แอนิเมชัน และเส้นทางถูกปรับขนาดตาม",
+
+  "scale.appliedOver": "สเกลโมเดล {f}× แล้ว {n} วัตถุเกินสเกลสูงสุด {max}: การส่งออกถูกบล็อกจนกว่าจะลดลง",
+
+  "hist.scaleModel": "สเกลโมเดลทั้งหมด",
+
+  "val.objectScale": "วัตถุ {name} ({guid}) — สเกล {axis}: {value} เกินสเกลวัตถุสูงสุดของ Miliastra ที่ {max}",
+
+  "toast.exportObjectScale": "หยุดการส่งออก: {n} วัตถุเกินสเกลสูงสุด {max} ({names})",
+
+  "orient.section": "ทิศทางและสเกลของโมเดล",
+
+  "orient.intro": "หากโมเดลหันไปผิดทาง (เช่น +X แทน +Z) ให้หมุนทั้งชุด — วัตถุ กระดูก IK แอนิเมชัน — เป็นหนึ่งเดียวและทำให้เป็นท่าพักใหม่",
+
+  "orient.button": "ปรับทิศทางโมเดล…",
+
+  "tip.orient.button": "หมุนโมเดลทั้งหมดรอบจุดหมุนและตรึงผลลัพธ์ลงในฐานท่าพัก",
+
+  "orient.title": "ปรับทิศทางโมเดล",
+
+  "orient.explain": "โมเดลทั้งหมด (วัตถุและของตกแต่ง กระดูก เป้าหมายและโพล IK ข้อจำกัด เส้นทาง และทุกแอนิเมชัน) หมุนไปพร้อมกันรอบจุดหมุนของโมเดล ไม่มีสิ่งใดเคลื่อนที่สัมพัทธ์กับสิ่งอื่น",
+
+  "orient.detected": "ตรวจพบจากริก: ขณะนี้โมเดลหันไปทาง {fwd}",
+
+  "orient.notDetected": "ไม่พบริกมนุษย์เพื่อตรวจทิศทางปัจจุบัน เลือกด้านล่างหรือใช้การหมุนกำหนดเอง",
+
+  "orient.current": "ขณะนี้โมเดลหันไปทาง",
+
+  "orient.target": "ควรหันไปทาง",
+
+  "orient.dir.pZ": "+Z (ด้านหน้าของตัวแก้ไข / glTF / FBX)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "หมุนเร็วรอบแกน Y",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "กำหนดเอง X/Y/Z°",
+
+  "tip.orient.custom": "การหมุนใดๆ เป็นองศา Y เป็นการแก้ไขทั่วไปสำหรับโมเดลที่หันข้าง",
+
+  "orient.preview": "ดูตัวอย่างในวิวพอร์ต",
+
+  "orient.result": "การหมุน X {x}°, Y {y}°, Z {z}° → โมเดลจะหันไปทาง {fwd}",
+
+  "orient.freezeNote": "การหมุนถูกตรึงลงในฐานท่าพัก: กระดูกรากคงค่าการหมุนไว้ (ปกติเป็น 0) แอนิเมชันถูกปรับฐานให้เล่นเหมือนเดิมในทิศทางใหม่ และการส่งออกใช้เพียงครั้งเดียว",
+
+  "orient.apply": "ปรับทิศทางโมเดล",
+
+  "orient.noop": "ไม่มีการหมุนให้ใช้",
+
+  "orient.applied": "หมุนโมเดล Y {deg}° แล้ว ตอนนี้หันไปทาง {fwd} ทิศทางใหม่คือท่าพัก",
+
+  "orient.mismatchTitle": "ทิศทางด้านหน้าไม่ตรงกัน",
+
+  "orient.mismatch": "โครงกระดูกที่นำเข้าหันไปทาง {src} แต่โมเดลของคุณหันไปทาง {model} (ต่างกัน {deg}° รอบแกน Y) การรีทาร์เก็ตบนโมเดลที่หันข้างจะบิดกระดูกทุกชิ้นและส่งรูทโมชันไปผิดทาง",
+
+  "orient.mismatchHint": "\"ปรับทิศทางโมเดล\" หมุนโมเดลทั้งหมด (พร้อมริกและแอนิเมชัน) ให้หันเหมือนโครงกระดูกที่นำเข้าและตรึงเป็นท่าพักใหม่ ทำภายหลังได้จาก ริก → ทิศทางของโมเดล การดำเนินการต่อจะคงโมเดลไว้ตามเดิม",
+
+  "orient.continueAnyway": "ดำเนินการต่อโดยไม่ปรับทิศทาง",
+
+  "orient.reorientNow": "ปรับทิศทางโมเดล (Y {deg}°)",
+
+  "hist.reorientModel": "ปรับทิศทางโมเดล",
+
+  "clip.rootMotion": "รูทโมชัน (เคลื่อน {node})",
+
+  "tip.clip.rootMotion": "เปิด: แอนิเมชันเคลื่อนที่ในฉากและการเคลื่อนที่ถูกส่งออก ปิด: คลิปเดิมเล่นอยู่กับที่ คีย์การเคลื่อนที่ยังคงอยู่",
+
+  "clip.rootOn": "รูทโมชัน",
+
+  "clip.rootOff": "อยู่กับที่",
+
+  "clip.rootMotionOnHint": "รูทโมชันเปิด: ตัวละครเคลื่อนที่ในฉากและการเคลื่อนไหวถูกเบกลงในเส้นทางที่ส่งออก",
+
+  "clip.rootMotionOffHint": "รูทโมชันปิด: การเคลื่อนที่แนวนอนถูกละเว้นในการดูตัวอย่างและส่งออก (แนวตั้งยังคงอยู่) คีย์ไม่ถูกแก้ไข",
+
+  "hist.rootMotionOn": "รูทโมชันเปิด",
+
+  "hist.rootMotionOff": "รูทโมชันปิด",
+
+  "props.freeze": "ตรึง",
+
+  "props.freezeRot": "ตรึงการหมุน",
+
+  "props.freezePos": "ตรึงตำแหน่ง",
+
+  "props.freezeBoth": "ตรึงตำแหน่งและการหมุน",
+
+  "props.unfreeze": "ยกเลิกตรึง (คืนค่าท้องถิ่น)",
+
+  "tip.props.freeze": "คงกระดูกไว้ที่เดิมและทำให้การแปลงปัจจุบันเป็นท่าพักใหม่: ค่าท้องถิ่นกลายเป็น 0 ลูกหลาน วัตถุ IK และคีย์เดิมไม่เปลี่ยนแปลงทางสายตา",
+
+  "props.frozenInfo": "ฐานที่ตรึง: การหมุน {rot}° ตำแหน่ง {pos} ค่าท้องถิ่นสัมพัทธ์กับฐานนี้ รีเซ็ตจะกลับมาที่นี่",
+
+  "hist.freeze": "ตรึงการแปลง",
+
+  "hist.freezeRot": "ตรึงการหมุน",
+
+  "hist.freezePos": "ตรึงตำแหน่ง",
+
+  "hist.unfreeze": "ยกเลิกตรึงการแปลง",
+
+  "toast.freezeIK": "กระดูกนี้อยู่ในสายโซ่ IK: สายโซ่ถูกแก้ใหม่จากฐานพักใหม่และแสดงท่าเดิม",
+
+  "toast.freezeRebased": "ปรับฐานคีย์เฟรม {n} รายการเข้ากับฐานพักใหม่แล้ว แอนิเมชันไม่เปลี่ยนแปลงทางสายตา",
   "tip.props.keyPos": "แทรกคีย์เฟรมตำแหน่ง ณ เวลาปัจจุบัน",
   "tip.props.keyRot": "แทรกคีย์เฟรมการหมุน ณ เวลาปัจจุบัน",
   "tip.props.reset": "รีเซ็ตเป็นทรานส์ฟอร์มจากไฟล์ (วัตถุ) หรือค่าเริ่มต้น",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "ขั้นสแนปการหมุน (°)",
   "view.frameSelected": "จัดมุมมองที่เลือก",
   "view.frameAll": "จัดมุมมองทั้งหมด",
+
+  "view.validate": "ตรวจสอบสถานะวิวพอร์ต",
+
+  "toast.viewportOk": "วิวพอร์ตตรงกับโปรเจกต์: {n} เอนทิตี, {s} วัตถุในฉาก",
+
+  "toast.viewportIssues": "วิวพอร์ตไม่ซิงค์: {n} ปัญหา ({kinds}) — ดูคอนโซล",
   "tip.view.frameSelected": "จัดมุมมองให้อยู่กลางรายการที่เลือก ({k})",
   "tip.view.frameAll": "จัดให้ทุกอย่างอยู่ในมุมมอง ({k})",
   "view.views": "มุมมอง",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "กลับทิศการหมุนแนวตั้ง",
   "tip.display.reverseOrbit": "มีผลเฉพาะการหมุนด้วยการลากในวิวพอร์ต การเลื่อน การซูม และกิซโมนำทางไม่เปลี่ยน",
   "rotmode.normal": "ลูกตามไป",
-  "rotmode.preserve": "คงลูกไว้",
-  "tip.rotmode": "โหมดการหมุน ลูกตามไป: รายการลูกสืบทอดการหมุน คงลูกไว้: ปรับทิศกระดูก/วัตถุโดยที่รายการลูกทั้งหมดอยู่กับที่เป๊ะ (การแก้ไขท่าพัก/ริก คีย์เฟรมจะถูกปรับฐานใหม่เพื่อคงแอนิเมชัน)",
-  "props.rotModeHint": "เปิดคงลูกไว้อยู่: การแก้ไขการหมุนจะปรับทิศแกนของรายการนี้ ลูกอยู่กับที่ และคีย์เฟรมถูกปรับฐานใหม่แทนการบันทึกคีย์",
-  "hist.reorient": "ปรับทิศ (คงลูกไว้)",
+  "rotmode.preserve": "คงการแปลงโลกของลูก",
+  "tip.rotmode": "ย้ายหรือหมุนกระดูกนี้โดยให้ลูกหลานทั้งหมดอยู่กับที่ในพื้นที่โลก ลูกตาม: ลูกหลานย้ายและหมุนตาม คง: การแก้ริก/ท่าพัก — คำนวณการแปลงเฉพาะที่ของลูกหลานใหม่ ปรับฐานคีย์เฟรม (แอนิเมชันไม่เปลี่ยน) และไม่สร้างคีย์",
+  "props.rotModeHint": "เปิดคงการแปลงโลกของลูกอยู่: การแก้ตำแหน่งและการหมุนจะย้ายการแปลงท่าพักของรายการนี้ ลูกหลานอยู่กับที่และคีย์เฟรมถูกปรับฐานแทนการสร้างคีย์",
+  "hist.reorient": "แปลง (คงลูกไว้)",
   "toast.reorientRebased": "ปรับทิศแล้ว: ปรับฐานคีย์เฟรม {n} รายการใน {m} คลิป เพื่อให้แอนิเมชันที่เห็นไม่เปลี่ยน",
   "toast.reorientIK": "กระดูกนี้เป็นส่วนหนึ่งของโซ่ IK ผล IK จะคำนวณใหม่จากทิศทางท่าพักใหม่",
+
+  "toast.reorientInexact": "การหมุนของ {names} มีแอนิเมชัน การย้ายจึงคงลูกหลานไว้ได้แม่นยำเฉพาะเฟรมปัจจุบัน เลิกทำหากไม่ต้องการ",
+
+  "props.rotModeMoveWarn": "การหมุนของรายการนี้มีแอนิเมชัน: การย้ายคงลูกหลานไว้ได้เฉพาะเฟรมปัจจุบัน (การหมุนยังแม่นยำ)",
   "project.name": "โปรเจกต์",
   "project.state": "สถานะ",
   "project.untitled": "โปรเจกต์ไม่มีชื่อ",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "นำเข้าโมเดลก่อน",
   "autorig.noBones": "ไม่สามารถเสนอกระดูกสำหรับเลย์เอาต์นี้",
   "hist.autoRig": "ริกอัตโนมัติ",
+  "autorig.basePose": "ท่าพื้นฐาน",
+  "autorig.pose.tpose": "ท่า T",
+  "autorig.pose.apose": "ท่า A",
+  "autorig.pose.standing": "ยืน (กลาง)",
+  "autorig.pose.spread": "กางปีก",
+  "autorig.pose.straight": "โซ่ตรง",
+  "autorig.pose.detected": "คงท่าที่นำเข้า",
+  "autorig.poseInfo": "ริกจะถูกสร้างในท่า {pose} ชิ้นส่วนโมเดลจะย้ายตามกระดูกไปยังท่านั้น (เลิกทำได้ เรขาคณิตไม่เปลี่ยน)",
+  "autorig.poseKeep": "ริกใช้ท่าที่นำเข้าตามเดิม",
+  "retarget.button": "นำเข้าแอนิเมชัน…",
+  "tip.retarget.button": "นำเข้าแอนิเมชัน FBX / BVH / glTF / GLB / VRM / DAE และรีทาร์เก็ตไปยังริกนี้",
+  "retarget.title": "นำเข้าแอนิเมชัน (รีทาร์เก็ต)",
+  "retarget.needRig": "เพิ่มกระดูกก่อน (ริกอัตโนมัติหรือเพิ่มกระดูก): แอนิเมชันที่นำเข้าจะรีทาร์เก็ตไปยังริก",
+  "retarget.parsing": "กำลังแยกวิเคราะห์ {name}…",
+  "retarget.intro": "เฉพาะแอนิเมชัน: เมชในไฟล์จะถูกละเว้น จับคู่กระดูกต้นทางกับริกของคุณ ดูตัวอย่าง แล้วใช้เป็นคลิปปกติ (เลิกทำขั้นเดียว)",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "คลิป",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "ตัวเลือก",
+  "retarget.mapping": "การจับคู่กระดูก (เป้าหมาย ← ต้นทาง)",
+  "retarget.preview": "ดูตัวอย่าง",
+  "retarget.rootMotion": "การเคลื่อนที่ราก",
+  "retarget.root.inPlace": "ปิด — เล่นอยู่กับที่ (นำเข้าการเคลื่อนที่ เปิดได้ต่อคลิป)",
+  "retarget.root.keep": "เปิด — ตัวละครเคลื่อนที่ (ปรับตามส่วนสูง)",
+  "retarget.root.none": "ไม่นำเข้าการเคลื่อนที่ของราก",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "จับคู่อัตโนมัติ",
+  "retarget.clearMap": "ล้าง",
+  "retarget.savePreset": "บันทึกพรีเซ็ต",
+  "retarget.loadPreset": "โหลดพรีเซ็ต",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "ดูตัวอย่าง",
+  "retarget.stop": "หยุดดูตัวอย่าง",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "ใช้",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "นำเข้าแอนิเมชัน",
 };

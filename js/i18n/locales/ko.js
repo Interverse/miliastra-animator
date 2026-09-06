@@ -126,6 +126,80 @@ export default {
   "export.validationInfo": "참고 사항만 있습니다.",
   "export.levels": "✕ 내보내기 차단 · ⚠ 부정확할 수 있음 · ℹ 참고",
   "export.download": "애니메이션 .gia 내보내기",
+
+  "limit.title": "경로 이동 포인트 제한",
+
+  "limit.message": "이 경로에는 안전 최대치인 {max}개를 초과하는 이동 포인트가 있습니다. 게임 내 {game} 포인트 제한은 현재 신뢰할 수 없으므로 이 편집기는 내보내는 경로를 {max} 포인트로 제한합니다.",
+
+  "limit.colAnimation": "애니메이션",
+
+  "limit.colObject": "객체 / 경로",
+
+  "limit.colPoints": "포인트",
+
+  "limit.colStatus": "상태",
+
+  "limit.over": "제한 초과",
+
+  "limit.choices": "자동 압축은 형태, 시작/끝, 회전, 높이 변화, 타이밍, 속도 변화, 방향 변화를 유지하면서 중복 포인트(공선, 거의 중복, 베이크 중간 샘플)를 제거합니다. 취소하면 프로젝트를 변경하거나 파일을 저장하지 않고 편집기로 돌아갑니다.",
+
+  "limit.compress": "자동 압축",
+
+  "limit.cancelExport": "내보내기 취소",
+
+  "limit.previewTitle": "압축 미리보기",
+
+  "limit.previewOk": "영향받은 모든 경로가 이제 {max}개 포인트 안에 들어갑니다. 뷰포트에 원본 경로는 회색, 압축 경로는 황색으로 표시됩니다.",
+
+  "limit.previewFail": "자동 압축으로 동작을 눈에 띄게 바꾸지 않고 모든 경로를 {max}개 포인트로 줄일 수 없었습니다. 아무것도 내보내지 않았습니다. 애니메이션을 단순화(키 줄이기, 정밀도 낮추기, 분할)한 뒤 다시 시도하세요.",
+
+  "limit.arrow": "{before} → {after}",
+
+  "limit.errorOk": "최대 편차 {pos} cm / {rot}°",
+
+  "limit.errorTooBig": "편차가 너무 큼: {pos} cm / {rot}°",
+
+  "limit.notReached": "제한에 도달할 수 없음",
+
+  "limit.previewHint": "압축된 경로는 이번 내보내기에만 사용되며 프로젝트는 원본 애니메이션을 유지합니다.",
+
+  "limit.remember": "앞으로의 내보내기에서도 이 애니메이션을 자동 압축 (프로젝트 설정, 실행 취소 가능)",
+
+  "tip.limit.remember": "영향받은 내보내기 슬롯에 \"자동 압축\"을 켭니다. 편집 가능한 애니메이션은 변경되지 않습니다.",
+
+  "limit.useCompressed": "압축된 경로 사용 및 내보내기",
+
+  "export.pathPoints": "경로 포인트: 객체당 최대 {n} / {max} (움직이는 객체 {objs}개)",
+
+  "export.pathPointsCompressed": "{from}에서 자동 압축됨",
+
+  "export.pathPointsOver": "{max} 포인트 제한을 초과합니다. 내보내기 시 자동 압축을 제안합니다.",
+
+  "export.autoCompress": "내보내기 시 {max} 포인트로 자동 압축",
+
+  "tip.export.autoCompress": "내보낼 때마다 이 애니메이션의 경로를 Miliastra 제한까지 압축합니다 (편집 가능한 애니메이션은 그대로)",
+
+  "export.autoCompressFailed": "{n}개 경로는 안전하게 자동 압축할 수 없습니다. 내보내기가 중단되고 설명이 표시됩니다.",
+
+  "export.limitSummary": "{n}개 경로가 {max} 포인트 제한을 초과합니다. 내보내기 시 자동 압축 또는 취소를 선택할 수 있습니다.",
+
+  "toast.exportPathLimit": "내보내기 중단: {n}개 경로가 {max} 포인트 제한을 초과합니다",
+
+  "hist.exportCompress": "내보내기 자동 압축",
+
+  "hist.simplifyPath": "경로 단순화",
+
+  "path.simplify": "경로 단순화…",
+
+  "tip.path.simplify": "허용 오차 내의 중복 포인트 제거 (실시간 개수)",
+
+  "path.simplifyIntro": "없어도 경로가 허용 오차보다 적게 이동하는 포인트를 제거합니다. 시작, 끝, 모서리는 유지됩니다.",
+
+  "path.simplifyTolerance": "허용 오차",
+
+  "path.simplifyResult": "{before} → {after} 포인트 (최대 편차 {err} cm)",
+
+  "path.simplifyApply": "단순화",
   "export.report": "마지막 내보내기",
   "export.reportParts": "애니메이션 오브젝트",
   "export.reportDevices": "모션 장치",
@@ -174,6 +248,156 @@ export default {
   "props.keyPos": "위치 키",
   "props.keyRot": "회전 키",
   "props.reset": "초기화",
+
+  "scale.button": "전체 모델 스케일…",
+
+  "tip.scale.button": "전체 모델(객체, 리그, 애니메이션 거리)을 피벗 기준으로 크기 조절하고 새 크기를 베이크합니다",
+
+  "scale.title": "전체 모델 스케일",
+
+  "scale.explain": "전체 조립이 모델 피벗을 중심으로 균일하게 스케일됩니다: 부품 간 거리, 본 위치와 길이, IK 타깃과 폴, 표시 지오메트리, 이동 키, 루트 모션, 경로. 회전과 타이밍은 변하지 않습니다. 새 크기가 편집 가능한 모델이 되며 두 번 적용될 것은 남지 않습니다.",
+
+  "scale.presets": "프리셋",
+
+  "scale.factorLabel": "스케일 계수 (×)",
+
+  "scale.percent": "백분율 (%)",
+
+  "scale.factor": "계수",
+
+  "scale.extent": "모델 크기",
+
+  "scale.largest": "가장 큰 객체 스케일",
+
+  "scale.max": "최대 {max}",
+
+  "scale.overWarning": "{n}개 객체가 Miliastra 최대 스케일 {max}을(를) 초과합니다. 그래도 스케일할 수 있지만 제한 이내가 될 때까지 내보낼 수 없습니다.",
+
+  "scale.axis": "축 {axis}",
+
+  "scale.more": "… 외 {n}개",
+
+  "scale.overHint": "더 작은 계수를 선택하거나 그대로 적용한 뒤 나중에 줄이세요(실행 취소로 원래 크기가 정확히 복원됩니다).",
+
+  "scale.bakeNote": "실행 취소 한 단계입니다. 결과는 프로젝트의 정상 크기로 저장됩니다.",
+
+  "scale.apply": "모델 스케일",
+
+  "scale.applyAnyway": "그래도 적용",
+
+  "scale.noop": "계수 1×는 아무것도 바꾸지 않습니다.",
+
+  "scale.applied": "모델을 {f}× 스케일했습니다. 리그, 애니메이션, 경로도 함께 크기 조절되었습니다.",
+
+  "scale.appliedOver": "모델을 {f}× 스케일했습니다. {n}개 객체가 최대 스케일 {max}을(를) 초과합니다: 줄일 때까지 내보내기가 차단됩니다.",
+
+  "hist.scaleModel": "전체 모델 스케일",
+
+  "val.objectScale": "객체 {name} ({guid}) — 스케일 {axis}: {value}이(가) Miliastra 최대 객체 스케일 {max}을(를) 초과합니다.",
+
+  "toast.exportObjectScale": "내보내기 중단: {n}개 객체가 최대 스케일 {max}을(를) 초과합니다 ({names})",
+
+  "orient.section": "모델 방향 및 스케일",
+
+  "orient.intro": "모델이 잘못된 방향(예: +Z 대신 +X)을 향하면 객체, 본, IK, 애니메이션을 포함한 전체 조립을 하나로 회전하고 그것을 새 레스트로 만듭니다.",
+
+  "orient.button": "모델 방향 재설정…",
+
+  "tip.orient.button": "전체 모델을 피벗 기준으로 회전하고 결과를 레스트 기준에 고정합니다",
+
+  "orient.title": "모델 방향 재설정",
+
+  "orient.explain": "전체 모델(객체와 장식, 본, IK 타깃과 폴, 제약, 경로, 모든 애니메이션)이 모델 피벗을 중심으로 함께 회전합니다. 서로에 대한 상대 위치는 변하지 않습니다.",
+
+  "orient.detected": "리그에서 감지됨: 모델은 현재 {fwd}를 향합니다.",
+
+  "orient.notDetected": "현재 정면 방향을 감지할 인간형 리그가 없습니다. 아래에서 선택하거나 사용자 지정 회전을 사용하세요.",
+
+  "orient.current": "현재 향하는 방향",
+
+  "orient.target": "향해야 할 방향",
+
+  "orient.dir.pZ": "+Z (편집기 / glTF / FBX 정면)",
+
+  "orient.dir.mZ": "−Z",
+
+  "orient.dir.pX": "+X",
+
+  "orient.dir.mX": "−X",
+
+  "orient.quick": "Y축 빠른 회전",
+
+  "orient.turn": "Y {deg}°",
+
+  "orient.custom": "사용자 지정 X/Y/Z°",
+
+  "tip.orient.custom": "임의의 회전(도). 옆을 향한 모델은 보통 Y로 수정합니다",
+
+  "orient.preview": "뷰포트에서 미리보기",
+
+  "orient.result": "회전 X {x}°, Y {y}°, Z {z}° → 모델은 {fwd}를 향하게 됩니다.",
+
+  "orient.freezeNote": "회전은 레스트 기준에 고정됩니다: 루트 본은 회전 값을 유지하고(보통 0), 애니메이션은 새 방향에서 동일하게 재생되도록 재기준화되며, 내보내기는 정확히 한 번만 적용합니다.",
+
+  "orient.apply": "모델 방향 재설정",
+
+  "orient.noop": "적용할 회전이 없습니다.",
+
+  "orient.applied": "모델을 Y {deg}° 회전했습니다. 이제 {fwd}를 향합니다. 새 방향이 레스트 포즈입니다.",
+
+  "orient.mismatchTitle": "정면 방향 불일치",
+
+  "orient.mismatch": "가져온 스켈레톤은 {src}를 향하지만 모델은 {model}을 향합니다(Y축 {deg}° 차이). 옆을 향한 모델에 리타깃하면 모든 본이 뒤틀리고 루트 모션이 잘못된 방향으로 갑니다.",
+
+  "orient.mismatchHint": "\"모델 방향 재설정\"은 전체 모델(리그와 애니메이션 포함)을 가져온 스켈레톤과 같은 방향으로 돌리고 새 레스트로 고정합니다. 나중에 리깅 → 모델 방향에서도 할 수 있습니다. 계속하면 모델은 그대로 유지됩니다.",
+
+  "orient.continueAnyway": "재설정 없이 계속",
+
+  "orient.reorientNow": "모델 방향 재설정 (Y {deg}°)",
+
+  "hist.reorientModel": "모델 방향 재설정",
+
+  "clip.rootMotion": "루트 모션({node} 이동)",
+
+  "tip.clip.rootMotion": "켜짐: 애니메이션이 씬을 이동하고 이동이 내보내집니다. 꺼짐: 같은 클립이 제자리에서 재생되며 이동 키는 유지됩니다.",
+
+  "clip.rootOn": "루트 모션",
+
+  "clip.rootOff": "제자리",
+
+  "clip.rootMotionOnHint": "루트 모션 켜짐: 캐릭터가 씬을 이동하고 그 이동이 내보내기 경로에 베이크됩니다.",
+
+  "clip.rootMotionOffHint": "루트 모션 꺼짐: 미리보기와 내보내기에서 수평 이동을 무시합니다(수직 이동 유지). 키는 수정되지 않습니다.",
+
+  "hist.rootMotionOn": "루트 모션 켜짐",
+
+  "hist.rootMotionOff": "루트 모션 꺼짐",
+
+  "props.freeze": "고정",
+
+  "props.freezeRot": "회전 고정",
+
+  "props.freezePos": "위치 고정",
+
+  "props.freezeBoth": "위치 및 회전 고정",
+
+  "props.unfreeze": "고정 해제(로컬 값 복원)",
+
+  "tip.props.freeze": "본을 제자리에 둔 채 현재 변환을 새 레스트로 만듭니다: 로컬 값이 0이 됩니다. 자손, 객체, IK, 기존 키는 시각적으로 변하지 않습니다.",
+
+  "props.frozenInfo": "고정 기준: 회전 {rot}°, 위치 {pos}. 로컬 값은 이에 상대적이며 재설정은 여기로 돌아갑니다.",
+
+  "hist.freeze": "변환 고정",
+
+  "hist.freezeRot": "회전 고정",
+
+  "hist.freezePos": "위치 고정",
+
+  "hist.unfreeze": "변환 고정 해제",
+
+  "toast.freezeIK": "이 본은 IK 체인에 속합니다: 체인은 새 레스트 기준에서 다시 풀려 같은 포즈를 보여줍니다.",
+
+  "toast.freezeRebased": "키프레임 {n}개가 새 레스트 기준으로 재기준화되었습니다. 애니메이션은 시각적으로 동일합니다.",
   "tip.props.keyPos": "현재 시간에 위치 키프레임 삽입",
   "tip.props.keyRot": "현재 시간에 회전 키프레임 삽입",
   "tip.props.reset": "파일의 변환(오브젝트) 또는 기본값으로 초기화",
@@ -308,6 +532,12 @@ export default {
   "tip.snapRot": "회전 스냅 단계(°)",
   "view.frameSelected": "선택 항목 맞추기",
   "view.frameAll": "전체 맞추기",
+
+  "view.validate": "뷰포트 상태 검증",
+
+  "toast.viewportOk": "뷰포트가 프로젝트와 일치합니다: 엔티티 {n}개, 씬 객체 {s}개",
+
+  "toast.viewportIssues": "뷰포트 동기화 오류: 문제 {n}건({kinds}) — 콘솔 확인",
   "tip.view.frameSelected": "선택 항목을 화면 중앙에({k})",
   "tip.view.frameAll": "모든 것을 화면에 맞춤({k})",
   "view.views": "뷰",
@@ -482,12 +712,16 @@ export default {
   "display.reverseOrbitY": "수직 회전 반전",
   "tip.display.reverseOrbit": "뷰포트에서 드래그로 회전할 때만 적용됩니다. 이동, 확대/축소, 탐색 기즈모는 바뀌지 않습니다",
   "rotmode.normal": "자식 따라감",
-  "rotmode.preserve": "자식 유지",
-  "tip.rotmode": "회전 모드. 자식 따라감: 하위 항목이 회전을 상속합니다. 자식 유지: 본/오브젝트의 방향을 바꾸되 모든 하위 항목은 제자리에 유지됩니다(레스트/리그 편집; 애니메이션 보존을 위해 키프레임이 재기준화됩니다).",
-  "props.rotModeHint": "자식 유지가 켜져 있습니다: 회전 편집은 이 항목의 축 방향을 바꿉니다. 자식은 제자리에 있고 키프레임은 새로 기록되지 않고 재기준화됩니다.",
-  "hist.reorient": "방향 재설정(자식 유지)",
+  "rotmode.preserve": "자식 월드 변환 유지",
+  "tip.rotmode": "이 본을 이동하거나 회전해도 모든 자손은 월드 공간에서 제자리에 유지됩니다. 자식 따라감: 자손이 함께 이동·회전합니다. 유지: 리그/레스트 편집 — 자손의 로컬 변환을 다시 계산하고 키프레임을 재기준화하며(애니메이션 불변) 키를 만들지 않습니다.",
+  "props.rotModeHint": "자식 월드 변환 유지가 켜져 있습니다: 위치와 회전 편집은 이 항목의 레스트 변환을 움직입니다. 자손은 제자리에 있고 키프레임은 키 대신 재기준화됩니다.",
+  "hist.reorient": "변환(자식 유지)",
   "toast.reorientRebased": "방향 재설정: 클립 {m}개의 키프레임 {n}개를 재기준화하여 보이는 애니메이션은 그대로입니다",
   "toast.reorientIK": "이 본은 IK 체인의 일부입니다. IK 결과는 새 레스트 방향으로 다시 계산됩니다",
+
+  "toast.reorientInexact": "{names}의 회전이 애니메이션되어 있어 이동 시 자손은 현재 프레임에서만 정확히 고정됩니다. 원하지 않으면 실행 취소하세요.",
+
+  "props.rotModeMoveWarn": "이 항목의 회전이 애니메이션되어 있습니다: 이동은 현재 프레임에서만 자손을 고정합니다(회전은 정확합니다).",
   "project.name": "프로젝트",
   "project.state": "상태",
   "project.untitled": "제목 없는 프로젝트",
@@ -682,4 +916,106 @@ export default {
   "autorig.noObjects": "먼저 모델을 가져오세요",
   "autorig.noBones": "이 배치에는 본을 제안할 수 없습니다",
   "hist.autoRig": "자동 리그",
+  "autorig.basePose": "기본 포즈",
+  "autorig.pose.tpose": "T 포즈",
+  "autorig.pose.apose": "A 포즈",
+  "autorig.pose.standing": "서기(중립)",
+  "autorig.pose.spread": "날개 펼침",
+  "autorig.pose.straight": "직선 체인",
+  "autorig.pose.detected": "가져온 포즈 유지",
+  "autorig.poseInfo": "리그는 {pose}로 생성되며 모델 부품은 본과 함께 그 포즈로 이동합니다(실행 취소 가능, 지오메트리 불변).",
+  "autorig.poseKeep": "리그는 가져온 포즈 그대로 생성됩니다.",
+  "retarget.button": "애니메이션 가져오기…",
+  "tip.retarget.button": "FBX / BVH / glTF / GLB / VRM / DAE 애니메이션을 가져와 이 리그에 리타겟",
+  "retarget.title": "애니메이션 가져오기(리타겟)",
+  "retarget.needRig": "먼저 본을 추가하세요(자동 리그 또는 본 추가). 가져온 애니메이션은 리그에 리타겟됩니다.",
+  "retarget.parsing": "{name} 분석 중…",
+  "retarget.intro": "애니메이션만: 파일의 메시는 무시됩니다. 소스 본을 리그에 매핑하고 미리 본 뒤 일반 클립으로 적용합니다(실행 취소 한 단계).",
+  "retarget.file": "File",
+  "retarget.sourceRig": "Source skeleton",
+  "retarget.sourceRigInfo": "{bones} bones · height {height} m ({unit})",
+  "retarget.target": "Target",
+  "retarget.targetInfo": "{name} · {bones} bones",
+  "retarget.meshIgnored": "{n} mesh(es) in the file are ignored (reference only).",
+  "retarget.vrmMap": "VRM humanoid bone map found and used for the automatic mapping.",
+  "retarget.presetLoaded": "Mapping preset \"{name}\" loaded for this skeleton.",
+  "retarget.clips": "클립",
+  "retarget.clipInfo": "{dur} s · {keys} keys · {fps} fps",
+  "retarget.options": "옵션",
+  "retarget.mapping": "본 매핑(대상 ← 소스)",
+  "retarget.preview": "미리보기",
+  "retarget.rootMotion": "루트 모션",
+  "retarget.root.inPlace": "꺼짐 — 제자리 재생 (이동은 가져오며 클립별로 켤 수 있음)",
+  "retarget.root.keep": "켜짐 — 캐릭터가 이동 (키에 맞춰 스케일)",
+  "retarget.root.none": "루트 이동을 가져오지 않음",
+  "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
+  "retarget.rootNone": "No horizontal root motion in this clip.",
+  "retarget.scaleToHeight": "Scale root motion to character height",
+  "tip.retarget.scaleToHeight": "Translations are scaled by target height / source height so proportions differ freely",
+  "retarget.tolerance": "Key reduction",
+  "retarget.tol.low": "Coarse (1.5°)",
+  "retarget.tol.normal": "Normal (0.5°)",
+  "retarget.tol.high": "Fine (0.2°)",
+  "retarget.tol.none": "Keep every sample",
+  "retarget.ik": "Also drive IK targets (bake FK feet/hands onto the targets)",
+  "tip.retarget.ik": "Keys the existing IK targets at the retargeted tip positions",
+  "retarget.loop": "Looping clip",
+  "retarget.role": "Role: {role}",
+  "retarget.autoMap": "자동 매핑",
+  "retarget.clearMap": "지우기",
+  "retarget.savePreset": "프리셋 저장",
+  "retarget.loadPreset": "프리셋 불러오기",
+  "retarget.presetName": "Preset name",
+  "retarget.presetSaved": "Mapping preset saved",
+  "retarget.noPresets": "No saved mapping presets yet",
+  "retarget.ok": "Mapping looks complete.",
+  "retarget.play": "미리보기",
+  "retarget.stop": "미리보기 중지",
+  "retarget.previewHint": "Preview builds a temporary clip and plays it in the viewport; nothing is saved until you apply.",
+  "retarget.previewStats": "Preview ready: {keys} keys (reduced from {from}) on {bones} bones",
+  "retarget.apply": "적용",
+  "retarget.applied": "Imported {n} clip(s), {keys} keys (one undo step)",
+  "retarget.err.unityMuscle": "This Unity .anim is a Humanoid (muscle-space) clip; its curves are not bone transforms and cannot be converted without Unity's avatar. Export it as FBX / glTF instead.",
+  "retarget.err.unsupported": "Unsupported animation format \"{ext}\". Supported: {formats}.",
+  "retarget.err.browserOnly": "Collada (.dae) can only be parsed in the browser.",
+  "retarget.err.parse": "Could not read the animation: {err}",
+  "retarget.err.noClips": "The file contains no animation clips.",
+  "retarget.err.noBones": "The file contains no skeleton / animated nodes.",
+  "retarget.err.noClipSelected": "Select at least one clip.",
+  "retarget.warn.duplicate": "Source bone \"{source}\" drives several targets: {targets}",
+  "retarget.warn.unmappedMajor": "Not mapped: {roles}",
+  "retarget.warn.targetMissing": "Your rig has no bone for: {roles}",
+  "retarget.warn.noHips": "Your rig has no hips/root bone.",
+  "retarget.warn.noHipsMapped": "No hips bone mapped: root motion cannot be transferred.",
+  "retarget.warn.highRate": "Very dense sampling ({rate} Hz): keys will be reduced.",
+  "retarget.warn.scale": "Unusual source height ({h} m): check the unit scale.",
+  "retarget.warn.nan": "{n} invalid (NaN) samples were skipped.",
+  "retarget.warn.noTargetBones": "The project has no bones.",
+  "retarget.warn.noSourceBones": "No source bones.",
+  "retarget.warn.emptyClip": "The clip has no animated tracks.",
+  "retarget.warn.nothingMapped": "Nothing is mapped yet.",
+  "retarget.warn.hierarchy": "Source limbs are not under the mapped hips: check the hierarchy mapping.",
+  "retarget.warn.externalBuffers": "This .gltf references external .bin files that cannot be loaded from a single file; use .glb.",
+  "role.hips": "Hips",
+  "role.spine": "Spine",
+  "role.chest": "Chest",
+  "role.neck": "Neck",
+  "role.head": "Head",
+  "role.shoulder.L": "Shoulder L",
+  "role.upperArm.L": "Upper arm L",
+  "role.forearm.L": "Forearm L",
+  "role.hand.L": "Hand L",
+  "role.shoulder.R": "Shoulder R",
+  "role.upperArm.R": "Upper arm R",
+  "role.forearm.R": "Forearm R",
+  "role.hand.R": "Hand R",
+  "role.thigh.L": "Thigh L",
+  "role.shin.L": "Shin L",
+  "role.foot.L": "Foot L",
+  "role.toe.L": "Toe L",
+  "role.thigh.R": "Thigh R",
+  "role.shin.R": "Shin R",
+  "role.foot.R": "Foot R",
+  "role.toe.R": "Toe R",
+  "hist.retarget": "애니메이션 가져오기",
 };

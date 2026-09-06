@@ -48,15 +48,31 @@ export function bakeClip(project, clip, { precision = 'normal', objectIds = null
       const span = t1 - t0;
       const n = Math.max(4, Math.min(48, Math.ceil(span / 0.02)));
       let worst = 0, worstT = (t0 + t1) / 2;
-      for (let i = 1; i < n; i++) {
-        const u = i / n, t = t0 + span * u;
+      // uniform samples plus every authored key time inside the span: a long clip with
+      // keys closer together than the uniform spacing must not alias into "linear"
+      const ts = [];
+      for (let i = 1; i < n; i++) ts.push(t0 + span * (i / n));
+      for (const kt of times) if (kt > t0 + 1e-6 && kt < t1 - 1e-6) ts.push(kt);
+      const errs = [];
+      // a single Motion Device segment cannot say which way it turns once the end
+      // rotations are ~180° apart, and a full revolution would collapse to nothing:
+      // segments that turn more than 150° are always split
+      const bigTurn = quat.angle(a.rot, b.rot) > 150 * Math.PI / 180;
+      for (const t of ts) {
+        const u = (t - t0) / span;
         const w = P(t);
         const ep = v3.dist(w.pos, v3.lerp(a.pos, b.pos, u)) / tol.pos;
         const er = quat.angle(w.rot, quat.slerp(a.rot, b.rot, u)) / rotTol;
         const e = Math.max(ep, er);
+        errs.push([t, e]);
         if (e > worst) { worst = e; worstT = t; }
       }
-      if (worst <= 1 || span < 2 * MIN_SEGMENT || depth > 14) {
+      // among the authored keys that are (nearly) as bad as the worst sample, split at the
+      // one closest to the middle: a path with many equally sharp corners then subdivides
+      // in balanced halves instead of one corner at a time (which would exhaust the depth)
+      if (worst > 1) { const mid = (t0 + t1) / 2; for (const [t, e] of errs) if (e >= Math.max(1, worst * 0.9) && times.includes(t) && (!times.includes(worstT) || Math.abs(t - mid) < Math.abs(worstT - mid))) worstT = t; }
+      if (bigTurn && worst <= 1) { worst = 2; worstT = (t0 + t1) / 2; }
+      if (worst <= 1 || span < 2 * MIN_SEGMENT || depth > 24) {
         if (worst > 1) warnings.push({ key: 'bake.tooFine', nodeId: obj.id, t: t0 });
         segments.push({ t0, t1, pos: b.pos, rot: b.rot });
         return;
