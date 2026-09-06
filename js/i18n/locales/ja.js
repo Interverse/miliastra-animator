@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● 自動キー",
   "status.navHint": "中ドラッグで回転 · 右ドラッグでパン · ホイールでズーム",
   "viewport.empty": ".gia ファイルを読み込んで始めましょう",
-  "viewport.emptyHint": "このウィンドウ内にドロップするか、プロジェクトパネルを使ってください。",
+  "viewport.emptyLead": "Miliastra のモデルを読み込み、リグを作り、アニメーションを付けて書き出します。",
+
+  "viewport.emptyHint": "このウィンドウのどこにでもドロップするか、ファイル → .gia モデルを読み込む を使ってください。",
   "hint.channelKeyed": "このチャンネルはアニメーション済みです：I（またはキーボタン）を押すと変更がアニメーションに残ります。",
 
   "tl.clip": "クリップ",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "アニメーションを読み込み…",
   "tip.retarget.button": "FBX / BVH / glTF / GLB / VRM / DAE アニメーションを読み込み、このリグにリターゲット",
   "retarget.title": "アニメーションを読み込み（リターゲット）",
-  "retarget.needRig": "先にボーンを追加してください（オートリグまたはボーン追加）。読み込んだアニメーションはリグにリターゲットされます。",
+  "retarget.needRig": "先にボーンを追加してください：読み込んだアニメーションはリグにリターゲットされます。",
   "retarget.parsing": "{name} を解析中…",
   "retarget.intro": "アニメーションのみ：ファイル内のメッシュは無視されます。ソースボーンをリグに対応付け、プレビューしてから通常のクリップとして適用します（1 ステップで元に戻せます）。",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "コマンド検索",
   "sc.app.settings": "設定",
   "guide.next.import": "次：.gia モデルを読み込みます。",
-  "guide.next.rig": "次：ボーンを追加します（オートリグ または ボーンを追加）。オブジェクトを直接アニメーションさせることもできます。",
+  "guide.next.rig": "次：複数のオブジェクトをまとめて動かすならボーンを追加します。オブジェクトを直接アニメーションさせることもできます。",
   "guide.next.animate": "次：アニメーションを追加します。",
   "guide.next.keys": "次：オートキーをオンにして何かを移動・回転し、キーフレームを記録します。",
   "guide.next.export": "次：書き出しチェックリストを確認して .gia をダウンロードします。",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "リグの前にモデルを読み込んでください。",
   "rig.bonesHead": "ボーン",
   "rig.noBonesTitle": "このモデルにはまだボーンがありません。",
-  "rig.noBonesHint": "ボーンは編集補助です。ボーンは付属するオブジェクトを動かし、ゲームはその結果のオブジェクトの動きを受け取ります。オートリグはモデルのパーツから骨格を提案します。",
+  "rig.noBonesHint": "ボーンは編集補助です。ボーンは付属するオブジェクトを動かし、ゲームはその結果のオブジェクトの動きを受け取ります。ボーンを追加し、アウトライナーでオブジェクトをその上にドラッグしてください。",
   "rig.ikHead": "IK とコントロール",
   "rig.noConstraintsNoBones": "IK にはボーンが必要です。先にボーンを追加し、チェーン末端のボーンで「IK を追加」してください。",
   "rig.utilities": "リグ ユーティリティ",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "向きとスケールを確認",
   "tut.model.b": "モデルは +Z を向き、最終的な大きさになっている必要があります。ここでモデル全体の向き変更やスケールを行います。オブジェクト・ボーン・アニメーションが一緒に動きます。",
   "palette.unavailable": "現在は使用できません",
+  // ---- compact project header ----
+  "project.details": "プロジェクトの詳細",
+  "project.modified": "更新日時",
+  "project.actions": "プロジェクト操作",
 };

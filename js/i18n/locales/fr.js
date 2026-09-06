@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Glisser central : orbite · Glisser droit : panoramique · Molette : zoom",
   "viewport.empty": "Importez un fichier .gia pour commencer",
-  "viewport.emptyHint": "Déposez-le n'importe où dans cette fenêtre ou utilisez le panneau Projet.",
+  "viewport.emptyLead": "Chargez un modèle Miliastra, puis riggez, animez et exportez-le.",
+
+  "viewport.emptyHint": "Déposez-le n'importe où dans cette fenêtre, ou utilisez Fichier → Importer un modèle .gia.",
   "hint.channelKeyed": "Ce canal est animé : appuyez sur I (ou sur les boutons de clé) pour conserver la modification dans l'animation.",
 
   "tl.clip": "Clip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Importer une animation…",
   "tip.retarget.button": "Importer une animation FBX / BVH / glTF / GLB / VRM / DAE et la retargeter sur ce rig",
   "retarget.title": "Importer une animation (retarget)",
-  "retarget.needRig": "Ajoutez d'abord des os (Auto-Rig ou Ajouter un os) : l'animation importée est retargetée sur le rig.",
+  "retarget.needRig": "Ajoutez d'abord des os : une animation importée est reciblée sur le rig.",
   "retarget.parsing": "Analyse de {name}…",
   "retarget.intro": "Animation seule : les maillages du fichier sont ignorés. Associez les os source à votre rig, prévisualisez, puis appliquez comme clips normaux (une étape d'annulation).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Recherche de commandes",
   "sc.app.settings": "Paramètres",
   "guide.next.import": "Ensuite : importez un modèle .gia.",
-  "guide.next.rig": "Ensuite : ajoutez des os (Auto-Rig ou Ajouter un os). Vous pouvez aussi animer les objets directement.",
+  "guide.next.rig": "Ensuite : ajoutez des os pour déplacer des groupes d'objets ensemble, ou animez les objets directement.",
   "guide.next.animate": "Ensuite : ajoutez une animation.",
   "guide.next.keys": "Ensuite : déplacez ou tournez un élément avec Auto Key actif pour enregistrer des clés.",
   "guide.next.export": "Ensuite : vérifiez la liste d'export et téléchargez le .gia.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Importez un modèle avant de faire le rig.",
   "rig.bonesHead": "Os",
   "rig.noBonesTitle": "Ce modèle n'a pas encore d'os.",
-  "rig.noBonesHint": "Les os sont une aide à l'édition : un os déplace les objets qui lui sont attachés et le jeu reçoit le mouvement d'objet résultant. Auto-Rig propose un squelette à partir des pièces du modèle.",
+  "rig.noBonesHint": "Les os sont une aide à l'édition : un os déplace les objets qui lui sont attachés et le jeu reçoit le mouvement d'objet résultant. Ajoutez un os, puis faites glisser des objets dessus dans l'Outliner.",
   "rig.ikHead": "IK et contrôles",
   "rig.noConstraintsNoBones": "L'IK a besoin d'os : ajoutez d'abord des os, puis « Ajouter IK » sur le dernier os d'une chaîne.",
   "rig.utilities": "Outils de rig",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Vérifier l'orientation et l'échelle",
   "tut.model.b": "Le modèle doit regarder vers +Z et avoir sa taille finale. Réorientez ou mettez à l'échelle tout le modèle ici — objets, os et animations bougent ensemble.",
   "palette.unavailable": "indisponible pour l’instant",
+  // ---- compact project header ----
+  "project.details": "Détails du projet",
+  "project.modified": "Modifié",
+  "project.actions": "Actions du projet",
 };

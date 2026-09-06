@@ -8,6 +8,7 @@ import { getNode, childrenOf } from '../scene/scene.js';
 import { displayOf, hasDisplayOffset, isPositionOnly } from './editor.js';
 import { hasPartEdits, PART_KINDS } from '../scene/display-parts.js';
 import { showAutoRigDialog } from './autorig-dialog.js';
+import { FEATURES } from './feature-flags.js';
 import { textPrompt } from './dialogs.js';
 import { activeClip } from '../anim/clips.js';
 import { quat, v3, normDeg } from '../core/math.js';
@@ -289,8 +290,8 @@ export function initRightPanels(editor, viewport) {
       body.append(empty(t('rig.noBonesTitle')));
       body.append(hint(t('rig.noBonesHint')));
       body.append(btnRow(
-        button(t('autorig.button'), () => showAutoRigDialog(editor), { cls: 'mini primary-mini', tip: t('tip.autorig') }),
-        button(t('add.bone'), () => editor.addBone(null), { tip: t('tip.add.bone') }),
+        FEATURES.autoRig ? button(t('autorig.button'), () => showAutoRigDialog(editor), { cls: 'mini primary-mini', tip: t('tip.autorig') }) : null,
+        button(t('add.bone'), () => editor.addBone(null), { cls: 'mini primary-mini', tip: t('tip.add.bone') }),
         button(t('add.bonesForSelected'), () => editor.addBonesForSelected(), { disabled: !editor.selectedNodes().some((n) => n.type === 'object'), tip: t('tip.add.bonesForSelected') }),
       ));
     } else if (!node) {
@@ -355,8 +356,8 @@ export function initRightPanels(editor, viewport) {
         ...(node.basis ? [{ sep: true }, { label: t('props.unfreeze'), action: () => editor.unfreezeTransform(node.id) }] : []),
       ]), { tip: t('tip.props.freeze') }),
     ));
-    if (bones.length) body.append(btnRow(button(t('autorig.button'), () => showAutoRigDialog(editor), { tip: t('tip.autorig') })));
-    body.append(advanced('rig-help', hint(t('autorig.intro')), hint(t('rig.help')), objs.length ? hint(t('rig.modelHint')) : null));
+    if (bones.length && FEATURES.autoRig) body.append(btnRow(button(t('autorig.button'), () => showAutoRigDialog(editor), { tip: t('tip.autorig') })));
+    body.append(advanced('rig-help', hint(t('rig.help')), objs.length ? hint(t('rig.modelHint')) : null));
   }
 
   // ---------- Model ----------
@@ -366,8 +367,12 @@ export function initRightPanels(editor, viewport) {
     const S = p.settings;
     const objs = p.nodes.filter((n) => n.type === 'object');
     if (!objs.length) {
-      body.append(empty(t('model.empty')));
-      body.append(btnRow(button(t('viewport.import'), () => editor.pickGiaFile?.(), { cls: 'mini primary-mini', tip: t('project.drop') })));
+      const drop = h('label', { class: 'filedrop' }, h('span', { text: t('project.drop') }), h('span', { class: 'hint', text: t('project.dropHint') }));
+      drop.addEventListener('click', () => editor.pickGiaFile?.());
+      drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+      drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+      drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) editor.readFile?.(f, { guarded: true }); });
+      body.append(drop);
       body.append(hint(t('model.emptyHint')));
       return;
     }

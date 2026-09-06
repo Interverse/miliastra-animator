@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Mitte ziehen: drehen · Rechts ziehen: schwenken · Rad: zoomen",
   "viewport.empty": "Importiere eine .gia-Datei, um zu beginnen",
-  "viewport.emptyHint": "Lege sie irgendwo in diesem Fenster ab oder nutze das Projekt-Panel.",
+  "viewport.emptyLead": "Lade ein Miliastra-Modell, dann riggen, animieren und exportieren.",
+
+  "viewport.emptyHint": "Ziehe sie irgendwo in dieses Fenster oder nutze Datei → .gia-Modell importieren.",
   "hint.channelKeyed": "Dieser Kanal ist animiert: Drücke I (oder die Key-Schaltflächen), um die Änderung in der Animation zu behalten.",
 
   "tl.clip": "Clip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Animation importieren…",
   "tip.retarget.button": "Eine FBX- / BVH- / glTF- / GLB- / VRM- / DAE-Animation importieren und auf dieses Rig übertragen",
   "retarget.title": "Animation importieren (Retargeting)",
-  "retarget.needRig": "Zuerst Knochen anlegen (Auto-Rig oder Knochen hinzufügen): importierte Animation wird auf das Rig übertragen.",
+  "retarget.needRig": "Füge zuerst Knochen hinzu: Eine importierte Animation wird auf das Rig übertragen.",
   "retarget.parsing": "{name} wird gelesen…",
   "retarget.intro": "Nur Animation: Meshes in der Datei werden ignoriert. Quellknochen dem Rig zuordnen, Vorschau, dann als normale Clips anwenden (ein Rückgängig-Schritt).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Befehlssuche",
   "sc.app.settings": "Einstellungen",
   "guide.next.import": "Als Nächstes: ein .gia-Modell importieren.",
-  "guide.next.rig": "Als Nächstes: Knochen hinzufügen (Auto-Rig oder Knochen hinzufügen). Objekte lassen sich auch direkt animieren.",
+  "guide.next.rig": "Als Nächstes: Knochen hinzufügen, um Objektgruppen gemeinsam zu bewegen, oder die Objekte direkt animieren.",
   "guide.next.animate": "Als Nächstes: eine Animation hinzufügen.",
   "guide.next.keys": "Als Nächstes: mit aktivem Auto-Key etwas verschieben oder drehen, um Keyframes aufzuzeichnen.",
   "guide.next.export": "Als Nächstes: Export-Checkliste prüfen und die .gia herunterladen.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Importiere vor dem Rigging ein Modell.",
   "rig.bonesHead": "Knochen",
   "rig.noBonesTitle": "Dieses Modell hat noch keine Knochen.",
-  "rig.noBonesHint": "Knochen sind eine Bearbeitungshilfe: Ein Knochen bewegt die angehängten Objekte, das Spiel erhält die resultierende Objektbewegung. Auto-Rig schlägt aus den Modellteilen ein Skelett vor.",
+  "rig.noBonesHint": "Knochen sind eine Bearbeitungshilfe: Ein Knochen bewegt die angehängten Objekte, das Spiel erhält die resultierende Objektbewegung. Füge einen Knochen hinzu und ziehe im Outliner Objekte darauf.",
   "rig.ikHead": "IK & Steuerungen",
   "rig.noConstraintsNoBones": "IK braucht Knochen: erst Knochen hinzufügen, dann „IK hinzufügen“ am letzten Knochen einer Kette.",
   "rig.utilities": "Rig-Werkzeuge",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Ausrichtung und Größe prüfen",
   "tut.model.b": "Das Modell sollte nach +Z schauen und seine endgültige Größe haben. Richte oder skaliere hier das ganze Modell — Objekte, Knochen und Animationen bewegen sich gemeinsam.",
   "palette.unavailable": "derzeit nicht verfügbar",
+  // ---- compact project header ----
+  "project.details": "Projektdetails",
+  "project.modified": "Geändert",
+  "project.actions": "Projektaktionen",
 };

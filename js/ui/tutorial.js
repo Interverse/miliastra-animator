@@ -5,7 +5,7 @@ import { t, onLangChange } from '../i18n/i18n.js';
 import { loadPrefs, updatePrefs } from '../core/persistence.js';
 
 const STEPS = [
-  { id: 'panel-project', key: 'tut.import', open: true, mode: 'model' },
+  { id: 'viewport', key: 'tut.import', mode: 'model' },
   { id: 'panel-model', key: 'tut.model', open: true, mode: 'model' },
   { id: 'panel-outliner', key: 'tut.bones', open: true, mode: 'rig' },
   { id: 'panel-rigging', key: 'tut.rigging', open: true, mode: 'rig' },

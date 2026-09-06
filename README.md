@@ -115,10 +115,33 @@ of the work; each shows only the panels that step needs, so the viewport keeps i
 
 | Workspace | Left rail | Right rail | Purpose |
 | --- | --- | --- | --- |
-| **Model** | Project (with the workflow guide), Outliner | Model, Properties | Import the `.gia`, check orientation & scale (Reorient / Scale entire model), scene settings (global offset, FPS), proxies. The timeline is hidden here. |
-| **Rig** | Project, Outliner | Rig, Properties | Bones → IK & controls (targets, poles, constraints) → Rig utilities (Preserve child world transforms, Freeze, Auto-Rig). |
-| **Animate** | Animations, Outliner, Project | Properties, Waypaths | Animations list with an *Import animation* subsection (retargeting), timeline, keyframes, root motion, paths. |
-| **Export** | Export (checklist), Project, Outliner | Properties | A checklist — model loaded, animations chosen (≤5), initial animation, path points ≤49, object scale ≤50, validation — where every item is clickable and jumps to the thing to fix, then the Export button. |
+| **Model** | Outliner | Model, Properties | Import the `.gia`, check orientation & scale (Reorient / Scale entire model), scene settings (global offset, FPS), proxies. The timeline is hidden here. |
+| **Rig** | Outliner | Rig, Properties | Bones → IK & controls (targets, poles, constraints) → Rig utilities (Preserve child world transforms, Freeze). |
+| **Animate** | Animations, Outliner | Properties, Waypaths | Animations list with an *Import animation* subsection (retargeting), timeline, keyframes, root motion, paths. |
+| **Export** | Export (checklist), Outliner | Properties | A checklist — model loaded, animations chosen (≤5), initial animation, path points ≤49, object scale ≤50, validation — where every item is clickable and jumps to the thing to fix, then the Export button. |
+
+Above the left rail, outside the scrolling panels, sits the **compact project header**
+(`js/ui/project-bar.js`) — the same in all four workspaces, so project-level context never
+moves when the workspace changes:
+
+```
+My Project                    ⋯
+character.gia · Unsaved changes
+▸ PROJECT DETAILS
+```
+
+- It answers only *which project is open* and *is it saved*. The name truncates with a tooltip
+  in narrow rails; the status never wraps or overlaps.
+- `⋯` opens the project actions (Save, Save as, Rename, All projects, New project); the same
+  actions are in the File menu and the top-bar 📁 button, so no workspace carries large
+  permanent project buttons. The top bar shows the save state as an icon only, to avoid saying
+  the same thing twice.
+- *Project details* is collapsed by default (state remembered) and holds metadata only: source
+  file, modified date, object / decoration / animation counts, storage note. No workflow
+  controls live inside it.
+- Below the header, a single line of beginner guidance names the next step and offers one
+  button. It is hidden before a model is imported (the viewport empty state already asks for
+  one) and after the first export.
 
 Other organising principles:
 
@@ -127,8 +150,8 @@ Other organising principles:
   length, children, IK constraints, *Advanced ▸* diagnostics), IK target / pole target (which
   constraint uses it, jump to the chain bone, IK on/off, world-locked), display part, or a hint
   when nothing is selected. *Advanced ▸* sections are collapsed by default and remember their state.
-- **Workflow guide.** The Project panel shows the four steps with done/current marks and the one
-  next action ("Next: add an animation" …); empty states in every panel say what to do next.
+- **Workflow guide.** One line under the project header names the next action ("Next: add an
+  animation" …); empty states in every panel say what to do next. See *Contextual hints* below.
 - **Menus.** File / Edit / View / Help in the top bar carry the global actions (new/open/save/import/
   export, undo/redo/keys/selection/parenting + the Add list, camera views/framing/checkable display
   toggles/performance mode/validate viewport, tutorial/controls/shortcuts/settings/about). Menus,
@@ -147,6 +170,38 @@ Other organising principles:
 - Everything is localized in all 15 languages (`tools/check-i18n.mjs` enforces key parity) and
   `tools/test-ui-shell.mjs` checks the workspace/panel matrix, shortcut labels and collisions, the
   command registry ↔ menu wiring and the new keys in every locale.
+
+## Contextual hints are derived, never remembered
+
+`js/ui/workflow.js` is the only place that decides what a project should do next. It reads the
+live project and returns one step:
+
+| Step | Condition | Hint |
+| --- | --- | --- |
+| `import` | no objects in the project | *Import a .gia file to begin* |
+| `rig` | model, no animations, no bones | add bones, or animate the objects directly |
+| `animate` | model and bones, no animations | add an animation |
+| `keys` | animations without keyframes | move something with Auto Key on |
+| `export` | keyframed animation, not exported yet | check the export checklist |
+| `done` | exported | nothing; the guidance stops |
+
+Both surfaces read that function and nothing else: the viewport empty state (title, one-line
+explanation, an **Import .gia…** button and the drop reminder) and the one-line next step under
+the project header. There is no stored `currentHint` string and no progress flag, so a hint can
+never describe a project that is no longer open — every render re-derives it. Undo, redo,
+deleting the model, adding or removing animations, retargeting, opening, recovering and
+importing all emit `change`, which re-renders both.
+
+The one piece of project progress that used to leak is `editor.lastReport` (set by an export).
+It is now cleared in `beginProjectSwitch()`, the single path taken by New, Open, Open Recent,
+Import .gia, Open project file, Duplicate and Recover, together with the transient status hint.
+So a new project starts at *Import a .gia* even if the previous one was exported, and the Export
+panel never shows the previous project's report. Global preferences (language, navigation,
+viewport, whether the tour was seen) are untouched by all of this.
+
+Tests: `node tools/test-hints.mjs` walks the regression list — launch, New Project, import,
+export-ready, export, New Project again, opening another incomplete project, undo/redo, deleting
+the model, session recovery, and four rounds of project switching with no leakage.
 
 ## Layout
 
@@ -209,7 +264,14 @@ The Display panel's brightness slider shades **display geometry only** (model de
 - **Progressive scene construction**: new objects are built within a 12 ms budget per frame with a *Building scene* hint; import stays responsive.
 - Regression test: `node tools/test-parts-plan.mjs` (grouping, unknown representation, LOD, performance mode, pick mapping on the Pantalone fixture).
 
-## Experimental Auto-Rig
+## Experimental Auto-Rig (currently hidden)
+
+> **Hidden from the UI.** `FEATURES.autoRig` in `js/ui/feature-flags.js` is `false`, so the
+> button in the Rig workspace, the command-palette entry and the beginner prompts that
+> suggested it are not shown. Nothing else changed: the implementation, the dialog and the
+> editor API stay in the build, projects rigged with Auto-Rig are ordinary bone hierarchies
+> that keep loading and editing normally, and `node tools/test-autorig.mjs` still covers it.
+> Setting the flag to `true` brings every entry point back.
 
 - Rigging panel, *Experimental Auto-Rig*. Auto-Rig analyses the model's parts and creates a suggested skeleton; you can edit the result before animating. It uses world-space bounds of every object's display parts, left/right symmetry pairs, the centre column, dimensions and name hints (names are a bonus, never required), classifies the layout as humanoid / quadruped / bird / segmented with a confidence, and asks you to pick the type when confidence is low.
 - The dialog previews the proposed bones in the viewport (green lines) and lists names, parents, assigned objects and per-bone confidence; untick bones to drop them, rename inline, optionally add leg / arm IK chains with pole targets. Objects it cannot assign confidently are listed and left alone. An existing rig is reported and never overwritten.

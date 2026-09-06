@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Seret tengah orbit · Seret kanan geser · Roda zoom",
   "viewport.empty": "Impor file .gia untuk memulai",
-  "viewport.emptyHint": "Jatuhkan di mana saja di jendela ini atau gunakan panel Proyek.",
+  "viewport.emptyLead": "Muat model Miliastra, lalu buat rig, animasikan, dan ekspor.",
+
+  "viewport.emptyHint": "Jatuhkan di mana saja pada jendela ini, atau gunakan Berkas → Impor model .gia.",
   "hint.channelKeyed": "Saluran ini dianimasikan: tekan I (atau tombol key) untuk menyimpan perubahan ke animasi.",
 
   "tl.clip": "Klip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Impor animasi…",
   "tip.retarget.button": "Impor animasi FBX / BVH / glTF / GLB / VRM / DAE dan retarget ke rig ini",
   "retarget.title": "Impor animasi (retarget)",
-  "retarget.needRig": "Tambahkan tulang dulu (Auto-Rig atau Tambah tulang): animasi impor diretarget ke rig.",
+  "retarget.needRig": "Tambah tulang dulu: animasi yang diimpor diretarget ke rig.",
   "retarget.parsing": "Mengurai {name}…",
   "retarget.intro": "Hanya animasi: mesh dalam file diabaikan. Petakan tulang sumber ke rig Anda, pratinjau, lalu terapkan sebagai klip biasa (satu langkah batal).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Pencarian perintah",
   "sc.app.settings": "Pengaturan",
   "guide.next.import": "Berikutnya: impor model .gia.",
-  "guide.next.rig": "Berikutnya: tambah tulang (Auto-Rig atau Tambah tulang). Objek juga bisa dianimasikan langsung.",
+  "guide.next.rig": "Berikutnya: tambah tulang untuk menggerakkan sekelompok objek sekaligus, atau animasikan objek secara langsung.",
   "guide.next.animate": "Berikutnya: tambah animasi.",
   "guide.next.keys": "Berikutnya: pindahkan atau putar sesuatu dengan Auto Key aktif untuk merekam keyframe.",
   "guide.next.export": "Berikutnya: periksa daftar ekspor dan unduh .gia.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Impor model sebelum membuat rig.",
   "rig.bonesHead": "Tulang",
   "rig.noBonesTitle": "Model ini belum punya tulang.",
-  "rig.noBonesHint": "Tulang adalah alat bantu edit: tulang menggerakkan objek yang terpasang padanya dan game menerima gerakan objek hasilnya. Auto-Rig mengusulkan kerangka dari bagian-bagian model.",
+  "rig.noBonesHint": "Tulang adalah alat bantu edit: tulang menggerakkan objek yang terpasang padanya dan game menerima gerakan objek hasilnya. Tambahkan tulang, lalu seret objek ke atasnya di Outliner.",
   "rig.ikHead": "IK & kontrol",
   "rig.noConstraintsNoBones": "IK butuh tulang: tambah tulang dulu, lalu Tambah IK pada tulang terakhir sebuah rantai.",
   "rig.utilities": "Utilitas rig",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Periksa orientasi dan skala",
   "tut.model.b": "Model harus menghadap +Z dan berukuran final. Reorientasi atau skalakan seluruh model di sini — objek, tulang, dan animasi bergerak bersama.",
   "palette.unavailable": "tidak tersedia sekarang",
+  // ---- compact project header ----
+  "project.details": "Detail proyek",
+  "project.modified": "Diubah",
+  "project.actions": "Tindakan proyek",
 };

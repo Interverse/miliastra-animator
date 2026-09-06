@@ -51,16 +51,18 @@ export function initProjects(editor) {
     ]);
   });
   const syncState = () => {
-    projBtn.textContent = '📁 ' + t('project.projects');
-    projBtn.title = t('tip.projects');
+    projBtn.textContent = '📁';
+    projBtn.title = `${t('project.projects')} · ${t('tip.projects')}`;
+    projBtn.setAttribute('aria-label', t('project.projects'));
     const name = editor.projectName || editor.defaultProjectName();
     const hasContent = editor.project.nodes.length || editor.project.clips.length;
     if (!hasContent && !editor.projectId) { state.textContent = ''; state.hidden = true; }
     else {
       state.hidden = false;
-      state.textContent = editor.dirty ? `● ${t('project.stateUnsaved')}` : `✓ ${t('project.stateSaved')}`;
+      state.textContent = editor.dirty ? '●' : '✓';
       state.classList.toggle('dirty', !!editor.dirty);
       state.title = `${name} · ${editor.dirty ? t('project.stateUnsaved') : t('project.stateSaved')} · ${t('tip.saveState', { k: primaryKeyLabel('file.save') })}`;
+      state.setAttribute('aria-label', editor.dirty ? t('project.stateUnsaved') : t('project.stateSaved'));
     }
     document.title = `${hasContent ? name + (editor.dirty ? ' *' : '') + ' · ' : ''}${t('app.title')}`;
   };

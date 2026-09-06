@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● 자동 키",
   "status.navHint": "가운데 드래그 회전 · 오른쪽 드래그 이동 · 휠 확대/축소",
   "viewport.empty": ".gia 파일을 가져와 시작하세요",
-  "viewport.emptyHint": "이 창 아무 곳에나 끌어다 놓거나 프로젝트 패널을 사용하세요.",
+  "viewport.emptyLead": "Miliastra 모델을 불러온 뒤 리그를 만들고 애니메이션을 붙여 내보내세요.",
+
+  "viewport.emptyHint": "이 창 아무 곳에나 놓거나 파일 → .gia 모델 가져오기를 사용하세요.",
   "hint.channelKeyed": "이 채널은 애니메이션됩니다: I(또는 키 버튼)를 눌러 변경 사항을 애니메이션에 남기세요.",
 
   "tl.clip": "클립",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "애니메이션 가져오기…",
   "tip.retarget.button": "FBX / BVH / glTF / GLB / VRM / DAE 애니메이션을 가져와 이 리그에 리타겟",
   "retarget.title": "애니메이션 가져오기(리타겟)",
-  "retarget.needRig": "먼저 본을 추가하세요(자동 리그 또는 본 추가). 가져온 애니메이션은 리그에 리타겟됩니다.",
+  "retarget.needRig": "먼저 본을 추가하세요: 가져온 애니메이션은 리그에 리타깃됩니다.",
   "retarget.parsing": "{name} 분석 중…",
   "retarget.intro": "애니메이션만: 파일의 메시는 무시됩니다. 소스 본을 리그에 매핑하고 미리 본 뒤 일반 클립으로 적용합니다(실행 취소 한 단계).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "명령 검색",
   "sc.app.settings": "설정",
   "guide.next.import": "다음: .gia 모델을 가져오세요.",
-  "guide.next.rig": "다음: 본을 추가하세요 (오토 리그 또는 본 추가). 오브젝트를 직접 애니메이션할 수도 있습니다.",
+  "guide.next.rig": "다음: 여러 오브젝트를 함께 움직이려면 본을 추가하세요. 오브젝트를 직접 애니메이션할 수도 있습니다.",
   "guide.next.animate": "다음: 애니메이션을 추가하세요.",
   "guide.next.keys": "다음: 오토 키를 켠 상태에서 무언가를 이동하거나 회전해 키프레임을 기록하세요.",
   "guide.next.export": "다음: 내보내기 체크리스트를 확인하고 .gia를 다운로드하세요.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "리깅 전에 모델을 가져오세요.",
   "rig.bonesHead": "본",
   "rig.noBonesTitle": "이 모델에는 아직 본이 없습니다.",
-  "rig.noBonesHint": "본은 편집 보조 도구입니다. 본은 연결된 오브젝트를 움직이고, 게임은 그 결과인 오브젝트 움직임을 받습니다. 오토 리그는 모델 파트에서 골격을 제안합니다.",
+  "rig.noBonesHint": "본은 편집 보조 도구입니다. 본은 연결된 오브젝트를 움직이고, 게임은 그 결과인 오브젝트 움직임을 받습니다. 본을 추가한 뒤 아웃라이너에서 오브젝트를 본 위로 끌어다 놓으세요.",
   "rig.ikHead": "IK 및 컨트롤",
   "rig.noConstraintsNoBones": "IK에는 본이 필요합니다. 먼저 본을 추가한 뒤 체인의 마지막 본에서 IK 추가를 누르세요.",
   "rig.utilities": "리그 유틸리티",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "방향과 크기 확인",
   "tut.model.b": "모델은 +Z를 향하고 최종 크기여야 합니다. 여기서 모델 전체의 방향을 바꾸거나 크기를 조절하세요. 오브젝트, 본, 애니메이션이 함께 움직입니다.",
   "palette.unavailable": "지금은 사용할 수 없음",
+  // ---- compact project header ----
+  "project.details": "프로젝트 세부 정보",
+  "project.modified": "수정됨",
+  "project.actions": "프로젝트 작업",
 };

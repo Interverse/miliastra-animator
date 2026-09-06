@@ -167,6 +167,7 @@ export class Editor {
   // Drops all session-only editing state (called whenever a different project is loaded).
   resetTransientState() {
     this.interaction = null;
+    this.hint = '';
     this._shownE = new Map();
     this.exportPreviewSlot = null;
     this.displayEdit = false;
@@ -323,6 +324,7 @@ export class Editor {
     this.projectId = rec.id || rec.projectId || null;
     this.projectName = rec.name || rec.projectName || '';
     this.createdAt = rec.createdAt || null;
+    this.lastSavedAt = rec.modifiedAt || null;
     this.importInfo = null;
     this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.playing = false;
     this.applyOutlinerState(rec.ui);
@@ -426,6 +428,10 @@ export class Editor {
   beginProjectSwitch() {
     this.cancelInteraction();
     this.playing = false;
+    // export progress belongs to the project that produced it: a new/opened project starts
+    // again at "not exported yet", so contextual hints and the Export panel's report cannot
+    // describe the previous project
+    this.lastReport = null;
     // every temporary preview ends with the project it belonged to
     this.rigPreview = null;
     this.exportPreviewSlot = null;
@@ -815,7 +821,7 @@ export class Editor {
   }
   async clearSaved() { await clearRecovery(); }
   projectFileJSON() {
-    const b64 = this.giaBytes ? btoa(String.fromCharCode(...this.giaBytes)) : null;
+    const b64 = this.giaBytes ? bytesToBase64(this.giaBytes) : null;
     return JSON.stringify({ app: 'miliastra-animator', version: 1, giaName: this.giaName, projectName: this.projectName, gia: b64, project: this.project, ui: this.outlinerState() });
   }
   openProjectFile(text) {
@@ -1550,6 +1556,14 @@ export function canonicalEuler(q, anchor = null) {
   const identity = quat.angle(q, [0, 0, 0, 1]) < 1e-7;
   if (identity && (!anchor || anchor.every((a) => Math.abs(a) < 1e-4))) return [0, 0, 0];
   return e;
+}
+
+// A .gia is megabytes: String.fromCharCode(...bytes) overflows the call stack, so encode in chunks.
+function bytesToBase64(u8) {
+  let s = '';
+  const CHUNK = 0x8000;
+  for (let i = 0; i < u8.length; i += CHUNK) s += String.fromCharCode(...u8.subarray(i, i + CHUNK));
+  return btoa(s);
 }
 
 export function downloadBytes(bytes, name, type = 'application/octet-stream') {

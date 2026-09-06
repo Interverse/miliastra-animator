@@ -1,4 +1,5 @@
-// Left rail: Project (with the workflow guide), Outliner, Animations, Export (checklist).
+// Left rail: Outliner, Animations, Export (checklist). Project-level context lives in the
+// compact header above this rail (js/ui/project-bar.js), not in a panel of its own.
 import { t, onLangChange } from '../i18n/i18n.js';
 import { h, row, numInput, textInput, selectInput, checkbox, button, btnRow, subhead, hint, empty, rerender, fmt } from './dom.js';
 import { textPrompt, confirmDialog, showMenu, toast, messageDialog } from './dialogs.js';
@@ -17,7 +18,6 @@ const ICONS = { object: '▣', bone: '⌇', proxy: '◇', target: '⊕', pole: '
 
 export function initLeftPanels(editor, viewport) {
   const bodies = {
-    project: document.querySelector('#panel-project .panel-body'),
     outliner: document.querySelector('#panel-outliner .panel-body'),
     clips: document.querySelector('#panel-clips .panel-body'),
     export: document.querySelector('#panel-export .panel-body'),
@@ -30,81 +30,18 @@ export function initLeftPanels(editor, viewport) {
   let exportPlan = null; // final path points per object/animation (rebuilt with the validation while the Export panel is open)
   let validationTimer = null;
 
-  // ---------- Workflow guide ----------
-  // Model → Rig → Animate → Export: where the project stands and the one next step
-  // a beginner should take. Clicking a step opens that workspace.
-  function workflowGuide() {
-    const p = editor.project;
-    const objs = p.nodes.filter((n) => n.type === 'object');
-    const bones = p.nodes.filter((n) => n.type === 'bone');
-    const keyed = p.clips.some((c) => Object.values(c.tracks).some((tr) => tr.pos.length || tr.rot.length));
-    const done = { model: objs.length > 0, rig: bones.length > 0, animate: keyed, export: !!editor.lastReport };
-    const steps = ['model', 'rig', 'animate', 'export'];
-    const wrap = h('div', { class: 'guide' });
-    const stepper = h('div', { class: 'guide-steps', role: 'tablist' });
-    steps.forEach((m, i) => {
-      const b = h('button', { class: 'guide-step' + (editor.mode === m ? ' current' : '') + (done[m] ? ' done' : ''), title: t('tip.mode.' + m), onclick: () => { editor.setMode(m); } },
-        h('span', { class: 'guide-num', text: done[m] ? '✓' : String(i + 1) }), h('span', { class: 'guide-label', text: t('mode.' + m) }));
-      stepper.append(b);
-    });
-    wrap.append(stepper);
-    const next = !objs.length ? 'import' : !p.clips.length ? (bones.length ? 'animate' : 'rig') : !keyed ? 'keys' : !editor.lastReport ? 'export' : 'done';
-    const nextMode = { import: 'model', rig: 'rig', animate: 'animate', keys: 'animate', export: 'export', done: null }[next];
-    const line = h('div', { class: 'guide-next' }, h('span', { text: t('guide.next.' + next) }));
-    if (nextMode && nextMode !== editor.mode) line.append(button(t('mode.' + nextMode) + ' →', () => editor.setMode(nextMode), { cls: 'mini' }));
-    else if (next === 'import') line.append(button(t('viewport.import'), () => editor.pickGiaFile?.(), { cls: 'mini primary-mini' }));
-    else if (next === 'animate') line.append(button(t('export.addAnimation'), () => editor.createClip(), { cls: 'mini primary-mini' }));
-    else if (next === 'export') line.append(button(t('export.download'), () => { editor.setMode('export'); document.getElementById('btn-export')?.focus(); }, { cls: 'mini' }));
-    wrap.append(line);
-    if (next === 'rig') wrap.append(hint(t('guide.optional')));
-    return wrap;
-  }
+  // ---------- project files ----------
+  // Hidden pickers used by the File menu, the command palette, the viewport empty state and the
+  // Model workspace. They live here for the whole session, not inside a panel that may be hidden.
+  const giaInput = h('input', { type: 'file', accept: '.gia', style: 'display:none' });
+  giaInput.addEventListener('change', () => { const f = giaInput.files[0]; if (f) readFile(f, { guarded: true }); giaInput.value = ''; });
+  const projInput = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
+  projInput.addEventListener('change', async () => { const f = projInput.files[0]; if (!f) return; try { editor.openProjectFile(await f.text()); toast(t('toast.projectOpened')); } catch { toast(t('toast.projectOpenFailed'), 'error'); } projInput.value = ''; });
+  document.body.append(giaInput, projInput);
+  editor.pickGiaFile = () => giaInput.click();
+  editor.pickProjectFile = () => projInput.click();
+  editor.exportProjectFile = () => downloadBytes(new TextEncoder().encode(editor.projectFileJSON()), (editor.projectName || editor.giaName || 'project').replace(/\.gia$/i, '') + '.animator.json', 'application/json');
 
-  // ---------- Project ----------
-  function renderProject(body) {
-    const p = editor.project;
-    body.append(workflowGuide());
-    const input = h('input', { type: 'file', accept: '.gia' });
-    input.addEventListener('change', () => { const f = input.files[0]; if (f) readFile(f, { guarded: true }); input.value = ''; });
-    editor.pickGiaFile = () => input.click();
-    const drop = h('label', { class: 'filedrop' }, h('span', { text: t('project.drop') }), h('span', { class: 'hint', text: t('project.dropHint') }), input);
-    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
-    drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
-    drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) readFile(f, { guarded: true }); });
-    body.append(drop);
-    const objs = p.nodes.filter((n) => n.type === 'object');
-    const decs = objs.reduce((a, o) => a + (o.decorations?.length || 0), 0);
-    const hasContent = objs.length || p.clips.length;
-    body.append(h('div', { class: 'stat-grid' },
-      h('span', { class: 'k', text: t('project.name') }), h('span', { class: 'v', text: hasContent ? (editor.projectName || editor.defaultProjectName()) : '—', title: editor.projectName || '' }),
-      h('span', { class: 'k', text: t('project.state') }), h('span', { class: 'v' + (editor.dirty ? ' warn' : ''), text: hasContent ? t(editor.dirty ? 'project.stateUnsaved' : 'project.stateSaved') : '—' }),
-      h('span', { class: 'k', text: t('project.file') }), h('span', { class: 'v', text: editor.giaName || '—', title: editor.giaName || '' }),
-      h('span', { class: 'k', text: t('project.objects') }), h('span', { class: 'v', text: String(objs.length) }),
-      h('span', { class: 'k', text: t('project.decorations') }), h('span', { class: 'v', text: String(decs) }),
-      h('span', { class: 'k', text: t('project.clips') }), h('span', { class: 'v', text: String(p.clips.length) }),
-    ));
-    if (editor.importInfo?.controllerFound) body.append(hint(t('project.controllerNote')));
-    const projInput = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
-    projInput.addEventListener('change', async () => { const f = projInput.files[0]; if (!f) return; try { editor.openProjectFile(await f.text()); toast(t('toast.projectOpened')); } catch (e) { toast(t('toast.projectOpenFailed'), 'error'); } projInput.value = ''; });
-    body.append(projInput);
-    editor.pickProjectFile = () => projInput.click();
-    editor.exportProjectFile = () => downloadBytes(new TextEncoder().encode(editor.projectFileJSON()), (editor.projectName || editor.giaName || 'project').replace(/\.gia$/i, '') + '.animator.json', 'application/json');
-    body.append(btnRow(
-      button(`${t('project.saveLocal')} (${primaryKeyLabel('file.save')})`, () => editor.saveLocal(), { cls: hasContent && editor.dirty ? 'mini primary-mini' : 'mini', disabled: !hasContent, tip: t('tip.project.saveLocal') }),
-      button(t('project.saveAs') + '…', () => editor.saveLocal({ as: true }), { disabled: !hasContent, tip: t('tip.project.saveAs') }),
-    ));
-    body.append(btnRow(button(t('project.allProjects') + '…', () => editor.showProjectsDialog?.(), { tip: t('tip.projects') })));
-    body.append(hint(t('project.localHint')));
-    body.append(btnRow(
-      button(t('project.save'), () => editor.exportProjectFile(), { tip: t('tip.project.save'), disabled: !hasContent }),
-      button(t('project.open'), () => projInput.click(), { tip: t('tip.project.open') }),
-    ));
-    body.append(btnRow(
-      button(t('project.new'), async () => { if (await (editor.guardUnsaved ? editor.guardUnsaved() : confirmDialog({ title: t('project.new'), message: t('project.newConfirm'), danger: true }))) editor.newProject(); }, { tip: t('tip.project.new') }),
-      button(t('project.clearSaved'), async () => { if (await confirmDialog({ title: t('project.clearSaved'), message: t('project.clearConfirm'), danger: true })) { await editor.clearSaved(); toast(t('toast.savedCleared'), 'info'); } }, { tip: t('tip.project.clearSaved') }),
-    ));
-    body.append(hint(t('project.autosaveHint')));
-  }
   async function readFile(file, { guarded = false } = {}) {
     if (!/\.gia$/i.test(file.name)) { toast(t('toast.notGia'), 'warn'); return; }
     if (guarded && editor.guardUnsaved && !(await editor.guardUnsaved())) return;
@@ -452,8 +389,7 @@ export function initLeftPanels(editor, viewport) {
   for (const d of rail.querySelectorAll('details.panel')) d.addEventListener('toggle', scheduleFit);
   editor.on('mode', () => { scheduleFit(); setTimeout(scheduleFit, 50); scheduleValidation(); });
 
-  function renderAll(which = ['project', 'outliner', 'clips', 'export']) {
-    if (which.includes('project')) rerender(bodies.project, renderProject);
+  function renderAll(which = ['outliner', 'clips', 'export']) {
     if (which.includes('outliner')) {
       const prev = bodies.outliner.querySelector('.outliner-list');
       const keepScroll = prev ? prev.scrollTop : 0;
@@ -471,9 +407,6 @@ export function initLeftPanels(editor, viewport) {
   editor.on('outliner', () => renderAll(['outliner']));
   editor.on('export', () => renderAll(['export']));
   editor.on('preview', () => renderAll(['export']));
-  editor.on('dirty', () => renderAll(['project']));
-  editor.on('mode', () => renderAll(['project']));
-  editor.on('projects', () => renderAll(['project']));
   editor.on('time', () => renderAll(['clips']));
   onLangChange(() => renderAll());
   renderAll();

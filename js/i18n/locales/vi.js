@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Kéo chuột giữa xoay · Kéo chuột phải dịch · Con lăn thu phóng",
   "viewport.empty": "Nhập tệp .gia để bắt đầu",
-  "viewport.emptyHint": "Thả tệp vào bất kỳ đâu trong cửa sổ này hoặc dùng bảng Dự án.",
+  "viewport.emptyLead": "Tải một mô hình Miliastra, rồi làm rig, làm hoạt ảnh và xuất ra.",
+
+  "viewport.emptyHint": "Thả vào bất kỳ đâu trong cửa sổ này, hoặc dùng Tệp → Nhập mô hình .gia.",
   "hint.channelKeyed": "Kênh này có hoạt ảnh: nhấn I (hoặc các nút khóa) để giữ thay đổi trong hoạt ảnh.",
 
   "tl.clip": "Clip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Nhập hoạt ảnh…",
   "tip.retarget.button": "Nhập hoạt ảnh FBX / BVH / glTF / GLB / VRM / DAE và retarget lên rig này",
   "retarget.title": "Nhập hoạt ảnh (retarget)",
-  "retarget.needRig": "Thêm xương trước (Auto-Rig hoặc Thêm xương): hoạt ảnh nhập sẽ được retarget lên rig.",
+  "retarget.needRig": "Thêm xương trước: hoạt ảnh nhập vào sẽ được chuyển sang rig.",
   "retarget.parsing": "Đang phân tích {name}…",
   "retarget.intro": "Chỉ hoạt ảnh: lưới trong tệp bị bỏ qua. Ánh xạ xương nguồn vào rig, xem trước rồi áp dụng thành clip thường (một bước hoàn tác).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Tìm lệnh",
   "sc.app.settings": "Cài đặt",
   "guide.next.import": "Tiếp theo: nhập một mô hình .gia.",
-  "guide.next.rig": "Tiếp theo: thêm xương (Auto-Rig hoặc Thêm xương). Bạn cũng có thể làm hoạt ảnh trực tiếp cho vật thể.",
+  "guide.next.rig": "Tiếp theo: thêm xương để di chuyển nhiều vật thể cùng lúc, hoặc làm hoạt ảnh trực tiếp cho vật thể.",
   "guide.next.animate": "Tiếp theo: thêm một hoạt ảnh.",
   "guide.next.keys": "Tiếp theo: bật Auto Key rồi di chuyển hoặc xoay thứ gì đó để ghi khung hình khóa.",
   "guide.next.export": "Tiếp theo: kiểm tra danh sách xuất và tải .gia.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Nhập mô hình trước khi làm rig.",
   "rig.bonesHead": "Xương",
   "rig.noBonesTitle": "Mô hình này chưa có xương.",
-  "rig.noBonesHint": "Xương là công cụ hỗ trợ chỉnh sửa: xương di chuyển các vật thể gắn vào nó, và trò chơi nhận chuyển động vật thể kết quả. Auto-Rig đề xuất bộ xương từ các bộ phận của mô hình.",
+  "rig.noBonesHint": "Xương là công cụ hỗ trợ chỉnh sửa: xương di chuyển các vật thể gắn vào nó và trò chơi nhận chuyển động vật thể kết quả. Thêm một xương, rồi kéo vật thể vào nó trong Outliner.",
   "rig.ikHead": "IK & điều khiển",
   "rig.noConstraintsNoBones": "IK cần xương: thêm xương trước, rồi Thêm IK ở xương cuối của một chuỗi.",
   "rig.utilities": "Tiện ích rig",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Kiểm tra hướng và tỉ lệ",
   "tut.model.b": "Mô hình nên hướng về +Z và có kích thước cuối cùng. Xoay lại hoặc đổi tỉ lệ toàn bộ mô hình tại đây — vật thể, xương và hoạt ảnh di chuyển cùng nhau.",
   "palette.unavailable": "hiện không khả dụng",
+  // ---- compact project header ----
+  "project.details": "Chi tiết dự án",
+  "project.modified": "Sửa đổi",
+  "project.actions": "Thao tác dự án",
 };

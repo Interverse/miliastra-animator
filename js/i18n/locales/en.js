@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Middle-drag orbit · Right-drag pan · Wheel zoom",
   "viewport.empty": "Import a .gia file to begin",
-  "viewport.emptyHint": "Drop it anywhere in this window or use the Project panel.",
+  "viewport.emptyLead": "Load a Miliastra model, then rig, animate and export it.",
+
+  "viewport.emptyHint": "Drop it anywhere in this window, or use File → Import .gia model.",
   "hint.channelKeyed": "This channel is animated: press I (or the key buttons) to keep the change in the animation.",
 
   "tl.clip": "Clip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Import animation…",
   "tip.retarget.button": "Import an FBX / BVH / glTF / GLB / VRM / DAE animation and retarget it onto this rig",
   "retarget.title": "Import animation (retarget)",
-  "retarget.needRig": "Add bones first (Auto-Rig or Add bone): imported animation is retargeted onto the rig.",
+  "retarget.needRig": "Add bones first: an imported animation is retargeted onto the rig.",
   "retarget.parsing": "Parsing {name}…",
   "retarget.intro": "Animation only: meshes in the file are ignored. Map the source bones to your rig, preview, then apply as normal clips (one undo step).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Command search",
   "sc.app.settings": "Settings",
   "guide.next.import": "Next: import a .gia model.",
-  "guide.next.rig": "Next: add bones (Auto-Rig or Add bone). You can also animate objects directly.",
+  "guide.next.rig": "Next: add bones to move groups of objects together, or animate the objects directly.",
   "guide.next.animate": "Next: add an animation.",
   "guide.next.keys": "Next: move or rotate something with Auto Key on to record keyframes.",
   "guide.next.export": "Next: check the export checklist and download the .gia.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Import a model before rigging.",
   "rig.bonesHead": "Bones",
   "rig.noBonesTitle": "This model has no bones yet.",
-  "rig.noBonesHint": "Bones are an editing aid: a bone moves the objects attached to it, and the game receives the resulting object motion. Auto-Rig proposes a skeleton from the model's parts.",
+  "rig.noBonesHint": "Bones are an editing aid: a bone moves the objects attached to it, and the game receives the resulting object motion. Add a bone, then drag objects onto it in the Outliner.",
   "rig.ikHead": "IK & controls",
   "rig.noConstraintsNoBones": "IK needs bones: add bones first, then Add IK on the last bone of a chain.",
   "rig.utilities": "Rig utilities",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Check orientation and scale",
   "tut.model.b": "The model should face +Z and have its final size. Reorient or scale the whole model here — objects, bones and animations move together.",
   "palette.unavailable": "not available now",
+  // ---- compact project header ----
+  "project.details": "Project details",
+  "project.modified": "Modified",
+  "project.actions": "Project actions",
 };

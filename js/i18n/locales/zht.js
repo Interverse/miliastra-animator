@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● 自動關鍵影格",
   "status.navHint": "中鍵拖曳環繞 · 右鍵拖曳平移 · 滾輪縮放",
   "viewport.empty": "匯入 .gia 檔案以開始",
-  "viewport.emptyHint": "將其拖放到視窗任意位置，或使用「專案」面板。",
+  "viewport.emptyLead": "載入一個 Miliastra 模型，然後綁定、製作動畫並匯出。",
+
+  "viewport.emptyHint": "拖到本視窗任意位置，或使用 檔案 → 匯入 .gia 模型。",
   "hint.channelKeyed": "此通道已有動畫：按 I（或記錄按鈕）將變更保留至動畫中。",
 
   "tl.clip": "片段",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "匯入動畫…",
   "tip.retarget.button": "匯入 FBX / BVH / glTF / GLB / VRM / DAE 動畫並重定向到此綁定",
   "retarget.title": "匯入動畫（重定向）",
-  "retarget.needRig": "請先新增骨骼（自動綁定或新增骨骼）：匯入的動畫會重定向到綁定上。",
+  "retarget.needRig": "請先新增骨骼：匯入的動畫會重新定向到綁定上。",
   "retarget.parsing": "正在解析 {name}…",
   "retarget.intro": "僅匯入動畫：檔案中的網格會被忽略。將來源骨骼對應到你的綁定，預覽後作為一般片段套用（一步復原）。",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "指令搜尋",
   "sc.app.settings": "設定",
   "guide.next.import": "下一步：匯入 .gia 模型。",
-  "guide.next.rig": "下一步：新增骨骼（自動綁定或新增骨骼）。也可以直接為物件製作動畫。",
+  "guide.next.rig": "下一步：新增骨骼以整體帶動多個物件，也可以直接為物件製作動畫。",
   "guide.next.animate": "下一步：新增一個動畫。",
   "guide.next.keys": "下一步：開啟自動關鍵影格後移動或旋轉某個物件以記錄關鍵影格。",
   "guide.next.export": "下一步：檢查匯出清單並下載 .gia。",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "請先匯入模型再進行綁定。",
   "rig.bonesHead": "骨骼",
   "rig.noBonesTitle": "此模型還沒有骨骼。",
-  "rig.noBonesHint": "骨骼是編輯輔助工具：骨骼帶動附著在其上的物件，遊戲接收最終的物件運動。自動綁定會根據模型部件提出骨架方案。",
+  "rig.noBonesHint": "骨骼是編輯輔助工具：骨骼帶動附著在其上的物件，遊戲接收最終的物件運動。新增一根骨骼，然後在大綱中把物件拖到它上面。",
   "rig.ikHead": "IK 與控制器",
   "rig.noConstraintsNoBones": "IK 需要骨骼：先新增骨骼，然後在鏈末端骨骼上點選「新增 IK」。",
   "rig.utilities": "綁定工具",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "檢查朝向與縮放",
   "tut.model.b": "模型應朝向 +Z 並具有最終尺寸。在此對整個模型重新定向或縮放——物件、骨骼和動畫會一起移動。",
   "palette.unavailable": "目前無法使用",
+  // ---- compact project header ----
+  "project.details": "專案詳細資訊",
+  "project.modified": "修改時間",
+  "project.actions": "專案操作",
 };

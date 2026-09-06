@@ -255,7 +255,9 @@ button.icon.active { background: var(--blue); color: #fff; }
 #vp-status .autokey { color: var(--orange); font-weight: 600; }
 #vp-empty { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--t-disabled); font-size: 18px; pointer-events: none; text-align: center; max-width: 80%; line-height: 1.5; }
 #vp-empty:empty { display: none; }
-#vp-empty button { pointer-events: auto; margin-top: 12px; padding: 8px 16px; font-size: 13px; }
+#vp-empty .vp-empty-title { font-size: 18px; color: var(--t2); }
+#vp-empty button { pointer-events: auto; margin: 12px 0 0; padding: 8px 16px; font-size: 13px; }
+#vp-empty .vp-empty-drop { margin-top: 10px; font-size: 11px; color: var(--t-disabled); }
 #vp-empty small { display: block; font-size: 12px; margin-top: 8px; color: var(--t3); }
 #btn-tutorial { position: absolute; left: 12px; top: 12px; width: auto; margin: 0; padding: 6px 12px; font-size: 12px; font-weight: 400; background: rgba(27,30,36,.9); color: var(--t2); border: 1px solid var(--border-strong); z-index: 25; }
 #btn-tutorial:hover:not(:disabled) { background: var(--hover); color: var(--t1); }
@@ -325,18 +327,31 @@ body[data-mode="animate"] #panel-export, body[data-mode="animate"] #panel-riggin
 body[data-mode="export"] #panel-rigging, body[data-mode="export"] #panel-waypaths, body[data-mode="export"] #panel-model, body[data-mode="export"] #panel-clips { display: none; }
 body[data-mode="model"] #timeline, body[data-mode="model"] #timeline-resize { display: none; }
 
-/* ---------- workflow guide ---------- */
-.guide { margin: 0 0 10px; }
-.guide-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-.guide-step { width: auto; margin: 0; padding: 5px 4px; font-size: 11px; background: var(--surf); color: var(--t2); border: 1px solid var(--border); border-radius: 5px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
-.guide-step .guide-num { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border-strong); font-size: 10px; display: inline-flex; align-items: center; justify-content: center; }
-.guide-step .guide-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-.guide-step.done .guide-num { background: var(--green); border-color: var(--green); color: #fff; }
-.guide-step.current { border-color: var(--blue); color: #fff; background: rgba(45,108,223,.18); }
-.guide-step:hover:not(:disabled) { background: var(--hover); }
-.guide-next { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--t1); margin-top: 8px; }
-.guide-next > span { flex: 1 1 120px; }
-.guide-next button.mini { flex: 0 0 auto; }
+/* ---------- compact project header (same in every workspace) ---------- */
+/* Persistent context, not a tool panel: it sits above the scrolling panels so it never moves
+   between Model / Rig / Animate / Export, and it stays quieter than the workspace controls. */
+#project-bar { flex: 0 0 auto; padding: 8px 10px 7px; border-bottom: 1px solid var(--border); min-width: 0; }
+#project-bar .pb-main { display: flex; align-items: center; gap: 4px; min-width: 0; }
+#project-bar .pb-name { flex: 1 1 auto; min-width: 0; font-size: 13px; font-weight: 600; color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#project-bar .pb-menu { flex: 0 0 auto; width: 22px; height: 22px; padding: 0; margin: 0; font-size: 14px; line-height: 1; background: transparent; color: var(--t3); border: 1px solid transparent; border-radius: 4px; }
+#project-bar .pb-menu:hover:not(:disabled) { background: var(--hover); color: var(--t1); }
+#project-bar .pb-sub { display: flex; align-items: baseline; gap: 4px; margin-top: 1px; font-size: 11px; color: var(--t3); min-width: 0; }
+#project-bar .pb-file { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#project-bar .pb-sep, #project-bar .pb-state { flex: 0 0 auto; }
+#project-bar .pb-state.dirty { color: var(--amber); }
+#project-bar .pb-details { margin-top: 5px; }
+#project-bar .pb-details > summary { cursor: pointer; list-style: none; user-select: none; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--t3); }
+#project-bar .pb-details > summary::-webkit-details-marker { display: none; }
+#project-bar .pb-details > summary::before { content: "\25B8 "; }
+#project-bar .pb-details[open] > summary::before { content: "\25BE "; }
+#project-bar .pb-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 8px; margin: 4px 0 0; font-size: 11px; }
+#project-bar .pb-grid .k { color: var(--t3); }
+#project-bar .pb-grid .v { color: var(--t2); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#project-bar .hint { margin: 4px 0 0; }
+/* one line of beginner guidance, only while there is a meaningful next step */
+#next-step { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 5px 10px; min-width: 0; font-size: 11px; color: var(--t2); background: rgba(45,108,223,.10); border-bottom: 1px solid var(--border); }
+#next-step .ns-text { flex: 1 1 auto; min-width: 0; }
+#next-step button { flex: 0 0 auto; width: auto; margin: 0; padding: 3px 8px; font-size: 11px; }
 
 /* ---------- export checklist ---------- */
 .checklist { display: flex; flex-direction: column; gap: 3px; margin: 6px 0 10px; }

@@ -4,6 +4,8 @@ import { initI18n, t, onLangChange } from './i18n/i18n.js';
 import { Editor } from './ui/editor.js';
 import { Viewport } from './viewport/viewport.js';
 import { initLeftPanels } from './ui/panels-left.js';
+import { initProjectBar } from './ui/project-bar.js';
+import { workflowState } from './ui/workflow.js';
 import { initRightPanels } from './ui/panels-right.js';
 import { Timeline } from './ui/timeline.js';
 import { initTutorial } from './ui/tutorial.js';
@@ -29,6 +31,7 @@ async function main() {
   window.rotationDiagnostics = (id) => editor.rotationDiagnostics(id); // dev diagnostics: authored vs canonical vs shown Euler angles of a node
   const timeline = new Timeline(editor, document.getElementById('timeline'));
   initLeftPanels(editor, viewport);
+  initProjectBar(editor);
   initRightPanels(editor, viewport);
   const tutorial = initTutorial(editor);
   const ctx = { editor, viewport, timeline, tutorial };
@@ -64,10 +67,10 @@ function setupTopbar(editor, ctx) {
   const rightScroll = document.querySelector('#right .rail-scroll');
   // panel order per workspace (the stylesheet hides what a workspace does not need)
   const order = {
-    model: ['panel-project', 'panel-outliner', 'panel-clips', 'panel-export'],
-    rig: ['panel-project', 'panel-outliner', 'panel-clips', 'panel-export'],
-    animate: ['panel-clips', 'panel-outliner', 'panel-project', 'panel-export'],
-    export: ['panel-export', 'panel-project', 'panel-outliner', 'panel-clips'],
+    model: ['panel-outliner', 'panel-clips', 'panel-export'],
+    rig: ['panel-outliner', 'panel-clips', 'panel-export'],
+    animate: ['panel-clips', 'panel-outliner', 'panel-export'],
+    export: ['panel-export', 'panel-outliner', 'panel-clips'],
   };
   const orderRight = {
     model: ['panel-model', 'panel-properties', 'panel-rigging', 'panel-waypaths'],
@@ -207,15 +210,22 @@ function setupStatus(editor) {
   editor.on('hint', () => { clearTimeout(hintTimer); if (editor.hint) hintTimer = setTimeout(() => { editor.hint = ''; render(); }, 4000); });
 }
 
+// Empty viewport = the first step of the workflow, spelled out. Derived from the same state
+// as every other hint, so it appears for a new/emptied project and goes as soon as a model is in.
 function setupEmptyState(editor) {
   const el = document.getElementById('vp-empty');
   const render = () => {
     el.innerHTML = '';
-    if (editor.project.nodes.length) return;
+    if (workflowState(editor).hasModel) return;
     const btn = h('button', { class: 'mini primary-mini', text: t('viewport.import'), onclick: () => editor.pickGiaFile?.() });
-    el.append(h('div', { text: t('viewport.empty') }), h('small', { text: t('viewport.emptyHint') }), btn);
+    el.append(
+      h('div', { class: 'vp-empty-title', text: t('viewport.empty') }),
+      h('small', { text: t('viewport.emptyLead') }),
+      btn,
+      h('small', { class: 'vp-empty-drop', text: t('viewport.emptyHint') }),
+    );
   };
-  editor.on('change', render); onLangChange(render); render();
+  editor.on('change', render); editor.on('project', render); onLangChange(render); render();
 }
 
 function setupLayout(editor) {

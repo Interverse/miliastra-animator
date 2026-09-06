@@ -4,6 +4,7 @@
 import { t } from '../i18n/i18n.js';
 import { activeClip } from '../anim/clips.js';
 import { showAutoRigDialog } from './autorig-dialog.js';
+import { FEATURES } from './feature-flags.js';
 import { showRetargetDialog } from './retarget-dialog.js';
 import { showReorientDialog } from './orient-dialog.js';
 import { showScaleModelDialog } from './scale-dialog.js';
@@ -46,7 +47,7 @@ export function buildCommands(ctx) {
     { id: 'model.scale', group: 'model', label: () => t('scale.button'), keywords: 'scale entire model resize size', run: () => showScaleModelDialog(editor) },
     { id: 'model.workspace', group: 'model', label: () => t('cmd.goModel'), keywords: 'model workspace prepare offset display geometry', run: go('model') },
     // ---- rig ----
-    { id: 'rig.autorig', group: 'rig', label: () => t('autorig.button'), keywords: 'auto rig skeleton bones automatic humanoid quadruped', run: () => showAutoRigDialog(editor) },
+    ...(FEATURES.autoRig ? [{ id: 'rig.autorig', group: 'rig', label: () => t('autorig.button'), keywords: 'auto rig skeleton bones automatic humanoid quadruped', run: () => showAutoRigDialog(editor) }] : []),
     { id: 'rig.addBone', group: 'rig', label: () => t('add.bone'), keywords: 'add bone create', run: () => editor.addBone(editor.activeNode()?.type === 'bone' ? editor.active : null) },
     { id: 'rig.addBonesForSelected', group: 'rig', label: () => t('add.bonesForSelected'), keywords: 'bones selected objects', run: () => editor.addBonesForSelected() },
     { id: 'rig.addTarget', group: 'rig', label: () => t('add.target'), keywords: 'ik target add', run: () => editor.addNode('target', { atActive: true }) },

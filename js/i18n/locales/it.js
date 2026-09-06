@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Trascina col centrale: orbita · Trascina col destro: panoramica · Rotella: zoom",
   "viewport.empty": "Importa un file .gia per iniziare",
-  "viewport.emptyHint": "Rilascialo ovunque in questa finestra o usa il pannello Progetto.",
+  "viewport.emptyLead": "Carica un modello Miliastra, poi fai il rig, animalo ed esportalo.",
+
+  "viewport.emptyHint": "Trascinalo in un punto qualsiasi di questa finestra, oppure usa File → Importa modello .gia.",
   "hint.channelKeyed": "Questo canale è animato: premi I (o i pulsanti chiave) per mantenere la modifica nell'animazione.",
 
   "tl.clip": "Clip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Importa animazione…",
   "tip.retarget.button": "Importa un'animazione FBX / BVH / glTF / GLB / VRM / DAE e riadattala a questo rig",
   "retarget.title": "Importa animazione (retarget)",
-  "retarget.needRig": "Aggiungi prima delle ossa (Auto-Rig o Aggiungi osso): l'animazione importata viene riadattata al rig.",
+  "retarget.needRig": "Aggiungi prima le ossa: un'animazione importata viene trasferita sul rig.",
   "retarget.parsing": "Analisi di {name}…",
   "retarget.intro": "Solo animazione: le mesh nel file vengono ignorate. Associa le ossa sorgente al tuo rig, visualizza l'anteprima e applica come clip normali (un passo di annullamento).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Ricerca comandi",
   "sc.app.settings": "Impostazioni",
   "guide.next.import": "Prossimo: importa un modello .gia.",
-  "guide.next.rig": "Prossimo: aggiungi ossa (Auto-Rig o Aggiungi osso). Puoi anche animare gli oggetti direttamente.",
+  "guide.next.rig": "Prossimo: aggiungi ossa per muovere gruppi di oggetti insieme, oppure anima gli oggetti direttamente.",
   "guide.next.animate": "Prossimo: aggiungi un'animazione.",
   "guide.next.keys": "Prossimo: sposta o ruota qualcosa con Auto Key attivo per registrare i fotogrammi chiave.",
   "guide.next.export": "Prossimo: controlla la checklist di esportazione e scarica il .gia.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Importa un modello prima di fare il rig.",
   "rig.bonesHead": "Ossa",
   "rig.noBonesTitle": "Questo modello non ha ancora ossa.",
-  "rig.noBonesHint": "Le ossa sono un aiuto per la modifica: un osso muove gli oggetti collegati e il gioco riceve il movimento risultante. Auto-Rig propone uno scheletro dalle parti del modello.",
+  "rig.noBonesHint": "Le ossa sono un aiuto per la modifica: un osso muove gli oggetti collegati e il gioco riceve il movimento risultante. Aggiungi un osso, poi trascina gli oggetti su di esso nell'Outliner.",
   "rig.ikHead": "IK e controlli",
   "rig.noConstraintsNoBones": "L'IK richiede ossa: aggiungi prima le ossa, poi “Aggiungi IK” sull'ultimo osso di una catena.",
   "rig.utilities": "Strumenti rig",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Controlla orientamento e scala",
   "tut.model.b": "Il modello deve guardare verso +Z e avere la dimensione finale. Riorienta o scala qui l'intero modello — oggetti, ossa e animazioni si muovono insieme.",
   "palette.unavailable": "non disponibile ora",
+  // ---- compact project header ----
+  "project.details": "Dettagli del progetto",
+  "project.modified": "Modificato",
+  "project.actions": "Azioni del progetto",
 };

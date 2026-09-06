@@ -571,7 +571,9 @@ export default {
   "status.autoKey": "● AUTO KEY",
   "status.navHint": "Orta sürükle yörünge · Sağ sürükle kaydır · Tekerlek yakınlaştır",
   "viewport.empty": "Başlamak için bir .gia dosyası içe aktarın",
-  "viewport.emptyHint": "Bu pencerede herhangi bir yere bırakın veya Proje panelini kullanın.",
+  "viewport.emptyLead": "Bir Miliastra modeli yükleyin, sonra rig yapın, canlandırın ve dışa aktarın.",
+
+  "viewport.emptyHint": "Bu pencerede herhangi bir yere bırakın veya Dosya → .gia modeli içe aktar'ı kullanın.",
   "hint.channelKeyed": "Bu kanal animasyonlu: değişikliği animasyonda tutmak için I'ya (veya anahtar düğmelerine) basın.",
 
   "tl.clip": "Klip",
@@ -944,7 +946,7 @@ export default {
   "retarget.button": "Animasyon içe aktar…",
   "tip.retarget.button": "FBX / BVH / glTF / GLB / VRM / DAE animasyonunu içe aktarıp bu rig'e yeniden hedefle",
   "retarget.title": "Animasyon içe aktar (yeniden hedefleme)",
-  "retarget.needRig": "Önce kemik ekleyin (Otomatik Rig veya Kemik ekle): içe aktarılan animasyon rig'e yeniden hedeflenir.",
+  "retarget.needRig": "Önce kemik ekleyin: içe aktarılan animasyon rig'e yeniden hedeflenir.",
   "retarget.parsing": "{name} ayrıştırılıyor…",
   "retarget.intro": "Yalnızca animasyon: dosyadaki mesh'ler yok sayılır. Kaynak kemikleri rig'inize eşleyin, önizleyin, sonra normal klipler olarak uygulayın (tek geri alma adımı).",
   "retarget.file": "File",
@@ -1090,7 +1092,7 @@ export default {
   "sc.app.search": "Komut arama",
   "sc.app.settings": "Ayarlar",
   "guide.next.import": "Sonraki: bir .gia modeli içe aktarın.",
-  "guide.next.rig": "Sonraki: kemik ekleyin (Otomatik Rig veya Kemik ekle). Nesneleri doğrudan da canlandırabilirsiniz.",
+  "guide.next.rig": "Sonraki: nesne gruplarını birlikte hareket ettirmek için kemik ekleyin veya nesneleri doğrudan canlandırın.",
   "guide.next.animate": "Sonraki: bir animasyon ekleyin.",
   "guide.next.keys": "Sonraki: Auto Key açıkken bir şeyi taşıyın veya döndürün; anahtar kareler kaydedilir.",
   "guide.next.export": "Sonraki: dışa aktarma kontrol listesini inceleyip .gia'yı indirin.",
@@ -1104,7 +1106,7 @@ export default {
   "rig.noModel": "Rig'den önce bir model içe aktarın.",
   "rig.bonesHead": "Kemikler",
   "rig.noBonesTitle": "Bu modelde henüz kemik yok.",
-  "rig.noBonesHint": "Kemikler bir düzenleme yardımcısıdır: kemik, bağlı nesneleri taşır ve oyun ortaya çıkan nesne hareketini alır. Otomatik Rig, modelin parçalarından bir iskelet önerir.",
+  "rig.noBonesHint": "Kemikler bir düzenleme yardımcısıdır: kemik, bağlı nesneleri taşır ve oyun ortaya çıkan nesne hareketini alır. Bir kemik ekleyin, sonra Outliner'da nesneleri üzerine sürükleyin.",
   "rig.ikHead": "IK ve denetimler",
   "rig.noConstraintsNoBones": "IK için kemik gerekir: önce kemik ekleyin, sonra bir zincirin son kemiğinde IK ekle'ye basın.",
   "rig.utilities": "Rig araçları",
@@ -1132,4 +1134,8 @@ export default {
   "tut.model.t": "Yön ve ölçeği kontrol edin",
   "tut.model.b": "Model +Z yönüne bakmalı ve son boyutunda olmalı. Tüm modeli burada yeniden yönlendirin veya ölçekleyin — nesneler, kemikler ve animasyonlar birlikte hareket eder.",
   "palette.unavailable": "şu anda kullanılamaz",
+  // ---- compact project header ----
+  "project.details": "Proje ayrıntıları",
+  "project.modified": "Değiştirilme",
+  "project.actions": "Proje işlemleri",
 };
