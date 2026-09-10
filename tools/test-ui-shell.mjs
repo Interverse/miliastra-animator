@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { ACTIONS } from '../js/ui/shortcuts.js';
 import { FEATURES } from '../js/ui/feature-flags.js';
+import { placePopover } from '../js/ui/popover-place.js';
 
 let failures = 0;
 const check = (name, ok, detail = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? '  ' + detail : ''}`); if (!ok) failures++; };
@@ -91,9 +92,38 @@ check('the flag is off, so nothing offers Auto-Rig right now', FEATURES.autoRig 
 const PROMPTS = ['guide.next.rig', 'rig.noBonesHint', 'rig.noBonesTitle', 'retarget.needRig', 'viewport.emptyHint', 'outliner.empty', 'rig.empty'];
 check('no beginner prompt suggests Auto-Rig (English)', PROMPTS.every((k) => !/auto[- ]?rig/i.test(en[k] || '')));
 
+// ---- Graph Editor shares the timeline area and the key data ----
+const timelineSrc = read('js/ui/timeline.js'), graphSrc = read('js/ui/graph-editor.js');
+check('the timeline header switches between Dope Sheet and Graph Editor', html.includes('id="graph-body"') && html.includes('id="graph-canvas"') && timelineSrc.includes("setMode('graph')") && timelineSrc.includes("t('graph.mode.dope')") && en['graph.mode.dope'] && en['graph.mode.graph']);
+check('graph edits go through editor methods, never a private key store', ['updateKeyDrag', 'setPointValue', 'setPointTime', 'setPointTangent', 'setKeyHandles', 'selectCurvePoints', 'simplifyCurves'].every((m) => graphSrc.includes('ed.' + m + '(')) && !/clip\.tracks\[[^\]]+\]\[[^\]]+\]\s*=/.test(graphSrc));
+check('graph shortcuts share the timeline handling (select all, delete, copy/paste)', main.includes('timeline.isFocused()') && main.includes('timeline.selectAllKeys()'));
+check('palette exposes the Graph Editor and Simplify curves', ids.includes('anim.graph') && ids.includes('anim.simplify'));
+check('beginner tooltips exist for handles and interpolation', ['tip.graph.handle', 'tip.handle.auto', 'tip.handle.flat', 'tip.interp.linear', 'tip.interp.step', 'tip.interp.ease'].every((k) => en[k]));
+
+// ---- floating UI: one layering scale, portal menus that flip, filter field that survives rerenders ----
+const dialogs = read('js/ui/dialogs.js');
+check('menus render in the fixed overlay layer (document.body), not inside the opening toolbar', dialogs.includes('document.body.appendChild(menu)') && !dialogs.includes("host.style.position = 'relative'") && /\.menu \{ position: fixed;[^}]*z-index: var\(--z-popover\)/.test(css));
+check('one z-index scale: every floating element uses a --z-* tier', /--z-hud: \d+; --z-handles: \d+; --z-drop: \d+; --z-drawer: \d+; --z-popover: \d+; --z-float: \d+;/.test(css) && (css.match(/z-index: \d+/g) || []).every((m) => m === 'z-index: 1'));
+check('menus close on outside pointerdown, Escape, blur, resize and follow scrolling', ['onDown', 'onKey', "addEventListener('blur', close)", "addEventListener('resize', close)", "addEventListener('scroll', onScroll, true)"].every((x) => dialogs.includes(x)) && dialogs.includes('e.stopPropagation(); close();'));
+const vp = { w: 1000, h: 600 };
+const below = placePopover({ left: 100, top: 100, width: 80, height: 24 }, { w: 200, h: 150 }, vp);
+check('popover opens below its anchor', below.top === 128 && below.left === 100 && !below.flipped);
+const flip = placePopover({ left: 100, top: 520, width: 80, height: 24 }, { w: 200, h: 150 }, vp);
+check('popover flips above near the bottom edge', flip.flipped && flip.top === 520 - 4 - 150);
+const rightEdge = placePopover({ left: 950, top: 100, width: 40, height: 24 }, { w: 200, h: 150 }, vp);
+check('popover is pulled back inside at the right edge', rightEdge.left === 1000 - 8 - 200);
+const pt = placePopover({ x: 990, y: 590 }, { w: 200, h: 150 }, vp);
+check('context menus at a pointer near the corner stay inside the window', pt.left + 200 <= 1000 - 8 && pt.top + 150 <= 600 - 8);
+check('the Graph Editor filter field is created once, outside the rerendered rows', graphSrc.includes("this.search = h('input', { type: 'search'") && graphSrc.includes("this.rows.innerHTML = ''") && !graphSrc.includes("this.list.innerHTML = ''"));
+check('search inputs share the editor input style', css.includes('input[type="search"], select, textarea {') && css.includes('input::placeholder'));
+check('dialogs re-render their title, body and buttons on language change', dialogs.includes('onLangChange(() => {') && read('js/ui/settings-dialog.js').includes("body: () => buildSettings(editor)") && read('js/ui/shortcuts.js').includes('body: buildShortcutsBody'));
+check('every panel module subscribes to language changes', ['js/ui/panels-left.js', 'js/ui/panels-right.js', 'js/ui/timeline.js', 'js/ui/graph-editor.js', 'js/ui/project-bar.js', 'js/ui/menus.js', 'js/ui/tutorial.js', 'js/main.js'].every((f) => read(f).includes('onLangChange(')));
+check('graph and dope-sheet drags run through the key drag transaction with pointer capture and rAF coalescing', ['beginKeyDrag', 'updateKeyDrag', 'endKeyDrag', 'requestAnimationFrame', 'setPointerCapture'].every((x) => graphSrc.includes(x) && timelineSrc.includes(x)) && !graphSrc.includes('moveCurvePoints({ dt: dDt') && !timelineSrc.includes('moveSelectedKeys(dt - d.lastDt'));
+check('a view switch ends any drag first', timelineSrc.includes("this.editor.finishInteraction(); // a drag never survives a view switch"));
+
 // ---- localisation of the new keys in all 15 languages ----
 const LOCALES = ['de', 'es', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'ru', 'th', 'tr', 'vi', 'zhs', 'zht'];
-const NEW = Object.keys(en).filter((k) => /^(project\.(details|modified|actions)|mode\.model|panel\.model|menu\.(file|edit|view|help)|cmd\.|palette\.|settings\.|help\.|guide\.|model\.|rig\.(noModel|bonesHead|noBonesTitle|ikHead|utilities)|export\.check\.|props\.(advanced|selectHint)|clip\.(emptyTitle|importHead)|tut\.model)/.test(k));
+const NEW = Object.keys(en).filter((k) => /^(graph\.|handle\.|tip\.graph\.|tip\.handle\.|tip\.interp\.|project\.(details|modified|actions)|mode\.model|panel\.model|menu\.(file|edit|view|help)|cmd\.|palette\.|settings\.|help\.|guide\.|model\.|rig\.(noModel|bonesHead|noBonesTitle|ikHead|utilities)|export\.check\.|props\.(advanced|selectHint)|clip\.(emptyTitle|importHead)|tut\.model)/.test(k));
 for (const l of LOCALES) {
   const d = (await import(`../js/i18n/locales/${l}.js`)).default;
   const miss = NEW.filter((k) => !d[k]);

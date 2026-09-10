@@ -7,6 +7,9 @@ import { showMenu } from './dialogs.js';
 import { activeClip, clipEnd, keyRef, allKeys, INTERPOLATIONS, snapTime } from '../anim/clips.js';
 import { orderedNodes, getNode } from '../scene/scene.js';
 import { primaryKeyLabel } from './shortcuts.js';
+import { GraphEditor } from './graph-editor.js';
+import { keyRange, fitTimeRange, ZOOM_MIN, ZOOM_MAX } from './timeline-fit.js';
+import { loadPrefs, updatePrefs } from '../core/persistence.js';
 
 const LABEL_W = 150, RULER_H = 22, ROW_H = 20;
 const KEY_COLORS = { pos: '#f5a623', rot: '#7ec8ff', both: '#e4e8ef' };
@@ -22,15 +25,24 @@ export class Timeline {
     this.t0 = -0.15; // time at the left edge of the key area
     this.pxPerSec = 160;
     this.scrollY = 0;
+    // Auto-framing: the view is fitted to the keyed range whenever a different animation
+    // becomes active (switch, new, duplicate, import, project open/recover). Pan and zoom are
+    // otherwise the user's: editing keys, scrubbing, playing or selecting never touch them.
+    this.framedClip = undefined;   // clip id the current view was framed for
+    this.frameWhenSized = false;   // framing requested while the canvas had no size yet
     this.rows = [];
     this.drag = null;
     this.hover = null;
+    this.graph = new GraphEditor(editor, container.querySelector('#graph-body'));
+    this.mode = loadPrefs().animEditor === 'graph' ? 'graph' : 'dope';
     this.buildHead();
     this.bind();
     this.bindMove();
+    this.applyMode();
     new ResizeObserver(() => this.resize()).observe(container.querySelector('#tl-body'));
     editor.on('change', (d) => { if (!d?.transient) this.syncHead(); this.draw(); });
     editor.on('time', () => { this.syncHead(); this.draw(); });
+    editor.on('project', () => { this.framedClip = undefined; }); // a new/opened project frames again even if the clip id repeats
     editor.on('keys', () => this.draw());
     editor.on('selection', () => this.draw());
     editor.on('play', () => this.syncHead());
@@ -43,6 +55,10 @@ export class Timeline {
     const ed = this.editor;
     this.head.innerHTML = '';
     const tb = (label, tip, onClick, cls = '') => { const b = h('button', { class: 'tb-btn ' + cls, text: label, title: tip, onclick: onClick }); return b; };
+    const modes = h('div', { class: 'tb-group mode-switch' },
+      (this.dopeBtn = tb(t('graph.mode.dope'), t('tip.graph.dope'), () => this.setMode('dope'))),
+      (this.graphBtn = tb(t('graph.mode.graph'), t('tip.graph.graph'), () => this.setMode('graph'))),
+    );
     const transport = h('div', { class: 'tb-group' },
       tb('⏮', t('tip.tl.start', { k: primaryKeyLabel('anim.jumpStart') }), () => { ed.pause(); ed.setTime(0); }),
       tb('◀', t('tip.tl.stepBack', { k: primaryKeyLabel('anim.stepBack') }), () => ed.stepFrames(-1)),
@@ -71,14 +87,16 @@ export class Timeline {
       this.interpSelect,
       tb('✕', t('tip.tl.deleteKeys'), () => ed.deleteSelectedKeys()));
     const viewGroup = h('div', { class: 'tb-group' },
-      tb('⤢', t('tip.tl.fit'), () => this.fit()),
+      tb('⤢', t('tip.tl.frame', { k: primaryKeyLabel('view.frameAll') }), () => this.frameAnimation()),
       (this.collapseBtn = tb('▾', t('tip.tl.collapse'), () => { this.container.classList.toggle('collapsed'); this.collapseBtn.textContent = this.container.classList.contains('collapsed') ? '▴' : '▾'; this.resize(); })));
-    this.head.append(transport, clipGroup, timeGroup, keyGroup, h('span', { class: 'spacer' }), viewGroup);
+    this.head.append(modes, transport, clipGroup, timeGroup, keyGroup, h('span', { class: 'spacer' }), viewGroup);
     this.syncHead();
   }
   syncHead() {
     const ed = this.editor;
     const c = activeClip(ed.project);
+    this.dopeBtn.classList.toggle('active', this.mode === 'dope');
+    this.graphBtn.classList.toggle('active', this.mode === 'graph');
     this.playBtn.textContent = ed.playing ? '❚❚' : '▶';
     this.playBtn.classList.toggle('active', ed.playing);
     this.loopBtn.classList.toggle('pressed', !!c?.loop);
@@ -97,13 +115,49 @@ export class Timeline {
     this.autoKeyBtn.classList.toggle('on', !!ed.project.settings.autoKey);
     this.autoKeyBtn.textContent = t('tl.autoKey');
     this.fpsSelect.value = String(ed.fps);
-    for (const b of this.head.querySelectorAll('button')) if (b !== this.collapseBtn && b.textContent !== '+' && !b.classList.contains('autokey')) b.disabled = !c && b.parentElement !== this.head.lastChild;
+    for (const b of this.head.querySelectorAll('button')) if (b !== this.collapseBtn && b !== this.dopeBtn && b !== this.graphBtn && b.textContent !== '+' && !b.classList.contains('autokey')) b.disabled = !c && b.parentElement !== this.head.lastChild;
     this.emptyEl.innerHTML = '';
     if (!c) {
       this.emptyEl.append(h('span', { text: ed.project.nodes.length ? t('tl.emptyNoClip') : t('tl.emptyNoScene') }));
       if (ed.project.nodes.length) this.emptyEl.append(h('button', { class: 'mini', text: t('clip.new'), onclick: () => ed.createClip() }));
     } else if (!Object.keys(c.tracks).length) this.emptyEl.append(h('span', { text: t('tl.emptyNoKeys', { k: primaryKeyLabel('anim.insertKey') }) }));
   }
+
+  // ---------- Dope Sheet / Graph Editor ----------
+  // Both views share this header, the active clip, the playhead and the key selection; the
+  // Graph Editor simply takes over the body area. The choice is a preference of this editor.
+  setMode(m) {
+    if (m === this.mode) return;
+    this.editor.finishInteraction(); // a drag never survives a view switch
+    this.mode = m;
+    updatePrefs({ animEditor: m });
+    this.applyMode();
+    this.syncHead();
+    this.editor.emit('animEditor', m);
+  }
+  applyMode() {
+    const graph = this.mode === 'graph';
+    this.container.querySelector('#tl-body').hidden = graph;
+    this.container.querySelector('#graph-body').hidden = !graph;
+    this.container.classList.toggle('graph-mode', graph);
+    // curves need height: a collapsed or default-sized timeline grows for the session (the
+    // resize handle still sets the persisted height)
+    if (graph && this.container.offsetHeight < 300 && !this._grew) { this.container.classList.remove('collapsed'); this.container.style.height = '340px'; this._grew = true; }
+    if (graph) { this.graph.refreshList(true); this.graph.resize(); this.graph.draw(); }
+    else this.resize();
+  }
+  // keyboard shortcuts treat both canvases as "the timeline"
+  isFocused() { const a = document.activeElement; return a === this.canvas || a === this.graph.canvas; }
+  frameAll() { if (this.mode === 'graph') this.graph.frameClip(); else { this.frameAnimation(); this.draw(); } }
+  frameSelected() { if (this.mode === 'graph') this.graph.frameSelected(); else this.frameSelectedKeys(); }
+  frameSelectedKeys() {
+    const ed = this.editor;
+    const times = [...ed.selectedKeys].map((r) => Number(r.split('|')[2])).filter(Number.isFinite);
+    if (!times.length) { this.frameAll(); return; }
+    const fit = fitTimeRange({ t0: Math.min(...times), t1: Math.max(...times) }, this.w - LABEL_W);
+    this.t0 = fit.t0; this.pxPerSec = fit.pxPerSec; this.draw();
+  }
+  selectAllKeys() { if (this.mode === 'graph') this.graph.selectAllVisible(); else { const c = activeClip(this.editor.project); if (c) this.editor.selectKeys(allKeys(c).map((k) => keyRef(k.nodeId, k.channel, k.t))); } }
 
   // ---------- geometry ----------
   resize() {
@@ -115,19 +169,31 @@ export class Timeline {
     this.canvas.style.width = w + 'px'; this.canvas.style.height = hh + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.w = w; this.h = hh;
+    if (this.frameWhenSized) this.frameAnimation();
     this.draw();
+  }
+  // Fit every keyframe of the active animation (all channels) into the key area, centred with
+  // padding. Same calculation as the automatic framing; also the ⤢ button / F in the timeline.
+  frameAnimation() {
+    const c = activeClip(this.editor.project);
+    const width = (this.w || 0) - LABEL_W;
+    if (width < 40) { this.frameWhenSized = true; return; }   // hidden (Model workspace, collapsed): frame once it has a size
+    const fit = fitTimeRange(keyRange(c), width, { defaultSpan: Math.max(1, c?.duration || 2) });
+    this.t0 = fit.t0; this.pxPerSec = fit.pxPerSec; this.scrollY = 0;
+    this.framedClip = c ? c.id : null;
+    this.frameWhenSized = false;
+  }
+  maybeAutoFrame() {
+    const c = activeClip(this.editor.project);
+    const id = c ? c.id : null;
+    if (id === this.framedClip) return;
+    this.frameAnimation();
   }
   xOf(time) { return LABEL_W + (time - this.t0) * this.pxPerSec; }
   timeAt(x) { return this.t0 + (x - LABEL_W) / this.pxPerSec; }
   rowAt(y) { const i = Math.floor((y - RULER_H + this.scrollY) / ROW_H); return i >= 0 && i < this.rows.length ? i : -1; }
   yOfRow(i) { return RULER_H + i * ROW_H - this.scrollY; }
-  fit() {
-    const c = activeClip(this.editor.project);
-    const end = c ? Math.max(0.5, clipEnd(c)) : 2;
-    this.pxPerSec = Math.max(20, (this.w - LABEL_W - 40) / end);
-    this.t0 = -20 / this.pxPerSec;
-    this.draw();
-  }
+  fit() { this.frameAnimation(); this.draw(); }
   buildRows() {
     const ed = this.editor;
     const c = activeClip(ed.project);
@@ -142,7 +208,8 @@ export class Timeline {
   }
 
   draw() {
-    if (!this.w) return;
+    if (!this.w || this.mode === 'graph') return;
+    this.maybeAutoFrame();
     const ed = this.editor, g = this.ctx;
     const c = activeClip(ed.project);
     this.buildRows();
@@ -298,7 +365,7 @@ export class Timeline {
       const c = activeClip(ed.project);
       if (!c) return;
       try { cv.setPointerCapture(e.pointerId); } catch {}
-      if (e.button === 1 || (e.button === 0 && e.altKey)) { this.drag = { mode: 'pan', x, y, t0: this.t0, sy: this.scrollY }; return; }
+      if (e.button === 1 || (e.button === 0 && e.altKey)) { this.drag = { mode: 'pan', x, y, t0: this.t0, sy: this.scrollY, rect: cv.getBoundingClientRect() }; return; }
       if (e.button === 2) {
         const hit = this.keyAt(x, y);
         if (hit) { if (!hit.refs.some((r) => ed.selectedKeys.has(r))) ed.selectKeys(hit.refs); this.keyMenu(e); }
@@ -306,7 +373,7 @@ export class Timeline {
       }
       if (e.button !== 0) return;
       if (y < RULER_H || x < LABEL_W) {
-        if (y < RULER_H && x >= LABEL_W) { ed.pause(); ed.setTime(this.snap(this.timeAt(x), e)); this.drag = { mode: 'scrub' }; }
+        if (y < RULER_H && x >= LABEL_W) { ed.pause(); ed.setTime(this.snap(this.timeAt(x), e)); this.drag = { mode: 'scrub', rect: cv.getBoundingClientRect() }; }
         else if (x < LABEL_W) { const i = this.rowAt(y); const r = this.rows[i]; if (r?.kind === 'node') ed.select(r.node.id, e.shiftKey ? 'add' : 'replace'); else if (r?.kind === 'summary') ed.selectKeys(allKeys(c).map((k) => keyRef(k.nodeId, k.channel, k.t))); }
         return;
       }
@@ -315,9 +382,10 @@ export class Timeline {
         if (e.shiftKey) ed.selectKeys(hit.refs, 'add');
         else if (e.ctrlKey || e.metaKey) ed.selectKeys(hit.refs, 'toggle');
         else if (!hit.refs.every((r) => ed.selectedKeys.has(r))) ed.selectKeys(hit.refs);
-        this.drag = { mode: 'move', x, startT: this.timeAt(x), moved: 0, lastDt: 0 };
+        if (!ed.beginKeyDrag()) return;
+        this.drag = { mode: 'move', x, startT: this.timeAt(x), moved: 0, lastDt: 0, rect: cv.getBoundingClientRect() };
       } else {
-        this.drag = { mode: 'box', x, y, cx: x, cy: y, add: e.shiftKey };
+        this.drag = { mode: 'box', x, y, cx: x, cy: y, add: e.shiftKey, rect: cv.getBoundingClientRect() };
         if (!e.shiftKey) ed.selectKeys([]);
       }
     }
@@ -327,8 +395,8 @@ export class Timeline {
     const ed = this.editor;
     if (this.drag === d) this.drag = null;
     try { if (d.pointerId != null && this.canvas.hasPointerCapture(d.pointerId)) this.canvas.releasePointerCapture(d.pointerId); } catch {}
-    if (cancel) { if (d.mode === 'move' && d.moved) ed.restoreCommitted(); }
-    else if (d.mode === 'move' && d.moved) ed.commit(t('hist.moveKeys'));
+    if (this._raf) { cancelAnimationFrame(this._raf); this._raf = 0; if (this._pending && !cancel) this.applyMove(d, this._pending); this._pending = null; }
+    if (d.mode === 'move') ed.endKeyDrag(!cancel && d.moved > 0, t('hist.moveKeys'));
     else if (d.mode === 'box') {
       const c = activeClip(ed.project);
       if (c) {
@@ -350,16 +418,14 @@ export class Timeline {
   bindMove() {
     const cv = this.canvas, ed = this.editor;
     const pos = (e) => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    // Pointer moves are coalesced to one update per animation frame; the drag owns the pointer
+    // (capture) so crossing frame lines, keys or rows — or leaving the canvas — never ends it.
     cv.addEventListener('pointermove', (e) => {
-      const { x, y } = pos(e);
       const d = this.drag;
-      if (!d) { const hit = this.keyAt(x, y); cv.style.cursor = hit ? 'pointer' : y < RULER_H && x > LABEL_W ? 'col-resize' : 'default'; return; }
-      if (d.mode === 'pan') { this.t0 = d.t0 - (x - d.x) / this.pxPerSec; this.scrollY = Math.max(0, d.sy - (y - d.y)); this.draw(); }
-      else if (d.mode === 'scrub') ed.setTime(Math.max(0, this.snap(this.timeAt(x), e)));
-      else if (d.mode === 'move') {
-        const dt = this.snapDelta(this.timeAt(x) - d.startT, e);
-        if (dt !== d.lastDt) { ed.moveSelectedKeys(dt - d.lastDt, false); d.lastDt = dt; d.moved++; }
-      } else if (d.mode === 'box') { d.cx = x; d.cy = y; this.draw(); }
+      if (!d) { const { x, y } = pos(e); const hit = this.keyAt(x, y); cv.style.cursor = hit ? 'pointer' : y < RULER_H && x > LABEL_W ? 'col-resize' : 'default'; return; }
+      const r = d.rect || cv.getBoundingClientRect();
+      this._pending = { x: e.clientX - r.left, y: e.clientY - r.top, alt: e.altKey };
+      if (!this._raf) this._raf = requestAnimationFrame(() => { this._raf = 0; const m = this._pending; this._pending = null; if (m && this.drag === d) this.applyMove(d, m); });
     });
     const up = () => { const d = this.drag; if (d) this.settle(d, false); };
     cv.addEventListener('pointerup', up);
@@ -370,7 +436,7 @@ export class Timeline {
       const { x } = pos(e);
       if (e.ctrlKey) {
         const tAt = this.timeAt(x);
-        this.pxPerSec = Math.max(10, Math.min(4000, this.pxPerSec * Math.exp(-e.deltaY * 0.0015)));
+        this.pxPerSec = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, this.pxPerSec * Math.exp(-e.deltaY * 0.0015)));
         this.t0 = tAt - (x - LABEL_W) / this.pxPerSec;
       } else if (e.shiftKey) this.t0 += e.deltaY / this.pxPerSec * 0.6;
       else this.scrollY = Math.max(0, this.scrollY + e.deltaY * 0.5);
@@ -383,12 +449,22 @@ export class Timeline {
       if (r?.kind === 'node' && x > LABEL_W && !this.keyAt(x, y)) { ed.setTime(this.snap(this.timeAt(x), e)); ed.insertKeyframe([r.node.id]); }
     });
   }
+  // one coalesced pointer move; `m` is relative to the canvas, movement is always measured from
+  // the drag start (total offset), never from the previous snapped position
+  applyMove(d, m) {
+    const ed = this.editor, e = { altKey: m.alt };
+    if (d.mode === 'pan') { this.t0 = d.t0 - (m.x - d.x) / this.pxPerSec; this.scrollY = Math.max(0, d.sy - (m.y - d.y)); this.draw(); }
+    else if (d.mode === 'scrub') ed.setTime(Math.max(0, this.snap(this.timeAt(m.x), e)));
+    else if (d.mode === 'move') {
+      const dt = this.snapDelta(this.timeAt(m.x) - d.startT, e);
+      if (dt !== d.lastDt) { ed.updateKeyDrag({ dt }); d.lastDt = dt; d.moved++; }
+    } else if (d.mode === 'box') { d.cx = m.x; d.cy = m.y; this.draw(); }
+  }
   snap(tm, e) { return e?.altKey ? snapTime(tm) : this.editor.timeOfFrame(Math.round(tm * this.editor.fps)); }
   snapDelta(dt, e) { return e?.altKey ? snapTime(dt) : Math.round(dt * this.editor.fps) / this.editor.fps; }
   keyMenu(e) {
     const ed = this.editor;
-    const anchor = this.head.lastChild;
-    const menu = showMenu(anchor, [
+    const menu = showMenu({ x: e.clientX, y: e.clientY }, [
       { head: t('tl.interp') },
       ...INTERPOLATIONS.map((i) => ({ label: t('interp.' + i), action: () => ed.setKeyInterpolation(i) })),
       { sep: true },
@@ -396,7 +472,7 @@ export class Timeline {
       { label: t('menu.copyKeys'), action: () => ed.copySelectedKeys() },
       { label: t('menu.deleteKeys'), action: () => ed.deleteSelectedKeys() },
     ]);
-    menu.style.position = 'fixed'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+    return menu;
   }
 }
 

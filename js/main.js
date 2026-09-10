@@ -329,7 +329,7 @@ function setupKeyboard(editor, viewport, timeline) {
     const action = early;
     if (!action) return;
     if (editor.interaction?.kind.startsWith('gizmo') || editor.interactionKind === 'panel-resize') editor.finishInteraction();
-    const inTimeline = document.activeElement === timeline.canvas;
+    const inTimeline = timeline.isFocused();
     const c = activeClip(editor.project);
     const handled = (() => {
       switch (action) {
@@ -347,7 +347,7 @@ function setupKeyboard(editor, viewport, timeline) {
         case 'edit.undo': editor.undo(); return true;
         case 'edit.redo': editor.redo(); return true;
         case 'edit.delete': if (inTimeline || (editor.selectedKeys.size && !editor.selection.size)) editor.deleteSelectedKeys(); else if (editor.pathPointSel) editor.removePathPoint(editor.pathPointSel.wpId, editor.pathPointSel.index); else editor.deleteSelected?.(); return true;
-        case 'edit.selectAll': if (inTimeline && c) editor.selectKeys(Object.entries(c.tracks).flatMap(([id, tr]) => [...tr.pos.map((k) => `${id}|pos|${k.t}`), ...tr.rot.map((k) => `${id}|rot|${k.t}`)])); else editor.selectAll(); return true;
+        case 'edit.selectAll': if (inTimeline && c) timeline.selectAllKeys(); else editor.selectAll(); return true;
         case 'edit.deselect': editor.deselectAll(); return true;
         case 'edit.rename': editor.renameActive?.(); return true;
         case 'edit.add': addMenu(editor, document.querySelector('#vp-toolbar .tb-group:last-child button')); return true;
@@ -363,8 +363,8 @@ function setupKeyboard(editor, viewport, timeline) {
         case 'anim.copyKeys': editor.copySelectedKeys(); return true;
         case 'anim.pasteKeys': editor.pasteKeys(); return true;
         case 'anim.duplicateKeys': editor.duplicateSelectedKeys(); return true;
-        case 'view.frameSelected': viewport.frameSelected(); return true;
-        case 'view.frameAll': viewport.frameAll(); return true;
+        case 'view.frameSelected': if (inTimeline) timeline.frameSelected(); else viewport.frameSelected(); return true;
+        case 'view.frameAll': if (inTimeline) timeline.frameAll(); else viewport.frameAll(); return true;
         case 'view.projection': viewport.cam.toggleProjection(); viewport.nav.syncBtn(); return true;
         case 'view.front': case 'view.back': case 'view.right': case 'view.left': case 'view.top': case 'view.bottom': viewport.setView(action.slice(5)); return true;
         case 'view.wasd': editor.setWasd(!editor.wasd); toast(t(editor.wasd ? 'toast.wasdOn' : 'toast.wasdOff'), 'info'); return true;

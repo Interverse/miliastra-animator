@@ -6,6 +6,11 @@ import { customDialog } from './dialogs.js';
 import { showShortcutsDialog } from './shortcuts.js';
 
 export function showSettingsDialog(editor) {
+  // the body is a function: makeDialog rebuilds it when the language changes (this is the
+  // dialog the language is changed from, so it must never show the previous language)
+  return customDialog({ title: () => t('settings.title'), body: () => buildSettings(editor), buttons: [{ label: () => t('btn.close'), primary: true, value: () => 'close' }] });
+}
+function buildSettings(editor) {
   const body = h('div', { class: 'settings' });
   const section = (title, ...items) => h('details', { class: 'settings-sec', open: true }, h('summary', { text: title }), ...items);
   // General
@@ -41,5 +46,5 @@ export function showSettingsDialog(editor) {
     btnRow(button(t('tip.shortcuts') + '…', () => showShortcutsDialog(), { tip: t('settings.shortcutsTip') })),
   ));
   body.append(hint(t('settings.scopeHint')));
-  return customDialog({ title: t('settings.title'), body, buttons: [{ label: t('btn.close'), primary: true, value: () => 'close' }] });
+  return body;
 }

@@ -65,6 +65,9 @@ export function buildCommands(ctx) {
     { id: 'anim.autoKey', group: 'anim', label: () => t('sc.anim.autoKey'), key: 'anim.autoKey', keywords: 'auto key automatic keyframes', checked: () => !!editor.project.settings.autoKey, run: () => editor.toggleAutoKey() },
     { id: 'anim.play', group: 'anim', label: () => t('sc.anim.play'), key: 'anim.play', keywords: 'play pause preview', run: () => editor.togglePlay() },
     { id: 'anim.rootMotion', group: 'anim', label: () => t('cmd.rootMotion'), keywords: 'root motion in place travel', when: () => !!clip() && editor.clipHasRootMotion(clip()), checked: () => clip()?.rootMotion !== false, run: () => editor.setClipRootMotion(clip().id, clip().rootMotion === false) },
+    { id: 'anim.frame', group: 'anim', label: () => t('graph.frameClip'), keywords: 'frame animation keyframes fit timeline zoom dope sheet', when: () => !!clip(), run: () => { editor.setMode('animate'); ctx.timeline?.frameAll(); } },
+    { id: 'anim.graph', group: 'anim', label: () => t('graph.mode.graph'), keywords: 'graph editor curve editor fcurve tangents handles', checked: () => ctx.timeline?.mode === 'graph', run: () => { editor.setMode('animate'); ctx.timeline?.setMode(ctx.timeline.mode === 'graph' ? 'dope' : 'graph'); } },
+    { id: 'anim.simplify', group: 'anim', label: () => t('graph.simplifyTitle'), keywords: 'simplify curves reduce keys keyframes dense imported baked', when: () => !!clip(), run: () => { editor.setMode('animate'); ctx.timeline?.setMode('graph'); ctx.timeline?.graph.simplifyDialog(); } },
     { id: 'anim.addPath', group: 'anim', label: () => t('path.addManual'), keywords: 'waypath path movement', run: () => editor.addWaypath('manual') },
     { id: 'anim.workspace', group: 'anim', label: () => t('cmd.goAnimate'), keywords: 'animate workspace timeline keyframes', run: go('animate') },
     // ---- export ----

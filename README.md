@@ -171,6 +171,102 @@ Other organising principles:
   `tools/test-ui-shell.mjs` checks the workspace/panel matrix, shortcut labels and collisions, the
   command registry ↔ menu wiring and the new keys in every locale.
 
+## Interaction and UI plumbing
+
+- **Language changes re-render everything visible.** Panels subscribe with `onLangChange`;
+  dialogs built with `makeDialog` accept functions for title, body and button labels and
+  rebuild themselves in place — including the Settings dialog the language is changed from —
+  without touching selection, playhead, zoom, filter text or history. No translated text is
+  stored in editor state; only keys.
+- **One layering scale.** `--z-hud / handles / drop / drawer / popover / float / start / tour /
+  palette / toast` in `css/style.css`; nothing sets an ad-hoc z-index. Menus (`showMenu`) render
+  in the fixed overlay layer on `document.body` and are placed by `placePopover()`
+  (`js/ui/popover-place.js`): below their anchor, flipped above near the bottom edge, pulled
+  inside at the sides, following scroll; context menus take a pointer position. The pointerdown
+  that closes a menu is swallowed so it never starts a drag underneath.
+- **Filter field.** The Graph Editor's search input is created once above the rerendered rows
+  (shared `input[type="search"]` styling), so typing keeps focus, caret and selection; the
+  global shortcut handler ignores editable elements.
+- **Drags are transactions.** `editor.beginKeyDrag()` snapshots the selected keys' tracks on
+  pointer-down; every pointer move re-applies the TOTAL offset from the drag start onto that
+  snapshot (`updateKeyDrag`), so snapping cannot stall, keys passed over reappear, and release
+  (`endKeyDrag`) commits once — Escape/cancel restores with no history entry. Both the Dope
+  Sheet and the Graph Editor hold pointer capture, cache the canvas rect for the drag, and
+  coalesce pointer moves to one update per animation frame. Time-moving interactions
+  (`timeline-*`, `graph-*`) are the only ones `setTime` leaves running, so scrubbing never
+  terminates itself when the playhead crosses a frame.
+
+## Auto-framing the animation view
+
+Whenever a different animation becomes active — switching in the selector, Add/Duplicate,
+Import animation, opening or recovering a project — the Dope Sheet fits every keyframe of that
+clip (all channels: bones, objects, IK targets, poles, retargeted tracks, hidden or collapsed
+rows included) into the key area, centred, with padding, at a zoom that stays usable: a single
+key or a 0.03 s clip gets at least a 0.5 s window, a minutes-long clip is never truncated
+(`js/ui/timeline-fit.js`, pure and unit-tested). It is a view operation only: keys, duration,
+playhead and playback are untouched. The fit uses the real canvas width; a timeline that is
+hidden when the clip changes (Model workspace, collapsed) frames as soon as it has a size.
+After that, pan and zoom belong to the user — moving, adding or deleting keys, scrubbing,
+playing or selecting never reset them. The ⤢ button, F/Shift+F with the timeline focused, and
+the palette's *Frame animation* run the same calculation on demand. The Graph Editor frames
+its own view on clip change (or restores the view last saved for that clip) and keeps a
+separate pan/zoom afterwards. Tests: `node tools/test-autoframe.mjs`.
+
+## Graph Editor (curve editor)
+
+The animation area has two views of the same keyframes, switched in its header:
+**Dope Sheet** (when keys occur) and **Graph Editor** (how values change between them). They
+share the active animation, the playhead, the key selection, Auto Key and the transport; the
+choice is remembered as an editor preference.
+
+- **One data model.** The graph edits `clip.tracks` through the same editor methods as the
+  Dope Sheet (`selectCurvePoints`, `moveCurvePoints`, `setPointValue/Time/Tangent`,
+  `setKeyHandles`, `simplifyCurves` in `js/ui/editor.js`). A graph point is one component of a
+  key (`nodeId|ch|t|comp`); selecting it selects the key in the Dope Sheet too. Every edit
+  re-evaluates the pose, the inspector and the viewport immediately; a continuous drag is one
+  undo entry (transient updates while dragging, one `commit` on release, Escape restores).
+- **Channels** come from `channelsOf()` in `js/anim/curves.js`: Position X/Y/Z and
+  Rotation X/Y/Z for every node with keys — bones, objects, IK targets and pole targets
+  (targets/poles are position-only). `CHANNEL_DEFS` is the one place to add future animatable
+  properties. The channel list filters, collapses per item, hides, solos, and marks bones whose
+  rotation is currently solved by an IK constraint.
+- **Interpolation and handles.** `linear`, `step` and `ease` are the existing per-key modes.
+  An eased segment is a cubic Hermite whose end slopes come from the keys' handles
+  (`key.h = { m: 'auto' | 'flat' | 'aligned' | 'free', in, out }`, slopes in units per second).
+  A key without `h` has flat handles — exactly the smoothstep the editor always produced, so old
+  projects play back unchanged. *Automatic* smooths through the neighbours without overshoot
+  (flat at extrema and at the ends), *Flat* eases in and out, *Aligned* keeps both handles in a
+  line, *Free* allows a kink. Handles are unweighted (drag changes the slope), which keeps the
+  curve a function of time. Nothing is offered that export cannot bake.
+- **Rotation channels are unwrapped.** Curves plot the authored angles (`key.e`): 0 → 720° rises
+  through 720 and is two turns; dragging or typing can pass through any number of revolutions.
+  Quaternion-only keys (IK, imported) get a continuous Euler chain from the previous key; the
+  first value edit writes it into the track (`ensureEulerTrack`). Never shortest-arc.
+- **View.** Time on X (frames or seconds, as the timeline), value on Y in metres or degrees;
+  Normalize maps each channel to ±1 for comparing units (display only). Wheel zooms both axes
+  (Shift: vertical only, Ctrl: horizontal only, Alt: pan), middle/Alt-drag pans, Frame
+  selected / all / animation, Reset view. Snapping: frames (default), other keys' times, value
+  steps from Settings → Input; Alt bypasses. Keys closer than 0.03 s still merge (`insertKey`).
+- **Editing.** Click / Shift / Ctrl / box selection, free drag (Shift locks to the dominant
+  axis), numeric Time/Value fields for the active point, right-click menu (insert key at the
+  cursor, delete, duplicate, copy/paste, interpolation, handle type, flatten, frame), double-click
+  a curve to insert a key at that time. A vertical drag only changes channels of the grabbed
+  unit, so metres and degrees never mix; multi-key time drags keep relative timing.
+- **Simplify curves** (`simplifyKeys`): tolerance-based key removal that keeps first/last keys,
+  stepped keys and interpolation boundaries, pauses, direction changes, and — by working on
+  unwrapped angles — the number and direction of turns. Undoable; the dialog previews
+  `before → after`.
+- **Export** is unchanged: `bakeClip` samples the evaluated pose (Hermite included) and only
+  subdivides where motion is not linear, so a straight A→B segment stays one movement; the
+  49-point limit and compression apply after.
+- **Persistence.** Handles live on the keys (project data). Graph UI state (zoom/pan, hidden
+  and solo channels, collapsed groups, active channel, filter) is saved in the project's `ui`
+  record; the Dope Sheet/Graph choice is a preference. Nothing changes the `.gia`.
+- Tests: `node tools/test-graph.mjs` (Hermite == smoothstep, handle modes, 0→450/720/1080/−720°
+  curves, IK target/pole channels driving the rig, drag/undo/redo/copy-paste/numeric edits,
+  Auto Key and inspector sync, box selection geometry, simplification incl. turn counts,
+  imported clips, save/reopen, baking and the path limit).
+
 ## Contextual hints are derived, never remembered
 
 `js/ui/workflow.js` is the only place that decides what a project should do next. It reads the

@@ -8,6 +8,7 @@ import { v3, quat, xf } from '../core/math.js';
 import { History } from '../core/history.js';
 import { saveRecovery, clearRecovery, loadPrefs, savePrefs, updatePrefs, migrateNavPrefs, putProject, getProject, deleteProject, newProjectId, isQuotaError, PROJECT_SCHEMA } from '../core/persistence.js';
 import { createClip, uniqueClipName, duplicateClip, getClip, activeClip, insertKey, keyRef, moveKeys, deleteKeys, copyKeys, pasteKeys, setInterpolation, clipEnd, track, evaluateKeys, snapTime } from '../anim/clips.js';
+import { parsePointRef, pointRef, ensureEuler, trackEuler, keyValue, setKeyValue, setKeyTangent, setKeyHandleMode, simplifyKeys, keySlopes } from '../anim/curves.js';
 import { evaluatePose, rootMotionNode, clipHasRootMotion } from '../anim/evaluate.js';
 import { createConstraint, chainBones } from '../anim/ik.js';
 import { createWaypath, evaluateWaypath, bakeWaypathKeys, pathDuration } from '../anim/waypath.js';
@@ -52,7 +53,12 @@ export class Editor {
     this.selection = new Set();
     this.active = null;
     this.selectedKeys = new Set();
+    // Graph Editor: which components of the selected keys are selected (key ref → Set of 0..2).
+    // Keys without an entry count as "all components" so the Dope Sheet and Graph agree.
+    this.curveComps = new Map();
     this.keyClipboard = null;
+    // Graph Editor UI state (saved with the project's ui record, never in the .gia)
+    this.graphUI = defaultGraphUI();
     this.mode = 'rig';
     this.tool = 'select';
     this.space = 'world';
@@ -326,7 +332,7 @@ export class Editor {
     this.createdAt = rec.createdAt || null;
     this.lastSavedAt = rec.modifiedAt || null;
     this.importInfo = null;
-    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.playing = false;
+    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.curveComps = new Map(); this.playing = false;
     this.applyOutlinerState(rec.ui);
     this.resetTransientState();
     this._committedProjectJson = null;
@@ -362,12 +368,13 @@ export class Editor {
     this.emit('projects');
   }
   // ---------- outliner disclosure ----------
-  outlinerState() { return { expandedDecos: [...this.expandedDecos], collapsed: [...this.collapsed] }; }
+  outlinerState() { return { expandedDecos: [...this.expandedDecos], collapsed: [...this.collapsed], graph: serializeGraphUI(this.graphUI) }; }
   applyOutlinerState(ui) {
     this.expandedDecos = new Set(Array.isArray(ui?.expandedDecos) ? ui.expandedDecos : []);
     this.collapsed = new Set(Array.isArray(ui?.collapsed) ? ui.collapsed : []);
+    this.graphUI = parseGraphUI(ui?.graph);
   }
-  resetOutlinerState() { this.expandedDecos = new Set(); this.collapsed = new Set(); }
+  resetOutlinerState() { this.expandedDecos = new Set(); this.collapsed = new Set(); this.graphUI = defaultGraphUI(); }
   // a row is "open" when its child nodes are shown and (if it has decorations) they are shown too
   isOutlinerOpen(node) {
     const decs = node.type === 'object' ? node.decorations?.length || 0 : 0;
@@ -766,7 +773,7 @@ export class Editor {
     this.emit('selection');
   }
   selectAll() { this.select(this.project.nodes.filter((n) => !n.hidden).map((n) => n.id)); }
-  deselectAll() { this.select([]); this.selectedKeys = new Set(); this.emit('keys'); }
+  deselectAll() { this.select([]); this.selectedKeys = new Set(); this.curveComps = new Map(); this.emit('keys'); }
   setActive(id) { if (id && !this.selection.has(id)) this.selection.add(id); this.active = id; this.emit('selection'); }
   activeNode() { return this.active ? getNode(this.project, this.active) : null; }
   selectedNodes() { return [...this.selection].map((id) => getNode(this.project, id)).filter(Boolean); }
@@ -802,7 +809,7 @@ export class Editor {
     this.beginProjectSwitch();
     this.project = createProject();
     this.giaBytes = null; this.giaName = null; this.importInfo = null;
-    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.playing = false;
+    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.curveComps = new Map(); this.playing = false;
     this.resetOutlinerState();
     this.projectId = null; this.projectName = ''; this.createdAt = null;
     this.resetTransientState();
@@ -832,7 +839,7 @@ export class Editor {
     this.project.settings = { ...createProject().settings, ...(data.project.settings || {}) };
     if (data.gia) { const bin = atob(data.gia); const u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); this.giaBytes = u8; } else this.giaBytes = null;
     this.giaName = data.giaName || null;
-    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.playing = false;
+    this.selection = new Set(); this.active = null; this.selectedKeys = new Set(); this.curveComps = new Map(); this.playing = false;
     this.applyOutlinerState(data.ui);
     this.projectId = null; this.projectName = data.projectName || this.defaultProjectName(); this.createdAt = null;
     this.resetTransientState();
@@ -1246,7 +1253,7 @@ export class Editor {
     this.commit(t('hist.renameClip'));
   }
   duplicateClip(id) { const c = getClip(this.project, id); if (!c) return; const d = duplicateClip(this.project, c); this.project.activeClipId = d.id; this.commit(t('hist.duplicateClip')); this.emit('time'); return d; }
-  setActiveClip(id) { this.finishInteraction(); this.clearPoseOverrides(); this.project.activeClipId = id; this.selectedKeys = new Set(); this.playing = false; this.invalidate(); this.commit(t('hist.switchClip')); this.emit('time'); }
+  setActiveClip(id) { this.finishInteraction(); this.clearPoseOverrides(); this.project.activeClipId = id; this.selectedKeys = new Set(); this.curveComps = new Map(); this.playing = false; this.invalidate(); this.commit(t('hist.switchClip')); this.emit('time'); }
   setClipProps(id, patch) { const c = getClip(this.project, id); if (!c) return; Object.assign(c, patch); if (patch.duration != null) c.playhead = Math.min(c.playhead, c.duration); this.commit(t('hist.clip')); this.emit('time'); }
   setTime(tm, emitChange = true) {
     const c = activeClip(this.project);
@@ -1255,7 +1262,8 @@ export class Editor {
     if (Math.abs(next - (c.playhead || 0)) > 1e-9) {
       // a frame change ends any transform first (its drag-start values belong to the old
       // frame) and discards unkeyed pose edits; timeline drags are the ones moving time
-      if (this.interaction && !this.interaction.kind.startsWith('timeline')) this.finishInteraction();
+      // (the Dope Sheet and Graph Editor scrub/drag interactions are the ones moving time)
+      if (this.interaction && !/^(timeline|graph)-/.test(this.interaction.kind)) this.finishInteraction();
       this.clearPoseOverrides();
     }
     c.playhead = next;
@@ -1310,12 +1318,13 @@ export class Editor {
     return !!(tr && tr[ch].some((k) => Math.abs(k.t - Number(ts)) < 1e-6));
   }
   selectKeys(refs, mode = 'replace') {
-    if (mode === 'replace') this.selectedKeys = new Set(refs);
-    else if (mode === 'add') for (const r of refs) this.selectedKeys.add(r);
+    // whole keys: every component (the Graph Editor narrows with selectCurvePoints)
+    if (mode === 'replace') { this.selectedKeys = new Set(refs); this.curveComps = new Map(); }
+    else if (mode === 'add') for (const r of refs) { this.selectedKeys.add(r); this.curveComps.delete(r); }
     else for (const r of refs) { if (this.selectedKeys.has(r)) this.selectedKeys.delete(r); else this.selectedKeys.add(r); }
     this.emit('keys');
   }
-  deleteSelectedKeys() { const c = activeClip(this.project); if (!c || !this.selectedKeys.size) return; deleteKeys(c, this.selectedKeys); this.selectedKeys = new Set(); this.clearPoseOverrides(); this.commit(t('hist.deleteKeys')); this.emit('keys'); }
+  deleteSelectedKeys() { const c = activeClip(this.project); if (!c || !this.selectedKeys.size) return; deleteKeys(c, this.selectedKeys); this.selectedKeys = new Set(); this.curveComps = new Map(); this.clearPoseOverrides(); this.commit(t('hist.deleteKeys')); this.emit('keys'); }
   moveSelectedKeys(dt, commit = true) { const c = activeClip(this.project); if (!c || !this.selectedKeys.size) return; this.selectedKeys = moveKeys(c, this.selectedKeys, dt); if (commit) this.commit(t('hist.moveKeys')); else this.transient(); this.emit('keys'); }
   copySelectedKeys() { const c = activeClip(this.project); if (!c) return; this.keyClipboard = copyKeys(c, this.selectedKeys); if (this.keyClipboard) toast(t('toast.copiedKeys', { n: this.keyClipboard.length }), 'info', 1500); }
   pasteKeys() { const c = activeClip(this.project); if (!c || !this.keyClipboard) return; this.selectedKeys = pasteKeys(c, this.keyClipboard, this.time); this.commit(t('hist.pasteKeys')); this.emit('keys'); }
@@ -1330,6 +1339,203 @@ export class Editor {
   }
   setKeyInterpolation(interp) { const c = activeClip(this.project); if (!c || !this.selectedKeys.size) return; setInterpolation(c, this.selectedKeys, interp); this.commit(t('hist.interp')); this.emit('keys'); }
   toggleAutoKey() { this.project.settings.autoKey = !this.project.settings.autoKey; this.commit(t('hist.autoKey')); this.emit('time'); }
+
+  // ---------- Graph Editor (same keys as the Dope Sheet, per component) ----------
+  // Select curve points. A point is one component of a key; the key itself joins
+  // selectedKeys so the Dope Sheet highlights it too.
+  selectCurvePoints(refs, mode = 'replace') {
+    if (mode === 'replace') { this.selectedKeys = new Set(); this.curveComps = new Map(); }
+    for (const r of refs) {
+      const { keyRef: kr, comp } = parsePointRef(r);
+      const set = this.curveComps.get(kr) || new Set();
+      if (mode === 'toggle' && set.has(comp)) { set.delete(comp); if (!set.size) { this.curveComps.delete(kr); this.selectedKeys.delete(kr); } else this.curveComps.set(kr, set); continue; }
+      set.add(comp); this.curveComps.set(kr, set); this.selectedKeys.add(kr);
+    }
+    this.emit('keys');
+  }
+  isPointSelected(kr, comp) { if (!this.selectedKeys.has(kr)) return false; const c = this.curveComps.get(kr); return !c || c.has(comp); }
+  selectedPoints() {
+    const out = [];
+    for (const kr of this.selectedKeys) { const comps = this.curveComps.get(kr) || new Set([0, 1, 2]); for (const c of comps) out.push(kr + '|' + c); }
+    return out;
+  }
+  // the key object behind a key ref (nodeId|ch|t) in the active clip
+  keyOf(kr) {
+    const clip = activeClip(this.project);
+    if (!clip) return null;
+    const [nodeId, ch, ts] = kr.split('|');
+    const keys = clip.tracks[nodeId]?.[ch];
+    if (!keys) return null;
+    const idx = keys.findIndex((k) => Math.abs(k.t - Number(ts)) < 1e-6);
+    return idx < 0 ? null : { key: keys[idx], keys, idx, nodeId, ch };
+  }
+  // A rotation track must carry authored angles before a curve value can be edited.
+  ensureEulerTrack(nodeId) {
+    const clip = activeClip(this.project);
+    const keys = clip?.tracks[nodeId]?.rot;
+    if (!keys) return false;
+    const node = getNode(this.project, nodeId);
+    return ensureEuler(keys, node?.rotE || null);
+  }
+  // Move the selected points: dt seconds (all selected keys), dv in the unit of `unit`
+  // ('m' | 'deg'; only channels of that unit take the value change, so metres and degrees
+  // never mix). commit=false during a drag (one history entry at the end).
+  moveCurvePoints({ dt = 0, dv = 0, unit = null } = {}, commit = true) {
+    const clip = activeClip(this.project);
+    if (!clip || !this.selectedKeys.size) return;
+    if (this.playing) this.pause();
+    if (dv) {
+      const touched = new Set();
+      for (const kr of this.selectedKeys) {
+        const rec = this.keyOf(kr);
+        if (!rec) continue;
+        const u = rec.ch === 'rot' ? 'deg' : 'm';
+        if (unit && u !== unit) continue;
+        if (rec.ch === 'rot') this.ensureEulerTrack(rec.nodeId);
+        const comps = this.curveComps.get(kr) || new Set([0, 1, 2]);
+        for (const c of comps) setKeyValue(rec.key, rec.ch, c, keyValue(rec.key, rec.ch, c) + dv);
+        touched.add(rec.nodeId);
+      }
+      if (touched.size) this.clearPoseOverrides([...touched]); // the edited curve is authoritative
+    }
+    if (dt) {
+      // remap the component selection onto the moved keys
+      const comps = new Map();
+      for (const [kr, set] of this.curveComps) { const [n, ch, ts] = kr.split('|'); comps.set(keyRef(n, ch, snapTime(Number(ts) + dt)), set); }
+      this.selectedKeys = moveKeys(clip, this.selectedKeys, dt);
+      this.curveComps = new Map([...comps].filter(([kr]) => this.selectedKeys.has(kr)));
+    }
+    if (commit) this.commit(t('hist.editCurve')); else this.transient();
+    this.emit('keys');
+  }
+  setPointValue(ref, value, commit = true) {
+    const { keyRef: kr, comp } = parsePointRef(ref);
+    const rec = this.keyOf(kr);
+    if (!rec) return;
+    if (rec.ch === 'rot') this.ensureEulerTrack(rec.nodeId);
+    setKeyValue(rec.key, rec.ch, comp, value);
+    this.clearPoseOverrides([rec.nodeId]);
+    if (commit) this.commit(t('hist.editCurve')); else this.transient();
+    this.emit('keys');
+  }
+  setPointTime(ref, time) {
+    const { keyRef: kr, nodeId, ch, comp } = parsePointRef(ref);
+    const rec = this.keyOf(kr);
+    if (!rec) return;
+    const dt = Math.max(0, snapTime(time)) - rec.key.t;
+    if (Math.abs(dt) < 1e-9) return;
+    const set = this.curveComps.get(kr);
+    const clip = activeClip(this.project);
+    const moved = moveKeys(clip, new Set([kr]), dt);
+    this.selectedKeys.delete(kr); for (const r of moved) this.selectedKeys.add(r);
+    this.curveComps.delete(kr); if (set) for (const r of moved) this.curveComps.set(r, set);
+    this.commit(t('hist.moveKeys')); this.emit('keys');
+    void nodeId; void ch; void comp;
+  }
+  // Tangent handle of one point: side 'in' | 'out', slope in units per second.
+  setPointTangent(ref, side, slope, { free = false, commit = true } = {}) {
+    const { keyRef: kr, comp } = parsePointRef(ref);
+    const rec = this.keyOf(kr);
+    if (!rec) return;
+    if (rec.ch === 'rot') this.ensureEulerTrack(rec.nodeId);
+    const h = rec.key.h;
+    if (!h || h.m === 'auto' || h.m === 'flat') setKeyHandleMode(rec.keys, rec.idx, rec.ch, 'aligned', rec.ch === 'rot' ? trackEuler(rec.keys) : null);
+    setKeyTangent(rec.key, side, comp, slope, { free });
+    if (commit) this.commit(t('hist.tangent')); else this.transient();
+    this.emit('keys');
+  }
+  // Handle mode of every selected key ('auto' | 'flat' | 'aligned' | 'free'); 'linear' and
+  // 'step' are interpolation modes and go through setKeyInterpolation.
+  setKeyHandles(mode) {
+    const clip = activeClip(this.project);
+    if (!clip || !this.selectedKeys.size) return;
+    if (mode === 'linear' || mode === 'step' || mode === 'ease') { this.setKeyInterpolation(mode); return; }
+    for (const kr of this.selectedKeys) {
+      const rec = this.keyOf(kr);
+      if (!rec) continue;
+      if (rec.ch === 'rot') this.ensureEulerTrack(rec.nodeId);
+      setKeyHandleMode(rec.keys, rec.idx, rec.ch, mode, rec.ch === 'rot' ? trackEuler(rec.keys) : null);
+      if (rec.key.i !== 'ease' && rec.key.i !== 'step') rec.key.i = 'ease'; // handles only shape eased segments
+    }
+    this.commit(t('hist.tangent')); this.emit('keys');
+  }
+  flattenTangents() {
+    for (const kr of this.selectedKeys) { const rec = this.keyOf(kr); if (rec) rec.key.h = { m: 'flat' }; }
+    this.commit(t('hist.tangent')); this.emit('keys');
+  }
+  // effective slopes of a point (for drawing handles)
+  pointSlopes(ref) {
+    const { keyRef: kr, comp } = parsePointRef(ref);
+    const rec = this.keyOf(kr);
+    if (!rec) return null;
+    return keySlopes(rec.keys, rec.idx, rec.ch, comp, rec.ch === 'rot' ? trackEuler(rec.keys) : null);
+  }
+  // Tolerance-based curve simplification of the given nodes (all, when null). Undoable.
+  simplifyCurves({ nodeIds = null, tolPos = 0.005, tolRot = 0.5 } = {}, { dryRun = false } = {}) {
+    const clip = activeClip(this.project);
+    if (!clip) return { before: 0, after: 0 };
+    let before = 0, after = 0;
+    const plan = [];
+    for (const [nodeId, tr] of Object.entries(clip.tracks)) {
+      if (nodeIds && !nodeIds.includes(nodeId)) continue;
+      for (const ch of ['pos', 'rot']) {
+        const keys = tr[ch];
+        if (!keys?.length) continue;
+        const node = getNode(this.project, nodeId);
+        const es = ch === 'rot' ? trackEuler(keys, node?.rotE || null) : null;
+        const res = simplifyKeys(keys, ch, ch === 'rot' ? tolRot : tolPos, es);
+        before += keys.length; after += res.keys.length;
+        plan.push({ nodeId, ch, keys: res.keys, es, all: keys });
+      }
+    }
+    if (dryRun) return { before, after };
+    for (const p of plan) {
+      if (p.ch === 'rot') p.all.forEach((k, i) => { if (!k.e) k.e = p.es[i]; });
+      clip.tracks[p.nodeId][p.ch] = p.keys;
+    }
+    this.selectedKeys = new Set(); this.curveComps = new Map();
+    this.clearPoseOverrides();
+    this.commit(t('hist.simplifyCurves')); this.emit('keys');
+    return { before, after };
+  }
+  setGraphUI(patch) { Object.assign(this.graphUI, patch); this.emit('graphui'); this.scheduleSave(); }
+
+  // ---------- key drag transaction (Dope Sheet and Graph Editor) ----------
+  // pointer-down snapshots the tracks of the selected keys; every pointer move puts the
+  // snapshot back and applies the TOTAL offset from the drag start — never the previous
+  // quantised step — so snapping cannot stall or drift, keys that merge while passing over
+  // others reappear when the pointer moves on, and release commits exactly once.
+  beginKeyDrag() {
+    const clip = activeClip(this.project);
+    if (!clip || !this.selectedKeys.size) return false;
+    if (this.playing) this.pause();
+    const refs = [...this.selectedKeys];
+    const snap = new Map();
+    for (const kr of refs) { const [n, ch] = kr.split('|'); const tk = n + '|' + ch; if (!snap.has(tk) && clip.tracks[n]?.[ch]) snap.set(tk, clip.tracks[n][ch].map(cloneKey)); }
+    this._keyDrag = { clipId: clip.id, refs, comps: new Map([...this.curveComps].map(([k, v]) => [k, new Set(v)])), snap };
+    return true;
+  }
+  restoreKeyDrag() {
+    const d = this._keyDrag;
+    const clip = d && getClip(this.project, d.clipId);
+    if (!clip) return false;
+    for (const [tk, keys] of d.snap) { const [n, ch] = tk.split('|'); track(clip, n, true)[ch] = keys.map(cloneKey); }
+    this.selectedKeys = new Set(d.refs);
+    this.curveComps = new Map([...d.comps].map(([k, v]) => [k, new Set(v)]));
+    return true;
+  }
+  updateKeyDrag({ dt = 0, dv = 0, unit = null } = {}) {
+    if (!this.restoreKeyDrag()) return;
+    if (dt || dv) this.moveCurvePoints({ dt, dv, unit }, false);
+    else { this.invalidate(); this.transient(); this.emit('keys'); }
+  }
+  endKeyDrag(commit, label = t('hist.editCurve')) {
+    if (!this._keyDrag) return;
+    if (commit) this.commit(label);
+    else { this.restoreKeyDrag(); this.clearPoseOverrides(); this.invalidate(); this.transient(); }
+    this._keyDrag = null;
+    this.emit('keys');
+  }
 
   // ---------- rigging ----------
   addConstraint(boneId) {
@@ -1565,6 +1771,13 @@ function bytesToBase64(u8) {
   for (let i = 0; i < u8.length; i += CHUNK) s += String.fromCharCode(...u8.subarray(i, i + CHUNK));
   return btoa(s);
 }
+
+const cloneKey = (k) => ({ ...k, v: k.v.slice(), ...(k.e ? { e: k.e.slice() } : {}), ...(k.h ? { h: { m: k.h.m, ...(k.h.in ? { in: k.h.in.slice() } : {}), ...(k.h.out ? { out: k.h.out.slice() } : {}) } } : {}) });
+
+// Graph Editor UI state: per-project, saved in the project's ui record (not in the .gia)
+export function defaultGraphUI() { return { normalize: false, hidden: new Set(), solo: null, collapsed: new Set(), active: null, filter: '', view: null }; }
+export function serializeGraphUI(g) { return g ? { normalize: !!g.normalize, hidden: [...g.hidden], solo: g.solo || null, collapsed: [...g.collapsed], active: g.active || null, filter: g.filter || '', view: g.view || null } : null; }
+export function parseGraphUI(u) { const g = defaultGraphUI(); if (!u) return g; g.normalize = !!u.normalize; g.hidden = new Set(Array.isArray(u.hidden) ? u.hidden : []); g.solo = u.solo || null; g.collapsed = new Set(Array.isArray(u.collapsed) ? u.collapsed : []); g.active = u.active || null; g.filter = u.filter || ''; g.view = u.view && typeof u.view === 'object' ? { ...u.view } : null; return g; }
 
 export function downloadBytes(bytes, name, type = 'application/octet-stream') {
   if (typeof document === 'undefined') return; // headless (tests): nothing to download to

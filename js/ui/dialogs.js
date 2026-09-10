@@ -2,6 +2,11 @@
 import { t } from '../i18n/i18n.js';
 import { BackdropGuard } from './backdrop-guard.js';
 
+import { onLangChange } from '../i18n/i18n.js';
+import { placePopover } from './popover-place.js';
+
+const val = (x, ...a) => (typeof x === 'function' ? x(...a) : x);
+
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -9,23 +14,33 @@ function el(tag, cls, text) {
   return e;
 }
 
+// title, body and button labels may be functions: they are re-evaluated when the language
+// changes while the dialog is open (the body is rebuilt in place, buttons relabelled), so a
+// dialog never shows stale text — including the Settings dialog the language is changed from.
 function makeDialog({ title, body, buttons, setup = null }) {
   const dlg = document.createElement('dialog');
-  const head = el('div', 'dlg-head', title);
+  const head = el('div', 'dlg-head', val(title));
   const bodyEl = el('div', 'dlg-body');
-  if (typeof body === 'string') bodyEl.textContent = body; else if (body) bodyEl.append(body);
+  const fillBody = () => { bodyEl.innerHTML = ''; const b = val(body); if (typeof b === 'string') bodyEl.textContent = b; else if (b) bodyEl.append(b); };
+  fillBody();
   const foot = el('div', 'dlg-foot');
   dlg.append(head, bodyEl, foot);
   document.body.appendChild(dlg);
   return new Promise((resolve) => {
     let done = false;
-    const finish = (v) => { if (done) return; done = true; try { dlg.close(); } catch {} dlg.dispatchEvent(new Event('close')); dlg.remove(); resolve(v); };
+    const finish = (v) => { if (done) return; done = true; offLang(); try { dlg.close(); } catch {} dlg.dispatchEvent(new Event('close')); dlg.remove(); resolve(v); };
+    const btns = [];
     for (const b of buttons) {
-      const btn = el('button', b.cls || 'secondary', b.label);
+      const btn = el('button', b.cls || 'secondary', val(b.label));
       btn.addEventListener('click', () => finish(b.value(bodyEl)));
-      foot.appendChild(btn);
+      foot.appendChild(btn); btns.push([btn, b]);
       if (b.primary) btn.classList.remove('secondary');
     }
+    const offLang = onLangChange(() => {
+      head.textContent = val(title);
+      for (const [btn, b] of btns) btn.textContent = val(b.label);
+      if (typeof body === 'function') fillBody();
+    });
     dlg.addEventListener('cancel', (e) => { e.preventDefault(); if (!guard.blocked) finish(null); });
     // backdrop click = genuine pointerdown + pointerup on the backdrop; drags that end over it,
     // file drags, lost pointer capture, blur and tab switches never close the dialog
@@ -99,28 +114,56 @@ export function toast(message, kind = 'success', ms = 2600) {
 }
 
 // Simple contextual menu anchored to an element; items: [{label, action, disabled, head, sep}]
+// Menus render in the fixed overlay layer (document.body, --z-popover), never inside the
+// toolbar or panel that opened them, so no stacking context, overflow or canvas can cover
+// or clip them. `anchor` is an element (menu below it, flipped above when there is more room)
+// or a pointer { x, y } (context menus). Closed by an outside pointerdown — which is swallowed,
+// so closing a menu never starts a drag underneath — Escape, window blur, resize or scroll.
 export function showMenu(anchor, items) {
-  document.querySelectorAll('.menu').forEach((m) => m.remove());
+  closeMenus();
   const menu = el('div', 'menu');
+  menu.setAttribute('role', 'menu');
   for (const it of items) {
     if (it.sep) { menu.appendChild(el('div', 'sep')); continue; }
     if (it.head) { menu.appendChild(el('div', 'menu-head', it.head)); continue; }
     const b = el('button', null);
+    b.setAttribute('role', 'menuitem');
     const icon = it.checked === true ? '✓' : it.checked === false ? '' : (it.icon || '');
     b.append(el('span', 'menu-ico', icon), el('span', 'menu-label', it.label));
     if (it.key) b.append(el('span', 'menu-key', it.key));
     if (it.checked != null) b.classList.add(it.checked ? 'checked' : 'unchecked');
     if (it.disabled) b.disabled = true;
-    b.addEventListener('click', () => { menu.remove(); it.action?.(); });
+    if (it.tip) b.title = it.tip;
+    b.addEventListener('click', () => { close(); it.action?.(); });
     menu.appendChild(b);
   }
-  const host = anchor.closest('.tb-group') || anchor.parentElement;
-  host.style.position = 'relative';
-  if (host.id === 'menubar') menu.style.left = anchor.offsetLeft + 'px';
-  host.appendChild(menu);
-  // keep the menu inside the window
-  requestAnimationFrame(() => { const r = menu.getBoundingClientRect(); if (r.right > window.innerWidth - 8) menu.style.left = (parseFloat(menu.style.left) || 0) - (r.right - window.innerWidth + 8) + 'px'; });
-  const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); window.removeEventListener('pointerdown', close, true); } };
-  setTimeout(() => window.addEventListener('pointerdown', close, true), 0);
+  document.body.appendChild(menu);
+  const position = () => {
+    const a = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : { x: anchor?.x ?? 0, y: anchor?.y ?? 0 };
+    const pos = placePopover(a, { w: menu.offsetWidth, h: menu.offsetHeight }, { w: window.innerWidth, h: window.innerHeight });
+    menu.style.left = pos.left + 'px'; menu.style.top = pos.top + 'px';
+    menu.classList.toggle('flipped', pos.flipped);
+  };
+  position();
+  const onDown = (e) => { if (menu.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); close(); };
+  const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } };
+  const onScroll = (e) => { if (!menu.contains(e.target)) position(); };
+  const close = () => {
+    menu.remove();
+    window.removeEventListener('pointerdown', onDown, true);
+    window.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('resize', close);
+    window.removeEventListener('blur', close);
+    document.removeEventListener('scroll', onScroll, true);
+  };
+  menu.__close = close;
+  setTimeout(() => {
+    window.addEventListener('pointerdown', onDown, true);
+    window.addEventListener('keydown', onKey, true);
+    window.addEventListener('resize', close);
+    window.addEventListener('blur', close);
+    document.addEventListener('scroll', onScroll, true);
+  }, 0);
   return menu;
 }
+export function closeMenus() { document.querySelectorAll('.menu').forEach((m) => (m.__close ? m.__close() : m.remove())); }

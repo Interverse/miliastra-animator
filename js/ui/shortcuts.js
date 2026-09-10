@@ -105,6 +105,15 @@ export function resetBindings() {
 }
 
 export function showShortcutsDialog() {
+  return customDialog({
+    title: () => t('sc.title'), body: buildShortcutsBody,
+    buttons: [
+      { label: () => t('sc.reset'), value: () => { resetBindings(); return 'reset'; } },
+      { label: () => t('btn.close'), primary: true, value: () => true },
+    ],
+  });
+}
+function buildShortcutsBody() {
   const body = document.createElement('div');
   const info = document.createElement('p');
   info.className = 'hint';
@@ -152,11 +161,5 @@ export function showShortcutsDialog() {
   extra.className = 'hint';
   extra.textContent = t('sc.mouse');
   body.appendChild(extra);
-  return customDialog({
-    title: t('sc.title'), body,
-    buttons: [
-      { label: t('sc.reset'), value: () => { resetBindings(); return 'reset'; } },
-      { label: t('btn.close'), primary: true, value: () => true },
-    ],
-  });
+  return body;
 }

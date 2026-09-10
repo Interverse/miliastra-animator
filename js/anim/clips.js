@@ -1,12 +1,16 @@
 // Animation clips, keyframes and interpolation.
 //   clip = { id, name, duration, loop, playhead, tracks: { [nodeId]: { pos: Key[], rot: Key[] } } }
-//   Key  = { t, v: number[] (vec3 or quat), i: 'linear' | 'step' | 'ease', e?: [x,y,z] }
+//   Key  = { t, v: number[] (vec3 or quat), i: 'linear' | 'step' | 'ease', e?: [x,y,z], h?: tangents }
+//   'ease' segments are cubic Hermite curves whose end slopes come from the keys' tangent
+//   handles (`h`, see curves.js). A key without `h` has flat handles, which is exactly the
+//   smoothstep "ease in/out" this editor always produced, so old projects play back unchanged.
 //   Rotation keys may carry `e`, the authored Euler angles in degrees, UNWRAPPED
 //   (450, 720, -1080 …). Between two keys that both carry `e` the angles are
 //   interpolated component-wise, so the number and direction of turns the user
 //   authored is exactly what plays; keys without `e` (IK, retargeting, baked
 //   data) interpolate by shortest-arc slerp as before.
 import { v3, quat } from '../core/math.js';
+import { easeVector } from './curves.js';
 
 export const MIN_KEY_SPACING = 0.03;
 export const INTERPOLATIONS = ['linear', 'ease', 'step'];
@@ -47,14 +51,15 @@ export function track(clip, nodeId, create = false) {
 export const snapTime = (t) => Math.round(t * 1000) / 1000;
 
 // Insert or replace a key (keys closer than MIN_KEY_SPACING are merged).
-export function insertKey(clip, nodeId, channel, t, v, interp = 'linear', e = null) {
+export function insertKey(clip, nodeId, channel, t, v, interp = 'linear', e = null, h = null) {
   const tr = track(clip, nodeId, true);
   const keys = tr[channel];
   t = snapTime(t);
   const existing = keys.find((k) => Math.abs(k.t - t) < MIN_KEY_SPACING - 1e-9);
-  if (existing) { existing.v = v.slice(); if (interp) existing.i = interp; if (channel === 'rot') { if (e) existing.e = e.slice(); else delete existing.e; } return existing; }
+  if (existing) { existing.v = v.slice(); if (interp) existing.i = interp; if (channel === 'rot') { if (e) existing.e = e.slice(); else delete existing.e; } if (h) existing.h = cloneHandles(h); return existing; }
   const k = { t, v: v.slice(), i: interp };
   if (channel === 'rot' && e) k.e = e.slice();
+  if (h) k.h = cloneHandles(h);
   keys.push(k);
   keys.sort((a, b) => a.t - b.t);
   return k;
@@ -75,6 +80,7 @@ export function pruneEmptyTracks(clip) {
 }
 
 function easeInOut(u) { return u * u * (3 - 2 * u); }
+export const cloneHandles = (h) => (h ? { m: h.m, ...(h.in ? { in: h.in.slice() } : {}), ...(h.out ? { out: h.out.slice() } : {}) } : undefined);
 
 export function evaluateKeys(keys, t, channel) {
   if (channel === 'rot') { const r = evaluateRotation(keys, t); return r ? r.q : null; }
@@ -86,8 +92,8 @@ export function evaluateKeys(keys, t, channel) {
   while (i < keys.length - 1 && keys[i + 1].t <= t) i++;
   const a = keys[i], b = keys[i + 1];
   if (a.i === 'step') return a.v;
-  let u = (t - a.t) / (b.t - a.t);
-  if (a.i === 'ease') u = easeInOut(u);
+  const u = (t - a.t) / (b.t - a.t);
+  if (a.i === 'ease') return easeVector(keys, i, channel, u);
   return v3.lerp(a.v, b.v, u);
 }
 // Rotation at time t → { q, e } (e = unwrapped Euler when the surrounding keys carry it, else null).
@@ -102,12 +108,13 @@ export function evaluateRotation(keys, t) {
   const a = keys[i], b = keys[i + 1];
   if (a.i === 'step') return at(a);
   let u = (t - a.t) / (b.t - a.t);
-  if (a.i === 'ease') u = easeInOut(u);
   if (a.e && b.e) {
-    // authored turns: interpolate the unwrapped angles, never the shortest arc
-    const e = [a.e[0] + (b.e[0] - a.e[0]) * u, a.e[1] + (b.e[1] - a.e[1]) * u, a.e[2] + (b.e[2] - a.e[2]) * u];
+    // authored turns: interpolate the unwrapped angles (Hermite for eased segments), never the
+    // shortest arc
+    const e = a.i === 'ease' ? easeVector(keys, i, 'rot', u) : [a.e[0] + (b.e[0] - a.e[0]) * u, a.e[1] + (b.e[1] - a.e[1]) * u, a.e[2] + (b.e[2] - a.e[2]) * u];
     return { q: quat.fromEulerDeg(e), e };
   }
+  if (a.i === 'ease') u = easeInOut(u);
   return { q: quat.slerp(a.v, b.v, u), e: null };
 }
 
@@ -164,7 +171,7 @@ export function moveKeys(clip, refs, dt) {
   }
   for (const m of moving) {
     const nt = snapTime(m.k.t + dt);
-    insertKey(clip, m.nodeId, m.ch, nt, m.k.v, m.k.i, m.k.e);
+    insertKey(clip, m.nodeId, m.ch, nt, m.k.v, m.k.i, m.k.e, m.k.h);
     newRefs.add(keyRef(m.nodeId, m.ch, nt));
   }
   return newRefs;
@@ -180,7 +187,7 @@ export function deleteKeys(clip, refs) {
 export function copyKeys(clip, refs) {
   const out = [];
   for (const [nodeId, tr] of Object.entries(clip.tracks)) {
-    for (const ch of ['pos', 'rot']) for (const k of tr[ch]) if (refs.has(keyRef(nodeId, ch, k.t))) out.push({ nodeId, ch, t: k.t, v: k.v.slice(), i: k.i, e: k.e ? k.e.slice() : undefined });
+    for (const ch of ['pos', 'rot']) for (const k of tr[ch]) if (refs.has(keyRef(nodeId, ch, k.t))) out.push({ nodeId, ch, t: k.t, v: k.v.slice(), i: k.i, e: k.e ? k.e.slice() : undefined, h: cloneHandles(k.h) });
   }
   if (!out.length) return null;
   const t0 = Math.min(...out.map((k) => k.t));
@@ -192,7 +199,7 @@ export function pasteKeys(clip, clipboard, atTime, nodeRemap = null) {
   for (const k of clipboard) {
     const nodeId = nodeRemap?.get(k.nodeId) || k.nodeId;
     const nt = snapTime(atTime + k.t);
-    insertKey(clip, nodeId, k.ch, nt, k.v, k.i, k.e);
+    insertKey(clip, nodeId, k.ch, nt, k.v, k.i, k.e, k.h);
     refs.add(keyRef(nodeId, k.ch, nt));
   }
   return refs;
