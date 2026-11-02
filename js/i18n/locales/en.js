@@ -271,7 +271,7 @@ export default {
 
   "scale.title": "Scale entire model",
 
-  "scale.explain": "The complete assembly scales uniformly about the model pivot: distances between parts, bone positions and lengths, IK targets and poles, display geometry, translation keys, root motion and waypaths. Rotations and timing are unchanged. The new size becomes the editable model — nothing stays to be applied twice.",
+  "scale.explain": "Everything scales together around the model pivot: the distances between parts, bone positions and lengths, IK targets and poles, display geometry, position keys, root motion and waypaths. Rotations and timing don't change. The new size becomes the model you edit, so nothing gets applied twice.",
 
   "scale.presets": "Presets",
 
@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Scale entire model",
 
-  "val.objectScale": "Object {name} ({guid}) — scale {axis}: {value} exceeds Miliastra's maximum object scale of {max}.",
+  "val.objectScale": "Object {name} ({guid}): scale {axis} is {value}, above Miliastra's limit of {max}.",
 
   "toast.exportObjectScale": "Export stopped: {n} object(s) exceed the maximum scale of {max} ({names})",
 
   "orient.section": "Model orientation & scale",
 
-  "orient.intro": "If the model faces the wrong way (for example +X instead of +Z), turn the whole assembly — objects, bones, IK, animation — as one unit and make that the new rest.",
+  "orient.intro": "If the model faces the wrong way (for example +X instead of +Z), turn everything together (objects, bones, IK and animation) and make that the new rest pose.",
 
   "orient.button": "Reorient model…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "Viewport matches the project: {n} entities, {s} scene objects",
 
-  "toast.viewportIssues": "Viewport out of sync: {n} issue(s) ({kinds}) — see the console",
+  "toast.viewportIssues": "Viewport out of sync: {n} issue(s) ({kinds}). See the console.",
   "tip.view.frameSelected": "Center the view on the selection ({k})",
   "tip.view.frameAll": "Fit everything in the view ({k})",
   "view.views": "View",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Only affects orbiting by dragging in the viewport; panning, zoom and the navigation gizmo are unchanged",
   "rotmode.normal": "Children follow",
   "rotmode.preserve": "Preserve child world transforms",
-  "tip.rotmode": "Move or rotate this bone while keeping its descendants visually fixed in world space. Children follow: descendants move and turn with it. Preserve child world transforms: a rig/rest edit — descendant local transforms are recomputed, keyframes are rebased so the animation is unchanged, and no keys are created.",
+  "tip.rotmode": "Move or rotate this bone while its descendants stay where they are. Children follow: descendants move and turn with the bone. Preserve child world transforms: edits the rig's rest pose. Child transforms are recalculated, keyframes are adjusted so the animation looks the same, and no new keys are created.",
   "props.rotModeHint": "Preserve child world transforms is on: position and rotation edits move this item's rest transform; descendants stay exactly where they are and keyframes are rebased instead of keyed.",
   "hist.reorient": "Transform (preserve children)",
   "toast.reorientRebased": "Rig edit: {n} keyframe(s) in {m} clip(s) were rebased so the visible animation is unchanged",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Bone mapping (target ← source)",
   "retarget.preview": "Preview",
   "retarget.rootMotion": "Root motion",
-  "retarget.root.inPlace": "Off — play in place (travel imported, can be turned on per clip)",
-  "retarget.root.keep": "On — the character travels (scaled to its height)",
+  "retarget.root.inPlace": "Off: plays in place (the travel is still imported and can be turned on per clip)",
+  "retarget.root.keep": "On: the character travels across the scene (scaled to its height)",
   "retarget.root.none": "Do not import root translation",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Viewport controls",
   "help.controlsText": "Orbit: middle mouse or Alt+drag · Pan: right drag or Shift+middle · Zoom: wheel · WASD flight: hold right mouse (Settings → Navigation). Click to select, Shift+click to extend, drag the gizmo to move or rotate. Space swaps Move/Rotate.",
   "help.about": "About",
-  "help.aboutText": "Miliastra Animator — a browser-only animation editor for Miliastra .gia files. Nothing is uploaded: projects stay in this browser. Workflow: Model → Rig → Animate → Export.",
+  "help.aboutText": "Miliastra Animator is an animation editor for Miliastra .gia files that runs in your browser. Nothing is uploaded. Your projects stay in this browser. The workflow is Model → Rig → Animate → Export.",
   "sc.app.search": "Command search",
   "sc.app.settings": "Settings",
   "guide.next.import": "Next: import a .gia model.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": "Import .gia…",
   "model.empty": "No model loaded.",
   "model.emptyHint": "Import a .gia file to see its objects. Then check that the model faces +Z and has the size you expect.",
-  "model.orientIntro": "Faces the wrong way, or the wrong size? Turn or scale the whole assembly — objects, bones, IK, animations — as one unit and make that the new rest.",
+  "model.orientIntro": "Facing the wrong way, or the wrong size? Turn or scale everything together (objects, bones, IK and animations) and make that the new rest pose.",
   "model.displayHint": "The display model (meshes, boxes, custom parts) is an editor-only visualization: it never changes the exported file.",
   "rig.noModel": "Import a model before rigging.",
   "rig.bonesHead": "Bones",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Animations chosen: {n} / {max}",
   "export.check.initial": "Initial animation: {name}",
   "export.check.paths": "Path points within the limit ({max} per path)",
-  "export.check.pathsOver": "{n} path(s) over {max} points — fix on export or simplify",
+  "export.check.pathsOver": "{n} path(s) over {max} points. Fix it on export or simplify the path.",
   "export.check.scale": "Object scale within the limit ({max})",
   "export.check.scaleOver": "{n} object(s) exceed the scale limit of {max}",
   "export.check.tip": "Click to jump to this item",
   "tut.model.t": "Check orientation and scale",
-  "tut.model.b": "The model should face +Z and have its final size. Reorient or scale the whole model here — objects, bones and animations move together.",
+  "tut.model.b": "The model should face +Z and be its final size. You can turn or scale the whole model here, and the objects, bones and animations move with it.",
   "palette.unavailable": "not available now",
   // ---- compact project header ----
   "project.details": "Project details",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Edit curve",
   "hist.tangent": "Curve handles",
   "hist.simplifyCurves": "Simplify curves",
+  // ---- start screen samples ----
+  "start.sampleHead": "Sample project",
+  "start.sampleHint": "The same Bangboo, already rigged, with IK and four animations.",
+  "start.sampleOpen": "Open sample project",
+  "start.sampleGia": "Download sample .gia",
+  "tip.start.importProject": "Open a project file (.json) exported from this editor",
+  "tip.start.sampleOpen": "Open the rigged Bangboo with its four animations",
+  "tip.start.sampleGia": "Just the model, split into parts. No bones or animations.",
+  "toast.sampleFailed": "Couldn't load the sample. It only works when the editor runs from its website or a local server.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Start with a .gia file",
+  "start.giaHint": "Import a model you exported from Miliastra. Don't have one? Download the sample Bangboo. It's split into parts but has no bones or animations, so you can rig and animate it yourself.",
+  "start.giaHow": "How do I export a .gia?",
+  "tip.start.importGia": "Pick a .gia file you exported from Miliastra",
+  "giaHelp.title": "Exporting a .gia from Miliastra",
+  "giaHelp.alt": "Two screenshots. On the left, a model split into parts. On the right, everything is selected and Assets Exporting is in the right-click menu.",
+  "giaHelp.step1": "1. Separate your model into different parts, and use empty models to set pivot points. Empty model parents are a requirement.",
+  "giaHelp.step2": "2. Select all and Right Click, and select \"Assets Exporting\".",
+  "giaHelp.warn": "EXPORT FROM STAGE, NOT PREFAB EDITOR.",
+  "giaHelp.after": "When you have the .gia, import it here or drag it onto the editor.",
 };

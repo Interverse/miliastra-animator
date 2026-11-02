@@ -137,7 +137,10 @@ export function showMenu(anchor, items) {
     b.addEventListener('click', () => { close(); it.action?.(); });
     menu.appendChild(b);
   }
-  document.body.appendChild(menu);
+  // A modal <dialog> lives in the browser's top layer, above every z-index: a menu opened from
+  // one (or while one is open) must be placed inside it, or it renders behind the dialog.
+  const host = (anchor?.closest && anchor.closest('dialog[open]')) || [...document.querySelectorAll('dialog[open]')].pop() || document.body;
+  host.appendChild(menu);
   const position = () => {
     const a = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : { x: anchor?.x ?? 0, y: anchor?.y ?? 0 };
     const pos = placePopover(a, { w: menu.offsetWidth, h: menu.offsetHeight }, { w: window.innerWidth, h: window.innerHeight });

@@ -11,6 +11,7 @@ import { showScaleModelDialog } from './scale-dialog.js';
 import { showShortcutsDialog, primaryKeyLabel } from './shortcuts.js';
 import { showSettingsDialog } from './settings-dialog.js';
 import { confirmDialog, messageDialog, toast } from './dialogs.js';
+import { showGiaHelp } from './gia-help.js';
 
 // ctx: { editor, viewport, timeline, tutorial }
 export function buildCommands(ctx) {
@@ -28,7 +29,9 @@ export function buildCommands(ctx) {
     { id: 'file.importAnim', group: 'file', label: () => t('retarget.button'), keywords: 'import animation fbx bvh gltf glb retarget mocap', run: () => showRetargetDialog(editor) },
     { id: 'file.exportGia', group: 'file', label: () => t('export.download'), keywords: 'export gia download motion device', run: () => { editor.setMode('export'); editor.exportFile(); } },
     { id: 'file.exportProject', group: 'file', label: () => t('project.save'), keywords: 'export project json backup', run: () => editor.exportProjectFile?.() },
-    { id: 'file.importProject', group: 'file', label: () => t('project.open'), keywords: 'import project json', run: () => editor.pickProjectFile?.() },
+    { id: 'file.importProject', group: 'file', label: () => t('project.open'), keywords: 'import project json', run: () => (editor.importProjectGuarded ? editor.importProjectGuarded() : editor.pickProjectFile?.()) },
+    { id: 'file.sampleOpen', group: 'file', label: () => t('start.sampleOpen'), keywords: 'sample example demo bangboo project tutorial', run: () => editor.openSampleProject?.() },
+    { id: 'file.sampleGia', group: 'file', label: () => t('start.sampleGia'), keywords: 'sample example demo bangboo gia download', run: () => editor.downloadSampleGia?.() },
     { id: 'file.clearSaved', group: 'file', label: () => t('project.clearSaved'), keywords: 'clear saved recovery storage', run: async () => { if (await confirmDialog({ title: t('project.clearSaved'), message: t('project.clearConfirm'), danger: true })) { await editor.clearSaved(); toast(t('toast.savedCleared'), 'info'); } } },
     // ---- edit ----
     { id: 'edit.undo', group: 'edit', label: () => t('sc.edit.undo'), key: 'edit.undo', keywords: 'undo', run: () => editor.undo() },
@@ -85,6 +88,7 @@ export function buildCommands(ctx) {
     // ---- help / settings ----
     { id: 'help.tutorial', group: 'help', label: () => t('tut.button'), keywords: 'getting started tour tutorial help', run: () => ctx.tutorial?.start?.() },
     { id: 'help.shortcuts', group: 'help', label: () => t('tip.shortcuts'), keywords: 'keyboard shortcuts keys bindings', run: () => showShortcutsDialog() },
+    { id: 'help.giaExport', group: 'help', label: () => t('start.giaHow'), keywords: 'how export gia miliastra assets exporting stage prefab tutorial model parts', run: () => showGiaHelp(editor) },
     { id: 'help.controls', group: 'help', label: () => t('help.controls'), keywords: 'controls mouse navigation orbit pan zoom', run: () => messageDialog({ title: t('help.controls'), message: t('help.controlsText') }) },
     { id: 'help.about', group: 'help', label: () => t('help.about'), keywords: 'about version', run: () => messageDialog({ title: t('help.about'), message: t('help.aboutText') }) },
     { id: 'settings', group: 'help', label: () => t('settings.title') + '…', keywords: 'settings preferences options language navigation brightness', run: () => showSettingsDialog(editor) },

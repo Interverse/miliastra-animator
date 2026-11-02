@@ -33,6 +33,7 @@ export function initProjectBar(editor) {
       { label: t('start.rename') + '…', icon: '✎', disabled: !hasContent, action: renameProject },
       { sep: true },
       { label: t('project.allProjects') + '…', icon: '📁', action: () => editor.showProjectsDialog?.() },
+      { label: t('project.open') + '…', icon: '⤓', action: () => editor.importProjectGuarded?.() },
       { label: t('project.new'), icon: '✦', action: async () => { if (await (editor.guardUnsaved ? editor.guardUnsaved() : confirmDialog({ title: t('project.new'), message: t('project.newConfirm'), danger: true }))) editor.newProject(); } },
     ]);
   }

@@ -271,7 +271,7 @@ export default {
 
   "scale.title": "Escalar modelo inteiro",
 
-  "scale.explain": "Todo o conjunto é escalado uniformemente em torno do pivô do modelo: distâncias entre peças, posições e comprimentos dos ossos, alvos e polos IK, geometria de exibição, chaves de translação, root motion e trajetórias. Rotações e tempos não mudam. O novo tamanho torna-se o modelo editável — nada fica por aplicar duas vezes.",
+  "scale.explain": "Todo o conjunto é escalado uniformemente em torno do pivô do modelo: distâncias entre peças, posições e comprimentos dos ossos, alvos e polos IK, geometria de exibição, chaves de translação, root motion e trajetórias. Rotações e tempos não mudam. O novo tamanho torna-se o modelo editável. Nada fica por aplicar duas vezes.",
 
   "scale.presets": "Predefinições",
 
@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Escalar modelo inteiro",
 
-  "val.objectScale": "Objeto {name} ({guid}) — escala {axis}: {value} excede a escala máxima de objeto do Miliastra de {max}.",
+  "val.objectScale": "Objeto {name} ({guid}): escala {axis}: {value} excede a escala máxima de objeto do Miliastra de {max}.",
 
   "toast.exportObjectScale": "Exportação parada: {n} objeto(s) excedem a escala máxima de {max} ({names})",
 
   "orient.section": "Orientação e escala do modelo",
 
-  "orient.intro": "Se o modelo olha para o lado errado (por exemplo +X em vez de +Z), rode todo o conjunto — objetos, ossos, IK, animação — como uma unidade e torne isso o novo repouso.",
+  "orient.intro": "Se o modelo olha para o lado errado (por exemplo +X em vez de +Z), rode todo o conjunto (objetos, ossos, IK, animação) como uma unidade e torne isso o novo repouso.",
 
   "orient.button": "Reorientar modelo…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "O viewport corresponde ao projeto: {n} entidades, {s} objetos de cena",
 
-  "toast.viewportIssues": "Viewport dessincronizado: {n} problema(s) ({kinds}) — ver a consola",
+  "toast.viewportIssues": "Viewport dessincronizado: {n} problema(s) ({kinds}). Ver a consola",
   "tip.view.frameSelected": "Centralizar a visão na seleção ({k})",
   "tip.view.frameAll": "Ajustar tudo na visão ({k})",
   "view.views": "Visão",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Afeta apenas orbitar arrastando no viewport; deslocamento, zoom e o gizmo de navegação não mudam",
   "rotmode.normal": "Filhos seguem",
   "rotmode.preserve": "Preservar transformações mundiais dos filhos",
-  "tip.rotmode": "Mova ou rode este osso mantendo os descendentes visualmente fixos no espaço mundial. Filhos seguem: os descendentes movem-se e rodam com ele. Preservar: edição de rig/repouso — as transformações locais dos descendentes são recalculadas, os keyframes são rebaseados (animação inalterada) e nenhuma chave é criada.",
+  "tip.rotmode": "Mova ou rode este osso mantendo os descendentes visualmente fixos no espaço mundial. Filhos seguem: os descendentes movem-se e rodam com ele. Preservar: edição de rig/repouso. As transformações locais dos descendentes são recalculadas, os keyframes são rebaseados (animação inalterada) e nenhuma chave é criada.",
   "props.rotModeHint": "Preservar transformações dos filhos está ativo: edições de posição e rotação movem a transformação de repouso deste item; os descendentes ficam exatamente onde estão e os keyframes são rebaseados em vez de criados.",
   "hist.reorient": "Transformar (preservar filhos)",
   "toast.reorientRebased": "Reorientado: {n} keyframe(s) em {m} clipe(s) foram rebaseados para que a animação visível não mude",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Mapeamento de ossos (alvo ← origem)",
   "retarget.preview": "Pré-visualização",
   "retarget.rootMotion": "Movimento raiz",
-  "retarget.root.inPlace": "Desligado — tocar no lugar (deslocamento importado, ativável por clip)",
-  "retarget.root.keep": "Ligado — a personagem desloca-se (à escala da sua altura)",
+  "retarget.root.inPlace": "Desligado: tocar no lugar (deslocamento importado, ativável por clip)",
+  "retarget.root.keep": "Ligado: a personagem desloca-se (à escala da sua altura)",
   "retarget.root.none": "Não importar a translação raiz",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Controles do viewport",
   "help.controlsText": "Orbitar: botão do meio ou Alt+arrastar · Deslocar: botão direito ou Shift+meio · Zoom: roda · Voo WASD: segure o botão direito (Configurações → Navegação). Clique para selecionar, Shift+clique para estender, arraste o gizmo para mover ou girar. Espaço alterna Mover/Girar.",
   "help.about": "Sobre",
-  "help.aboutText": "Miliastra Animator — um editor de animação só no navegador para arquivos .gia do Miliastra. Nada é enviado: os projetos ficam neste navegador. Fluxo: Modelo → Rig → Animar → Exportar.",
+  "help.aboutText": "Miliastra Animator: um editor de animação só no navegador para arquivos .gia do Miliastra. Nada é enviado: os projetos ficam neste navegador. Fluxo: Modelo → Rig → Animar → Exportar.",
   "sc.app.search": "Pesquisa de comandos",
   "sc.app.settings": "Configurações",
   "guide.next.import": "Próximo: importe um modelo .gia.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": "Importar .gia…",
   "model.empty": "Nenhum modelo carregado.",
   "model.emptyHint": "Importe um arquivo .gia para ver seus objetos. Depois confira se o modelo aponta para +Z e tem o tamanho esperado.",
-  "model.orientIntro": "Aponta para o lado errado ou tem o tamanho errado? Gire ou escale o conjunto inteiro — objetos, ossos, IK, animações — como uma unidade e torne isso o novo repouso.",
+  "model.orientIntro": "Aponta para o lado errado ou tem o tamanho errado? Gire ou escale o conjunto inteiro (objetos, ossos, IK, animações) como uma unidade e torne isso o novo repouso.",
   "model.displayHint": "O modelo de exibição (malhas, caixas, peças personalizadas) é só uma visualização do editor: nunca altera o arquivo exportado.",
   "rig.noModel": "Importe um modelo antes de fazer o rig.",
   "rig.bonesHead": "Ossos",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Animações escolhidas: {n} / {max}",
   "export.check.initial": "Animação inicial: {name}",
   "export.check.paths": "Pontos de caminho dentro do limite ({max} por caminho)",
-  "export.check.pathsOver": "{n} caminho(s) acima de {max} pontos — corrija ao exportar ou simplifique",
+  "export.check.pathsOver": "{n} caminho(s) acima de {max} pontos. Corrija ao exportar ou simplifique",
   "export.check.scale": "Escala dos objetos dentro do limite ({max})",
   "export.check.scaleOver": "{n} objeto(s) excedem o limite de escala de {max}",
   "export.check.tip": "Clique para ir a este item",
   "tut.model.t": "Verifique orientação e escala",
-  "tut.model.b": "O modelo deve apontar para +Z e ter o tamanho final. Reoriente ou escale o modelo inteiro aqui — objetos, ossos e animações se movem juntos.",
+  "tut.model.b": "O modelo deve apontar para +Z e ter o tamanho final. Reoriente ou escale o modelo inteiro aqui. Objetos, ossos e animações se movem juntos.",
   "palette.unavailable": "indisponível agora",
   // ---- compact project header ----
   "project.details": "Detalhes do projeto",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Editar curva",
   "hist.tangent": "Alças da curva",
   "hist.simplifyCurves": "Simplificar curvas",
+  // ---- start screen samples ----
+  "start.sampleHead": "Projeto de exemplo",
+  "start.sampleHint": "O mesmo Bangboo, já com rig, IK e quatro animações.",
+  "start.sampleOpen": "Abrir projeto de exemplo",
+  "start.sampleGia": "Baixar .gia de exemplo",
+  "tip.start.importProject": "Abrir um arquivo de projeto (.json) exportado deste editor",
+  "tip.start.sampleOpen": "Abrir o Bangboo com rig e suas quatro animações",
+  "tip.start.sampleGia": "Só o modelo, separado em partes. Sem ossos nem animações.",
+  "toast.sampleFailed": "Não foi possível carregar o exemplo. Isso só funciona quando o editor é aberto pelo site ou por um servidor local.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Começar com um arquivo .gia",
+  "start.giaHint": "Importe um modelo que você exportou do Miliastra. Ainda não tem? Baixe o Bangboo de exemplo. Ele está separado em partes, mas não tem ossos nem animações, então o rig e a animação ficam com você.",
+  "start.giaHow": "Como exportar um .gia?",
+  "tip.start.importGia": "Escolha um arquivo .gia que você exportou do Miliastra",
+  "giaHelp.title": "Exportar um .gia do Miliastra",
+  "giaHelp.alt": "Duas capturas de tela. À esquerda, um modelo separado em partes. À direita, tudo selecionado e Assets Exporting no menu do botão direito.",
+  "giaHelp.step1": "1. Separe seu modelo em partes diferentes e use modelos vazios para definir os pontos de pivô. Modelos vazios como pais são obrigatórios.",
+  "giaHelp.step2": "2. Selecione tudo, clique com o botão direito e escolha \"Assets Exporting\".",
+  "giaHelp.warn": "EXPORTE PELO STAGE, NÃO PELO EDITOR DE PREFABS.",
+  "giaHelp.after": "Com o .gia em mãos, importe aqui ou arraste para o editor.",
 };

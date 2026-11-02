@@ -271,7 +271,7 @@ export default {
 
   "scale.title": "Skalakan seluruh model",
 
-  "scale.explain": "Seluruh rakitan diskalakan seragam di sekitar pivot model: jarak antar bagian, posisi dan panjang tulang, target dan pole IK, geometri tampilan, key translasi, root motion, dan jalur. Rotasi dan timing tidak berubah. Ukuran baru menjadi model yang dapat diedit — tidak ada yang diterapkan dua kali.",
+  "scale.explain": "Seluruh rakitan diskalakan seragam di sekitar pivot model: jarak antar bagian, posisi dan panjang tulang, target dan pole IK, geometri tampilan, key translasi, root motion, dan jalur. Rotasi dan timing tidak berubah. Ukuran baru menjadi model yang dapat diedit. Tidak ada yang diterapkan dua kali.",
 
   "scale.presets": "Preset",
 
@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Skalakan seluruh model",
 
-  "val.objectScale": "Objek {name} ({guid}) — skala {axis}: {value} melebihi skala objek maksimum Miliastra {max}.",
+  "val.objectScale": "Objek {name} ({guid}): skala {axis}: {value} melebihi skala objek maksimum Miliastra {max}.",
 
   "toast.exportObjectScale": "Ekspor dihentikan: {n} objek melebihi skala maksimum {max} ({names})",
 
   "orient.section": "Orientasi & skala model",
 
-  "orient.intro": "Jika model menghadap arah yang salah (misalnya +X bukan +Z), putar seluruh rakitan — objek, tulang, IK, animasi — sebagai satu unit dan jadikan itu istirahat baru.",
+  "orient.intro": "Jika model menghadap arah yang salah (misalnya +X bukan +Z), putar seluruh rakitan (objek, tulang, IK, animasi) sebagai satu unit dan jadikan itu istirahat baru.",
 
   "orient.button": "Orientasikan ulang model…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "Viewport sesuai dengan proyek: {n} entitas, {s} objek scene",
 
-  "toast.viewportIssues": "Viewport tidak sinkron: {n} masalah ({kinds}) — lihat konsol",
+  "toast.viewportIssues": "Viewport tidak sinkron: {n} masalah ({kinds}). Lihat konsol",
   "tip.view.frameSelected": "Pusatkan tampilan pada pilihan ({k})",
   "tip.view.frameAll": "Muat semuanya dalam tampilan ({k})",
   "view.views": "Tampilan",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Hanya memengaruhi orbit dengan menyeret di viewport; geser, zoom, dan gizmo navigasi tidak berubah",
   "rotmode.normal": "Anak mengikuti",
   "rotmode.preserve": "Pertahankan transformasi dunia anak",
-  "tip.rotmode": "Pindahkan atau putar tulang ini sambil menjaga semua keturunannya tetap diam secara visual di ruang dunia. Anak mengikuti: keturunan ikut bergerak dan berputar. Pertahankan: pengeditan rig/pose istirahat — transformasi lokal keturunan dihitung ulang, keyframe disesuaikan agar animasi tidak berubah, dan tidak ada key yang dibuat.",
+  "tip.rotmode": "Pindahkan atau putar tulang ini sambil menjaga semua keturunannya tetap diam secara visual di ruang dunia. Anak mengikuti: keturunan ikut bergerak dan berputar. Pertahankan: pengeditan rig/pose istirahat. Transformasi lokal keturunan dihitung ulang, keyframe disesuaikan agar animasi tidak berubah, dan tidak ada key yang dibuat.",
   "props.rotModeHint": "Pertahankan transformasi anak aktif: perubahan posisi dan rotasi memindahkan transformasi istirahat item ini; keturunan tetap di tempatnya dan keyframe disesuaikan, bukan dibuat.",
   "hist.reorient": "Transformasi (pertahankan anak)",
   "toast.reorientRebased": "Diorientasikan ulang: {n} keyframe di {m} klip dihitung ulang sehingga animasi yang terlihat tidak berubah",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Pemetaan tulang (target ← sumber)",
   "retarget.preview": "Pratinjau",
   "retarget.rootMotion": "Gerak akar",
-  "retarget.root.inPlace": "Nonaktif — putar di tempat (pergerakan diimpor, bisa diaktifkan per klip)",
-  "retarget.root.keep": "Aktif — karakter bergerak (diskalakan ke tingginya)",
+  "retarget.root.inPlace": "Nonaktif: putar di tempat (pergerakan diimpor, bisa diaktifkan per klip)",
+  "retarget.root.keep": "Aktif: karakter bergerak (diskalakan ke tingginya)",
   "retarget.root.none": "Jangan impor translasi akar",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Kontrol viewport",
   "help.controlsText": "Orbit: tombol tengah atau Alt+seret · Geser: tombol kanan atau Shift+tengah · Zoom: roda · Terbang WASD: tahan tombol kanan (Pengaturan → Navigasi). Klik untuk memilih, Shift+klik menambah, seret gizmo untuk memindah atau memutar. Spasi bertukar Pindah/Putar.",
   "help.about": "Tentang",
-  "help.aboutText": "Miliastra Animator — editor animasi khusus browser untuk berkas .gia Miliastra. Tidak ada yang diunggah: proyek tetap di browser ini. Alur: Model → Rig → Animasi → Ekspor.",
+  "help.aboutText": "Miliastra Animator: editor animasi khusus browser untuk berkas .gia Miliastra. Tidak ada yang diunggah: proyek tetap di browser ini. Alur: Model → Rig → Animasi → Ekspor.",
   "sc.app.search": "Pencarian perintah",
   "sc.app.settings": "Pengaturan",
   "guide.next.import": "Berikutnya: impor model .gia.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": "Impor .gia…",
   "model.empty": "Belum ada model.",
   "model.emptyHint": "Impor berkas .gia untuk melihat objeknya. Lalu pastikan model menghadap +Z dan berukuran sesuai.",
-  "model.orientIntro": "Menghadap ke arah yang salah, atau ukurannya salah? Putar atau skalakan seluruh rakitan — objek, tulang, IK, animasi — sebagai satu kesatuan dan jadikan itu pose istirahat baru.",
+  "model.orientIntro": "Menghadap ke arah yang salah, atau ukurannya salah? Putar atau skalakan seluruh rakitan (objek, tulang, IK, animasi) sebagai satu kesatuan dan jadikan itu pose istirahat baru.",
   "model.displayHint": "Model tampilan (mesh, kotak, bagian kustom) hanya visualisasi editor: tidak pernah mengubah berkas yang diekspor.",
   "rig.noModel": "Impor model sebelum membuat rig.",
   "rig.bonesHead": "Tulang",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Animasi dipilih: {n} / {max}",
   "export.check.initial": "Animasi awal: {name}",
   "export.check.paths": "Titik jalur dalam batas ({max} per jalur)",
-  "export.check.pathsOver": "{n} jalur melebihi {max} titik — perbaiki saat ekspor atau sederhanakan",
+  "export.check.pathsOver": "{n} jalur melebihi {max} titik. Perbaiki saat ekspor atau sederhanakan",
   "export.check.scale": "Skala objek dalam batas ({max})",
   "export.check.scaleOver": "{n} objek melebihi batas skala {max}",
   "export.check.tip": "Klik untuk lompat ke item ini",
   "tut.model.t": "Periksa orientasi dan skala",
-  "tut.model.b": "Model harus menghadap +Z dan berukuran final. Reorientasi atau skalakan seluruh model di sini — objek, tulang, dan animasi bergerak bersama.",
+  "tut.model.b": "Model harus menghadap +Z dan berukuran final. Reorientasi atau skalakan seluruh model di sini. Objek, tulang, dan animasi bergerak bersama.",
   "palette.unavailable": "tidak tersedia sekarang",
   // ---- compact project header ----
   "project.details": "Detail proyek",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Edit kurva",
   "hist.tangent": "Pegangan kurva",
   "hist.simplifyCurves": "Sederhanakan kurva",
+  // ---- start screen samples ----
+  "start.sampleHead": "Proyek contoh",
+  "start.sampleHint": "Bangboo yang sama, sudah di-rig, dengan IK dan empat animasi.",
+  "start.sampleOpen": "Buka proyek contoh",
+  "start.sampleGia": "Unduh .gia contoh",
+  "tip.start.importProject": "Buka berkas proyek (.json) yang diekspor dari editor ini",
+  "tip.start.sampleOpen": "Buka Bangboo yang sudah di-rig beserta empat animasinya",
+  "tip.start.sampleGia": "Hanya modelnya, sudah dipisah per bagian. Tanpa tulang dan animasi.",
+  "toast.sampleFailed": "Contoh gagal dimuat. Ini hanya berfungsi jika editor dibuka dari situsnya atau dari server lokal.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Mulai dengan berkas .gia",
+  "start.giaHint": "Impor model yang kamu ekspor dari Miliastra. Belum punya? Unduh Bangboo contoh. Modelnya sudah dipisah per bagian, tapi belum ada tulang dan animasi, jadi rig dan animasinya kamu buat sendiri.",
+  "start.giaHow": "Bagaimana cara mengekspor .gia?",
+  "tip.start.importGia": "Pilih berkas .gia yang kamu ekspor dari Miliastra",
+  "giaHelp.title": "Mengekspor .gia dari Miliastra",
+  "giaHelp.alt": "Dua tangkapan layar. Di kiri, model yang dipisah per bagian. Di kanan, semua bagian dipilih dan Assets Exporting ada di menu klik kanan.",
+  "giaHelp.step1": "1. Pisahkan modelmu menjadi beberapa bagian, lalu gunakan model kosong untuk menentukan titik pivot. Induk berupa model kosong wajib ada.",
+  "giaHelp.step2": "2. Pilih semua, klik kanan, lalu pilih \"Assets Exporting\".",
+  "giaHelp.warn": "EKSPOR DARI STAGE, BUKAN DARI PREFAB EDITOR.",
+  "giaHelp.after": "Setelah punya .gia, impor di sini atau seret ke editor.",
 };

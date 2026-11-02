@@ -102,8 +102,11 @@ check('beginner tooltips exist for handles and interpolation', ['tip.graph.handl
 
 // ---- floating UI: one layering scale, portal menus that flip, filter field that survives rerenders ----
 const dialogs = read('js/ui/dialogs.js');
-check('menus render in the fixed overlay layer (document.body), not inside the opening toolbar', dialogs.includes('document.body.appendChild(menu)') && !dialogs.includes("host.style.position = 'relative'") && /\.menu \{ position: fixed;[^}]*z-index: var\(--z-popover\)/.test(css));
-check('one z-index scale: every floating element uses a --z-* tier', /--z-hud: \d+; --z-handles: \d+; --z-drop: \d+; --z-drawer: \d+; --z-popover: \d+; --z-float: \d+;/.test(css) && (css.match(/z-index: \d+/g) || []).every((m) => m === 'z-index: 1'));
+check('menus render in the fixed overlay layer, not inside the opening toolbar', dialogs.includes('|| document.body;') && !dialogs.includes("host.style.position = 'relative'") && /\.menu \{ position: fixed;[^}]*z-index: var\(--z-popover\)/.test(css));
+const tier = (n) => Number((css.match(new RegExp(`--z-${n}: (\\d+);`)) || [])[1]);
+check('one z-index scale: every floating element uses a --z-* tier', ['hud', 'handles', 'drop', 'drawer', 'float', 'start', 'tour', 'palette', 'popover', 'toast'].every((n) => Number.isFinite(tier(n))) && (css.match(/z-index: \d+/g) || []).every((m) => m === 'z-index: 1'));
+check('menus sit above the start screen, floating panels, tour and palette', ['float', 'start', 'tour', 'palette', 'drawer'].every((n) => tier('popover') > tier(n)) && tier('toast') > tier('popover'));
+check('a menu opened from a modal dialog is placed inside it (top layer), else in document.body', dialogs.includes("anchor.closest('dialog[open]')") && dialogs.includes('host.appendChild(menu)'));
 check('menus close on outside pointerdown, Escape, blur, resize and follow scrolling', ['onDown', 'onKey', "addEventListener('blur', close)", "addEventListener('resize', close)", "addEventListener('scroll', onScroll, true)"].every((x) => dialogs.includes(x)) && dialogs.includes('e.stopPropagation(); close();'));
 const vp = { w: 1000, h: 600 };
 const below = placePopover({ left: 100, top: 100, width: 80, height: 24 }, { w: 200, h: 150 }, vp);
@@ -120,6 +123,44 @@ check('dialogs re-render their title, body and buttons on language change', dial
 check('every panel module subscribes to language changes', ['js/ui/panels-left.js', 'js/ui/panels-right.js', 'js/ui/timeline.js', 'js/ui/graph-editor.js', 'js/ui/project-bar.js', 'js/ui/menus.js', 'js/ui/tutorial.js', 'js/main.js'].every((f) => read(f).includes('onLangChange(')));
 check('graph and dope-sheet drags run through the key drag transaction with pointer capture and rAF coalescing', ['beginKeyDrag', 'updateKeyDrag', 'endKeyDrag', 'requestAnimationFrame', 'setPointerCapture'].every((x) => graphSrc.includes(x) && timelineSrc.includes(x)) && !graphSrc.includes('moveCurvePoints({ dt: dDt') && !timelineSrc.includes('moveSelectedKeys(dt - d.lastDt'));
 check('a view switch ends any drag first', timelineSrc.includes("this.editor.finishInteraction(); // a drag never survives a view switch"));
+
+// ---- start screen: import project + samples ----
+const projSrc = read('js/ui/projects.js');
+check('start screen offers New, Import .gia, Import project, Open sample, Download sample .gia, Continue', ["t('start.new')", "t('start.import')", "t('project.open') + '…', () => projInput.click()", "t('start.sampleOpen')", "t('start.sampleGia')", "t('start.continue')"].every((x) => projSrc.includes(x)));
+check('All projects, the project ⋯ menu, the Projects menu and the File menu can import a project file', projSrc.includes("value: () => 'importProject'") && bar.includes('editor.importProjectGuarded?.()') && projSrc.includes("action: () => importProjectGuarded()") && menuIds.includes('file.importProject') && menuIds.includes('file.sampleOpen') && menuIds.includes('file.sampleGia'));
+check('sample files ship without "(n)" suffixes and are the ones the code loads', projSrc.includes("'samples/Bangboo.animator.json'") && projSrc.includes("'samples/Bangboo.gia'") && read('samples/Bangboo.animator.json').length > 1000);
+{
+  const { Editor } = await import('../js/ui/editor.js');
+  const { importGia } = await import('../js/gia/gia-file.js').catch(() => ({}));
+  const ed = new Editor();
+  ed.openProjectFile(read('samples/Bangboo.animator.json'));
+  check('the sample project opens: model, rig, IK and several animations', ed.project.nodes.some((n) => n.type === 'object') && ed.project.nodes.some((n) => n.type === 'bone') && ed.project.constraints.length > 0 && ed.project.clips.length >= 2 && !!ed.giaBytes, `${ed.project.nodes.length} nodes, ${ed.project.clips.length} clips`);
+  const ed2 = new Editor();
+  const ok = ed2.importGia(new Uint8Array(readFileSync(new URL('../samples/Bangboo.gia', import.meta.url))), 'Bangboo.gia');
+  check('the sample .gia imports', ok && ed2.project.nodes.some((n) => n.type === 'object'), `${ed2.project.nodes.length} nodes`);
+  void importGia;
+}
+
+// ---- .gia section and export tutorial ----
+{
+  const { GIA_TUTORIAL_IMAGE, GIA_HELP_STEPS } = await import('../js/ui/gia-help.js');
+  const helpSrc = read('js/ui/gia-help.js');
+  check('start screen groups Import .gia, Download sample .gia and the export tutorial in one .gia section', /startCard\('▣', t\('start\.giaHead'\)[\s\S]{0,400}fileInput\.click\(\)[\s\S]{0,200}downloadSampleGia\(\)[\s\S]{0,200}showGiaHelp/.test(projSrc));
+  check('the .gia section says the sample has no bones or animations', /no bones or animations/.test(en['start.giaHint']) && /No bones or animations/.test(en['tip.start.sampleGia']));
+  check('the tutorial image ships with the site', readFileSync(new URL('../' + GIA_TUTORIAL_IMAGE, import.meta.url)).length > 10000);
+  check('the export steps are always written out under the image, step 2 carrying the Stage warning', !helpSrc.includes('needsCaptions') && helpSrc.includes("t('giaHelp.step1')") && /t\('giaHelp\.step2'\)[\s\S]{0,120}t\('giaHelp\.warn'\)/.test(helpSrc));
+  check('step 1 says empty model parents are required', /Empty model parents are a requirement/.test(en['giaHelp.step1']) && /^2\. Select all/.test(en['giaHelp.step2']) && en['giaHelp.warn'] === 'EXPORT FROM STAGE, NOT PREFAB EDITOR.');
+  check('Recent projects has a language picker and re-renders on language change', projSrc.includes("langSel.classList.add('start-lang')") && projSrc.includes('offLang = onLangChange(') && projSrc.includes('offLang?.()'));
+  check('the tutorial is reachable from the Help menu, the Model panel and the empty viewport', menuIds.includes('help.giaExport') && right.includes('showGiaHelp(editor)') && main.includes('showGiaHelp(editor)'));
+  for (const l of ['de', 'es', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'ru', 'th', 'tr', 'vi', 'zhs', 'zht']) {
+    const d = (await import(`../js/i18n/locales/${l}.js`)).default;
+    check(`${l}: tutorial captions are translated`, [...GIA_HELP_STEPS, 'giaHelp.alt', 'giaHelp.title'].every((k) => d[k] && d[k] !== en[k]));
+  }
+  // plain-language pass: no English em-dash asides or stock filler in the UI text
+  const enText = Object.values(en).filter((v) => typeof v === 'string');
+  check('English UI text has no em-dashes', enText.every((v) => !v.includes('—')));
+  check('English UI text avoids stock filler words', enText.every((v) => !/\b(seamless|effortless|robust|delve|leverage|unlock|elevate|empower|streamline|ready for you)\b/i.test(v)));
+}
 
 // ---- localisation of the new keys in all 15 languages ----
 const LOCALES = ['de', 'es', 'fr', 'id', 'it', 'ja', 'ko', 'pt', 'ru', 'th', 'tr', 'vi', 'zhs', 'zht'];

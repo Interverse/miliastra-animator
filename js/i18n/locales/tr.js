@@ -271,7 +271,7 @@ export default {
 
   "scale.title": "Tüm modeli ölçekle",
 
-  "scale.explain": "Tüm montaj model pivotu etrafında eşit olarak ölçeklenir: parçalar arası mesafeler, kemik konumları ve uzunlukları, IK hedefleri ve kutupları, görüntü geometrisi, öteleme anahtarları, kök hareketi ve yollar. Dönüşler ve zamanlama değişmez. Yeni boyut düzenlenebilir model olur — iki kez uygulanacak hiçbir şey kalmaz.",
+  "scale.explain": "Tüm montaj model pivotu etrafında eşit olarak ölçeklenir: parçalar arası mesafeler, kemik konumları ve uzunlukları, IK hedefleri ve kutupları, görüntü geometrisi, öteleme anahtarları, kök hareketi ve yollar. Dönüşler ve zamanlama değişmez. Yeni boyut düzenlenebilir model olur. Iki kez uygulanacak hiçbir şey kalmaz.",
 
   "scale.presets": "Ön ayarlar",
 
@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Tüm modeli ölçekle",
 
-  "val.objectScale": "Nesne {name} ({guid}) — ölçek {axis}: {value}, Miliastra'nın en büyük nesne ölçeği {max}'i aşıyor.",
+  "val.objectScale": "Nesne {name} ({guid}): ölçek {axis}: {value}, Miliastra'nın en büyük nesne ölçeği {max}'i aşıyor.",
 
   "toast.exportObjectScale": "Dışa aktarma durduruldu: {n} nesne en büyük ölçek {max}'i aşıyor ({names})",
 
   "orient.section": "Model yönü ve ölçeği",
 
-  "orient.intro": "Model yanlış yöne bakıyorsa (örn. +Z yerine +X), tüm montajı — nesneler, kemikler, IK, animasyon — tek parça olarak döndürün ve bunu yeni dinlenme yapın.",
+  "orient.intro": "Model yanlış yöne bakıyorsa (örn. +Z yerine +X), tüm montajı (nesneler, kemikler, IK, animasyon) tek parça olarak döndürün ve bunu yeni dinlenme yapın.",
 
   "orient.button": "Modeli yeniden yönlendir…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "Görünüm projeyle eşleşiyor: {n} öğe, {s} sahne nesnesi",
 
-  "toast.viewportIssues": "Görünüm eşitlenmemiş: {n} sorun ({kinds}) — konsola bakın",
+  "toast.viewportIssues": "Görünüm eşitlenmemiş: {n} sorun ({kinds}). Konsola bakın",
   "tip.view.frameSelected": "Görünümü seçime ortala ({k})",
   "tip.view.frameAll": "Her şeyi görünüme sığdır ({k})",
   "view.views": "Görünüm",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Yalnızca görünümde sürükleyerek yörüngeyi etkiler; kaydırma, yakınlaştırma ve gezinme gizmosu değişmez",
   "rotmode.normal": "Çocuklar izler",
   "rotmode.preserve": "Çocukların dünya dönüşümlerini koru",
-  "tip.rotmode": "Bu kemiği, alt öğeleri dünya uzayında görsel olarak sabit kalacak şekilde taşıyın veya döndürün. Çocuklar izler: alt öğeler onunla birlikte hareket eder ve döner. Koru: rig/dinlenme düzenlemesi — alt öğelerin yerel dönüşümleri yeniden hesaplanır, anahtar kareler yeniden tabanlanır (animasyon değişmez) ve anahtar oluşturulmaz.",
+  "tip.rotmode": "Bu kemiği, alt öğeleri dünya uzayında görsel olarak sabit kalacak şekilde taşıyın veya döndürün. Çocuklar izler: alt öğeler onunla birlikte hareket eder ve döner. Koru: rig/dinlenme düzenlemesi. Alt öğelerin yerel dönüşümleri yeniden hesaplanır, anahtar kareler yeniden tabanlanır (animasyon değişmez) ve anahtar oluşturulmaz.",
   "props.rotModeHint": "Çocukların dünya dönüşümlerini koru açık: konum ve dönüş düzenlemeleri bu öğenin dinlenme dönüşümünü taşır; alt öğeler tam yerinde kalır ve anahtar kareler oluşturulmak yerine yeniden tabanlanır.",
   "hist.reorient": "Dönüştür (çocukları koru)",
   "toast.reorientRebased": "Yeniden yönlendirildi: {m} klipteki {n} anahtar kare, görünen animasyon değişmesin diye yeniden temellendirildi",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Kemik eşleme (hedef ← kaynak)",
   "retarget.preview": "Önizleme",
   "retarget.rootMotion": "Kök hareketi",
-  "retarget.root.inPlace": "Kapalı — yerinde oynat (ilerleme içe aktarılır, klip başına açılabilir)",
-  "retarget.root.keep": "Açık — karakter ilerler (boyuna ölçeklenir)",
+  "retarget.root.inPlace": "Kapalı: yerinde oynat (ilerleme içe aktarılır, klip başına açılabilir)",
+  "retarget.root.keep": "Açık: karakter ilerler (boyuna ölçeklenir)",
   "retarget.root.none": "Kök ötelemesini içe aktarma",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Görünüm alanı denetimleri",
   "help.controlsText": "Yörünge: orta tuş veya Alt+sürükle · Kaydır: sağ sürükle veya Shift+orta · Yakınlaştır: tekerlek · WASD uçuş: sağ tuşu basılı tut (Ayarlar → Gezinme). Tıkla seç, Shift+tık ekle, gizmo'yu sürükleyerek taşı veya döndür. Boşluk Taşı/Döndür arasında geçer.",
   "help.about": "Hakkında",
-  "help.aboutText": "Miliastra Animator — Miliastra .gia dosyaları için yalnızca tarayıcıda çalışan bir animasyon düzenleyici. Hiçbir şey yüklenmez: projeler bu tarayıcıda kalır. Akış: Model → Rig → Animasyon → Dışa aktar.",
+  "help.aboutText": "Miliastra Animator: Miliastra .gia dosyaları için yalnızca tarayıcıda çalışan bir animasyon düzenleyici. Hiçbir şey yüklenmez: projeler bu tarayıcıda kalır. Akış: Model → Rig → Animasyon → Dışa aktar.",
   "sc.app.search": "Komut arama",
   "sc.app.settings": "Ayarlar",
   "guide.next.import": "Sonraki: bir .gia modeli içe aktarın.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": ".gia içe aktar…",
   "model.empty": "Model yüklenmedi.",
   "model.emptyHint": "Nesnelerini görmek için bir .gia dosyası içe aktarın. Sonra modelin +Z yönüne baktığını ve beklenen boyutta olduğunu kontrol edin.",
-  "model.orientIntro": "Yanlış yöne mi bakıyor ya da boyutu mu yanlış? Tüm montajı — nesneler, kemikler, IK, animasyonlar — tek parça olarak döndürün veya ölçekleyin ve bunu yeni dinlenme yapın.",
+  "model.orientIntro": "Yanlış yöne mi bakıyor ya da boyutu mu yanlış? Tüm montajı (nesneler, kemikler, IK, animasyonlar) tek parça olarak döndürün veya ölçekleyin ve bunu yeni dinlenme yapın.",
   "model.displayHint": "Görüntü modeli (mesh'ler, kutular, özel parçalar) yalnızca düzenleyici görselleştirmesidir: dışa aktarılan dosyayı asla değiştirmez.",
   "rig.noModel": "Rig'den önce bir model içe aktarın.",
   "rig.bonesHead": "Kemikler",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Seçilen animasyonlar: {n} / {max}",
   "export.check.initial": "Başlangıç animasyonu: {name}",
   "export.check.paths": "Yol noktaları sınır içinde (yol başına {max})",
-  "export.check.pathsOver": "{n} yol {max} noktayı aşıyor — dışa aktarırken düzeltin veya sadeleştirin",
+  "export.check.pathsOver": "{n} yol {max} noktayı aşıyor. Dışa aktarırken düzeltin veya sadeleştirin",
   "export.check.scale": "Nesne ölçeği sınır içinde ({max})",
   "export.check.scaleOver": "{n} nesne {max} ölçek sınırını aşıyor",
   "export.check.tip": "Bu öğeye gitmek için tıklayın",
   "tut.model.t": "Yön ve ölçeği kontrol edin",
-  "tut.model.b": "Model +Z yönüne bakmalı ve son boyutunda olmalı. Tüm modeli burada yeniden yönlendirin veya ölçekleyin — nesneler, kemikler ve animasyonlar birlikte hareket eder.",
+  "tut.model.b": "Model +Z yönüne bakmalı ve son boyutunda olmalı. Tüm modeli burada yeniden yönlendirin veya ölçekleyin. Nesneler, kemikler ve animasyonlar birlikte hareket eder.",
   "palette.unavailable": "şu anda kullanılamaz",
   // ---- compact project header ----
   "project.details": "Proje ayrıntıları",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Eğriyi düzenle",
   "hist.tangent": "Eğri tutamaçları",
   "hist.simplifyCurves": "Eğrileri sadeleştir",
+  // ---- start screen samples ----
+  "start.sampleHead": "Örnek proje",
+  "start.sampleHint": "Aynı Bangboo, rig'i yapılmış, IK ve dört animasyonla birlikte.",
+  "start.sampleOpen": "Örnek projeyi aç",
+  "start.sampleGia": "Örnek .gia indir",
+  "tip.start.importProject": "Bu düzenleyiciden dışa aktarılmış bir proje dosyasını (.json) aç",
+  "tip.start.sampleOpen": "Rig'li Bangboo'yu dört animasyonuyla aç",
+  "tip.start.sampleGia": "Yalnızca parçalara ayrılmış model. Kemik ve animasyon yok.",
+  "toast.sampleFailed": "Örnek yüklenemedi. Yalnızca düzenleyici web sitesinden ya da yerel bir sunucudan açıldığında çalışır.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": ".gia dosyasıyla başla",
+  "start.giaHint": "Miliastra'dan dışa aktardığınız bir modeli içe aktarın. Henüz yok mu? Örnek Bangboo'yu indirin. Parçalara ayrılmış ama kemiği ve animasyonu yok, rig ve animasyonu siz yaparsınız.",
+  "start.giaHow": ".gia nasıl dışa aktarılır?",
+  "tip.start.importGia": "Miliastra'dan dışa aktardığınız bir .gia dosyası seçin",
+  "giaHelp.title": "Miliastra'dan .gia dışa aktarma",
+  "giaHelp.alt": "İki ekran görüntüsü. Solda parçalara ayrılmış bir model var. Sağda her şey seçili ve sağ tık menüsünde Assets Exporting görünüyor.",
+  "giaHelp.step1": "1. Modelinizi farklı parçalara ayırın ve pivot noktalarını boş modellerle belirleyin. Boş modellerin ebeveyn olması zorunludur.",
+  "giaHelp.step2": "2. Hepsini seçin, sağ tıklayın ve \"Assets Exporting\"i seçin.",
+  "giaHelp.warn": "PREFAB EDITOR'DAN DEĞİL, STAGE'DEN DIŞA AKTARIN.",
+  "giaHelp.after": ".gia dosyanız hazır olunca buradan içe aktarın ya da düzenleyiciye sürükleyin.",
 };

@@ -309,7 +309,7 @@ export default {
 
   "hist.scaleModel": "전체 모델 스케일",
 
-  "val.objectScale": "객체 {name} ({guid}) — 스케일 {axis}: {value}이(가) Miliastra 최대 객체 스케일 {max}을(를) 초과합니다.",
+  "val.objectScale": "객체 {name} ({guid}): 스케일 {axis}: {value}이(가) Miliastra 최대 객체 스케일 {max}을(를) 초과합니다.",
 
   "toast.exportObjectScale": "내보내기 중단: {n}개 객체가 최대 스케일 {max}을(를) 초과합니다 ({names})",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "뷰포트가 프로젝트와 일치합니다: 엔티티 {n}개, 씬 객체 {s}개",
 
-  "toast.viewportIssues": "뷰포트 동기화 오류: 문제 {n}건({kinds}) — 콘솔 확인",
+  "toast.viewportIssues": "뷰포트 동기화 오류: 문제 {n}건({kinds}). 콘솔 확인",
   "tip.view.frameSelected": "선택 항목을 화면 중앙에({k})",
   "tip.view.frameAll": "모든 것을 화면에 맞춤({k})",
   "view.views": "뷰",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "뷰포트에서 드래그로 회전할 때만 적용됩니다. 이동, 확대/축소, 탐색 기즈모는 바뀌지 않습니다",
   "rotmode.normal": "자식 따라감",
   "rotmode.preserve": "자식 월드 변환 유지",
-  "tip.rotmode": "이 본을 이동하거나 회전해도 모든 자손은 월드 공간에서 제자리에 유지됩니다. 자식 따라감: 자손이 함께 이동·회전합니다. 유지: 리그/레스트 편집 — 자손의 로컬 변환을 다시 계산하고 키프레임을 재기준화하며(애니메이션 불변) 키를 만들지 않습니다.",
+  "tip.rotmode": "이 본을 이동하거나 회전해도 모든 자손은 월드 공간에서 제자리에 유지됩니다. 자식 따라감: 자손이 함께 이동·회전합니다. 유지: 리그/레스트 편집. 자손의 로컬 변환을 다시 계산하고 키프레임을 재기준화하며(애니메이션 불변) 키를 만들지 않습니다.",
   "props.rotModeHint": "자식 월드 변환 유지가 켜져 있습니다: 위치와 회전 편집은 이 항목의 레스트 변환을 움직입니다. 자손은 제자리에 있고 키프레임은 키 대신 재기준화됩니다.",
   "hist.reorient": "변환(자식 유지)",
   "toast.reorientRebased": "방향 재설정: 클립 {m}개의 키프레임 {n}개를 재기준화하여 보이는 애니메이션은 그대로입니다",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "본 매핑(대상 ← 소스)",
   "retarget.preview": "미리보기",
   "retarget.rootMotion": "루트 모션",
-  "retarget.root.inPlace": "꺼짐 — 제자리 재생 (이동은 가져오며 클립별로 켤 수 있음)",
-  "retarget.root.keep": "켜짐 — 캐릭터가 이동 (키에 맞춰 스케일)",
+  "retarget.root.inPlace": "꺼짐: 제자리 재생 (이동은 가져오며 클립별로 켤 수 있음)",
+  "retarget.root.keep": "켜짐: 캐릭터가 이동 (키에 맞춰 스케일)",
   "retarget.root.none": "루트 이동을 가져오지 않음",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "뷰포트 조작",
   "help.controlsText": "궤도 회전: 가운데 버튼 또는 Alt+드래그 · 이동: 오른쪽 드래그 또는 Shift+가운데 · 확대/축소: 휠 · WASD 비행: 오른쪽 버튼 유지 (설정 → 내비게이션). 클릭으로 선택, Shift+클릭으로 추가, 기즈모를 드래그해 이동/회전. Space로 이동/회전 전환.",
   "help.about": "정보",
-  "help.aboutText": "Miliastra Animator — Miliastra .gia 파일용 브라우저 전용 애니메이션 편집기. 아무것도 업로드되지 않으며 프로젝트는 이 브라우저에 남습니다. 작업 순서: 모델 → 리그 → 애니메이션 → 내보내기.",
+  "help.aboutText": "Miliastra Animator: Miliastra .gia 파일용 브라우저 전용 애니메이션 편집기. 아무것도 업로드되지 않으며 프로젝트는 이 브라우저에 남습니다. 작업 순서: 모델 → 리그 → 애니메이션 → 내보내기.",
   "sc.app.search": "명령 검색",
   "sc.app.settings": "설정",
   "guide.next.import": "다음: .gia 모델을 가져오세요.",
@@ -1129,7 +1129,7 @@ export default {
   "export.check.anims": "선택한 애니메이션: {n} / {max}",
   "export.check.initial": "초기 애니메이션: {name}",
   "export.check.paths": "경로 점이 제한 이내 (경로당 {max})",
-  "export.check.pathsOver": "{n}개 경로가 {max}점을 초과 — 내보낼 때 수정하거나 단순화",
+  "export.check.pathsOver": "{n}개 경로가 {max}점을 초과. 내보낼 때 수정하거나 단순화",
   "export.check.scale": "오브젝트 크기가 제한 이내 ({max})",
   "export.check.scaleOver": "{n}개 오브젝트가 크기 제한 {max}을(를) 초과",
   "export.check.tip": "클릭하면 이 항목으로 이동",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "커브 편집",
   "hist.tangent": "커브 핸들",
   "hist.simplifyCurves": "커브 단순화",
+  // ---- start screen samples ----
+  "start.sampleHead": "샘플 프로젝트",
+  "start.sampleHint": "같은 Bangboo에 리그, IK, 애니메이션 4개가 이미 들어 있습니다.",
+  "start.sampleOpen": "샘플 프로젝트 열기",
+  "start.sampleGia": "샘플 .gia 다운로드",
+  "tip.start.importProject": "이 편집기에서 내보낸 프로젝트 파일(.json) 열기",
+  "tip.start.sampleOpen": "리그된 Bangboo를 애니메이션 4개와 함께 엽니다",
+  "tip.start.sampleGia": "부위별로 나뉜 모델만 들어 있습니다. 본과 애니메이션은 없습니다.",
+  "toast.sampleFailed": "샘플을 불러오지 못했습니다. 편집기를 웹사이트나 로컬 서버에서 열었을 때만 됩니다.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": ".gia 파일로 시작하기",
+  "start.giaHint": "Miliastra에서 내보낸 모델을 가져오세요. 아직 없다면 샘플 Bangboo를 내려받으세요. 부위별로 나뉘어 있지만 본과 애니메이션은 없어서, 리그와 애니메이션을 직접 만들 수 있습니다.",
+  "start.giaHow": ".gia는 어떻게 내보내나요?",
+  "tip.start.importGia": "Miliastra에서 내보낸 .gia 파일을 고르세요",
+  "giaHelp.title": "Miliastra에서 .gia 내보내기",
+  "giaHelp.alt": "스크린샷 두 장. 왼쪽은 부위별로 나눈 모델이고, 오른쪽은 전부 선택한 뒤 우클릭 메뉴에 Assets Exporting이 보이는 모습입니다.",
+  "giaHelp.step1": "1. 모델을 여러 부위로 나누고, 빈 모델로 피벗 위치를 정하세요. 빈 모델을 부모로 두는 것은 필수입니다.",
+  "giaHelp.step2": "2. 모두 선택하고 우클릭한 뒤 \"Assets Exporting\"을 선택하세요.",
+  "giaHelp.warn": "프리팹 편집기가 아니라 스테이지에서 내보내세요.",
+  "giaHelp.after": ".gia가 준비되면 여기에서 가져오거나 편집기로 끌어다 놓으세요.",
 };

@@ -271,7 +271,7 @@ export default {
 
   "scale.title": "Đổi tỷ lệ toàn bộ mô hình",
 
-  "scale.explain": "Toàn bộ cụm được đổi tỷ lệ đều quanh trục mô hình: khoảng cách giữa các phần, vị trí và độ dài xương, mục tiêu và cực IK, hình học hiển thị, key dịch chuyển, root motion và đường đi. Xoay và thời gian không đổi. Kích thước mới trở thành mô hình có thể chỉnh sửa — không còn gì phải áp dụng hai lần.",
+  "scale.explain": "Toàn bộ cụm được đổi tỷ lệ đều quanh trục mô hình: khoảng cách giữa các phần, vị trí và độ dài xương, mục tiêu và cực IK, hình học hiển thị, key dịch chuyển, root motion và đường đi. Xoay và thời gian không đổi. Kích thước mới trở thành mô hình có thể chỉnh sửa. Không còn gì phải áp dụng hai lần.",
 
   "scale.presets": "Cài đặt sẵn",
 
@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Đổi tỷ lệ toàn bộ mô hình",
 
-  "val.objectScale": "Đối tượng {name} ({guid}) — tỷ lệ {axis}: {value} vượt tỷ lệ đối tượng tối đa {max} của Miliastra.",
+  "val.objectScale": "Đối tượng {name} ({guid}): tỷ lệ {axis}: {value} vượt tỷ lệ đối tượng tối đa {max} của Miliastra.",
 
   "toast.exportObjectScale": "Đã dừng xuất: {n} đối tượng vượt tỷ lệ tối đa {max} ({names})",
 
   "orient.section": "Hướng và tỷ lệ mô hình",
 
-  "orient.intro": "Nếu mô hình quay sai hướng (ví dụ +X thay vì +Z), hãy xoay toàn bộ cụm — đối tượng, xương, IK, hoạt ảnh — như một khối và đặt đó làm tư thế nghỉ mới.",
+  "orient.intro": "Nếu mô hình quay sai hướng (ví dụ +X thay vì +Z), hãy xoay toàn bộ cụm (đối tượng, xương, IK, hoạt ảnh) như một khối và đặt đó làm tư thế nghỉ mới.",
 
   "orient.button": "Định hướng lại mô hình…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "Khung nhìn khớp với dự án: {n} thực thể, {s} đối tượng cảnh",
 
-  "toast.viewportIssues": "Khung nhìn không đồng bộ: {n} vấn đề ({kinds}) — xem console",
+  "toast.viewportIssues": "Khung nhìn không đồng bộ: {n} vấn đề ({kinds}). Xem console",
   "tip.view.frameSelected": "Căn giữa khung nhìn vào mục đã chọn ({k})",
   "tip.view.frameAll": "Vừa tất cả trong khung nhìn ({k})",
   "view.views": "Góc nhìn",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Chỉ ảnh hưởng đến xoay quanh bằng cách kéo trong khung nhìn; dịch, thu phóng và gizmo điều hướng không đổi",
   "rotmode.normal": "Con đi theo",
   "rotmode.preserve": "Giữ biến đổi thế giới của con",
-  "tip.rotmode": "Di chuyển hoặc xoay xương này trong khi mọi hậu duệ vẫn đứng yên trong không gian thế giới. Con đi theo: hậu duệ di chuyển và xoay cùng. Giữ: chỉnh rig/tư thế nghỉ — biến đổi cục bộ của hậu duệ được tính lại, keyframe được rebase (hoạt ảnh không đổi) và không tạo key.",
+  "tip.rotmode": "Di chuyển hoặc xoay xương này trong khi mọi hậu duệ vẫn đứng yên trong không gian thế giới. Con đi theo: hậu duệ di chuyển và xoay cùng. Giữ: chỉnh rig/tư thế nghỉ. Biến đổi cục bộ của hậu duệ được tính lại, keyframe được rebase (hoạt ảnh không đổi) và không tạo key.",
   "props.rotModeHint": "Giữ biến đổi thế giới của con đang bật: chỉnh vị trí và xoay sẽ dời biến đổi nghỉ của mục này; hậu duệ giữ nguyên chỗ và keyframe được rebase thay vì tạo key.",
   "hist.reorient": "Biến đổi (giữ con)",
   "toast.reorientRebased": "Đã đổi hướng: {n} khung hình khóa trong {m} clip được quy chiếu lại để hoạt ảnh hiển thị không đổi",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Ánh xạ xương (đích ← nguồn)",
   "retarget.preview": "Xem trước",
   "retarget.rootMotion": "Chuyển động gốc",
-  "retarget.root.inPlace": "Tắt — phát tại chỗ (đã nhập di chuyển, có thể bật theo từng clip)",
-  "retarget.root.keep": "Bật — nhân vật di chuyển (tỷ lệ theo chiều cao)",
+  "retarget.root.inPlace": "Tắt: phát tại chỗ (đã nhập di chuyển, có thể bật theo từng clip)",
+  "retarget.root.keep": "Bật: nhân vật di chuyển (tỷ lệ theo chiều cao)",
   "retarget.root.none": "Không nhập dịch chuyển gốc",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Điều khiển khung nhìn",
   "help.controlsText": "Xoay quanh: chuột giữa hoặc Alt+kéo · Dịch: kéo chuột phải hoặc Shift+giữa · Thu phóng: cuộn · Bay WASD: giữ chuột phải (Cài đặt → Điều hướng). Nhấp để chọn, Shift+nhấp để thêm, kéo gizmo để di chuyển hoặc xoay. Space đổi Di chuyển/Xoay.",
   "help.about": "Giới thiệu",
-  "help.aboutText": "Miliastra Animator — trình chỉnh sửa hoạt ảnh chạy hoàn toàn trên trình duyệt cho tệp .gia của Miliastra. Không tải lên gì cả: dự án nằm trong trình duyệt này. Quy trình: Mô hình → Rig → Hoạt ảnh → Xuất.",
+  "help.aboutText": "Miliastra Animator: trình chỉnh sửa hoạt ảnh chạy hoàn toàn trên trình duyệt cho tệp .gia của Miliastra. Không tải lên gì cả: dự án nằm trong trình duyệt này. Quy trình: Mô hình → Rig → Hoạt ảnh → Xuất.",
   "sc.app.search": "Tìm lệnh",
   "sc.app.settings": "Cài đặt",
   "guide.next.import": "Tiếp theo: nhập một mô hình .gia.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": "Nhập .gia…",
   "model.empty": "Chưa tải mô hình.",
   "model.emptyHint": "Nhập tệp .gia để xem các vật thể. Sau đó kiểm tra mô hình hướng về +Z và có kích thước như mong muốn.",
-  "model.orientIntro": "Sai hướng hoặc sai kích thước? Xoay hoặc phóng to thu nhỏ toàn bộ cụm — vật thể, xương, IK, hoạt ảnh — như một khối và đặt làm tư thế nghỉ mới.",
+  "model.orientIntro": "Sai hướng hoặc sai kích thước? Xoay hoặc phóng to thu nhỏ toàn bộ cụm (vật thể, xương, IK, hoạt ảnh) như một khối và đặt làm tư thế nghỉ mới.",
   "model.displayHint": "Mô hình hiển thị (lưới, hộp, bộ phận tùy chỉnh) chỉ là hình ảnh trong trình chỉnh sửa: không bao giờ thay đổi tệp xuất ra.",
   "rig.noModel": "Nhập mô hình trước khi làm rig.",
   "rig.bonesHead": "Xương",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Hoạt ảnh đã chọn: {n} / {max}",
   "export.check.initial": "Hoạt ảnh ban đầu: {name}",
   "export.check.paths": "Điểm đường đi trong giới hạn ({max} mỗi đường)",
-  "export.check.pathsOver": "{n} đường vượt {max} điểm — sửa khi xuất hoặc đơn giản hóa",
+  "export.check.pathsOver": "{n} đường vượt {max} điểm. Sửa khi xuất hoặc đơn giản hóa",
   "export.check.scale": "Tỉ lệ vật thể trong giới hạn ({max})",
   "export.check.scaleOver": "{n} vật thể vượt giới hạn tỉ lệ {max}",
   "export.check.tip": "Nhấp để đến mục này",
   "tut.model.t": "Kiểm tra hướng và tỉ lệ",
-  "tut.model.b": "Mô hình nên hướng về +Z và có kích thước cuối cùng. Xoay lại hoặc đổi tỉ lệ toàn bộ mô hình tại đây — vật thể, xương và hoạt ảnh di chuyển cùng nhau.",
+  "tut.model.b": "Mô hình nên hướng về +Z và có kích thước cuối cùng. Xoay lại hoặc đổi tỉ lệ toàn bộ mô hình tại đây. Vật thể, xương và hoạt ảnh di chuyển cùng nhau.",
   "palette.unavailable": "hiện không khả dụng",
   // ---- compact project header ----
   "project.details": "Chi tiết dự án",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Sửa đường cong",
   "hist.tangent": "Tay cầm đường cong",
   "hist.simplifyCurves": "Đơn giản hóa đường cong",
+  // ---- start screen samples ----
+  "start.sampleHead": "Dự án mẫu",
+  "start.sampleHint": "Cùng Bangboo đó, đã có rig, IK và bốn hoạt ảnh.",
+  "start.sampleOpen": "Mở dự án mẫu",
+  "start.sampleGia": "Tải .gia mẫu",
+  "tip.start.importProject": "Mở tệp dự án (.json) đã xuất từ trình chỉnh sửa này",
+  "tip.start.sampleOpen": "Mở Bangboo đã có rig cùng bốn hoạt ảnh",
+  "tip.start.sampleGia": "Chỉ có mô hình đã tách thành các phần. Không có xương hay hoạt ảnh.",
+  "toast.sampleFailed": "Không tải được mẫu. Tính năng này chỉ hoạt động khi trình chỉnh sửa được mở từ trang web hoặc máy chủ cục bộ.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Bắt đầu với tệp .gia",
+  "start.giaHint": "Nhập mô hình bạn đã xuất từ Miliastra. Chưa có? Hãy tải Bangboo mẫu. Mô hình đã được tách thành các phần nhưng chưa có xương hay hoạt ảnh, nên bạn tự làm rig và hoạt ảnh.",
+  "start.giaHow": "Xuất .gia như thế nào?",
+  "tip.start.importGia": "Chọn tệp .gia bạn đã xuất từ Miliastra",
+  "giaHelp.title": "Xuất .gia từ Miliastra",
+  "giaHelp.alt": "Hai ảnh chụp màn hình. Bên trái là mô hình đã tách thành các phần. Bên phải là mọi thứ đã được chọn, với Assets Exporting trong menu chuột phải.",
+  "giaHelp.step1": "1. Tách mô hình thành các phần khác nhau và dùng mô hình rỗng để đặt điểm xoay. Bắt buộc phải có mô hình rỗng làm cha.",
+  "giaHelp.step2": "2. Chọn tất cả, nhấp chuột phải rồi chọn \"Assets Exporting\".",
+  "giaHelp.warn": "XUẤT TỪ STAGE, KHÔNG PHẢI TỪ PREFAB EDITOR.",
+  "giaHelp.after": "Khi đã có tệp .gia, hãy nhập ở đây hoặc kéo thả vào trình chỉnh sửa.",
 };

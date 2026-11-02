@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Scala l'intero modello",
 
-  "val.objectScale": "Oggetto {name} ({guid}) — scala {axis}: {value} supera la scala massima per oggetto di Miliastra di {max}.",
+  "val.objectScale": "Oggetto {name} ({guid}): scala {axis}: {value} supera la scala massima per oggetto di Miliastra di {max}.",
 
   "toast.exportObjectScale": "Esportazione interrotta: {n} oggetto/i superano la scala massima di {max} ({names})",
 
   "orient.section": "Orientamento e scala del modello",
 
-  "orient.intro": "Se il modello guarda nella direzione sbagliata (ad es. +X invece di +Z), ruota l'intero assieme — oggetti, ossa, IK, animazione — come un'unità e rendilo il nuovo riposo.",
+  "orient.intro": "Se il modello guarda nella direzione sbagliata (ad es. +X invece di +Z), ruota l'intero assieme (oggetti, ossa, IK, animazione) come un'unità e rendilo il nuovo riposo.",
 
   "orient.button": "Riorienta modello…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "Il viewport corrisponde al progetto: {n} entità, {s} oggetti di scena",
 
-  "toast.viewportIssues": "Viewport non sincronizzato: {n} problema/i ({kinds}) — vedi la console",
+  "toast.viewportIssues": "Viewport non sincronizzato: {n} problema/i ({kinds}). Vedi la console",
   "tip.view.frameSelected": "Centra la vista sulla selezione ({k})",
   "tip.view.frameAll": "Adatta tutto alla vista ({k})",
   "view.views": "Vista",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Influisce solo sull'orbita trascinando nella vista; panoramica, zoom e gizmo di navigazione restano invariati",
   "rotmode.normal": "Figli seguono",
   "rotmode.preserve": "Preserva le trasformazioni mondo dei figli",
-  "tip.rotmode": "Sposta o ruota questo osso mantenendo i discendenti visivamente fermi nello spazio mondo. I figli seguono: i discendenti si muovono e ruotano con esso. Preserva: modifica di rig/riposo — le trasformazioni locali dei discendenti vengono ricalcolate, i keyframe ribasati (animazione invariata) e non vengono creati key.",
+  "tip.rotmode": "Sposta o ruota questo osso mantenendo i discendenti visivamente fermi nello spazio mondo. I figli seguono: i discendenti si muovono e ruotano con esso. Preserva: modifica di rig/riposo. Le trasformazioni locali dei discendenti vengono ricalcolate, i keyframe ribasati (animazione invariata) e non vengono creati key.",
   "props.rotModeHint": "Preserva le trasformazioni dei figli è attivo: le modifiche di posizione e rotazione spostano la trasformazione di riposo di questo elemento; i discendenti restano esattamente dove sono e i keyframe vengono ribasati invece che creati.",
   "hist.reorient": "Trasforma (preserva figli)",
   "toast.reorientRebased": "Riorientato: {n} fotogramma/i chiave in {m} clip sono stati ribasati così l'animazione visibile è invariata",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Mappatura ossa (destinazione ← sorgente)",
   "retarget.preview": "Anteprima",
   "retarget.rootMotion": "Movimento radice",
-  "retarget.root.inPlace": "Disattivo — riproduci sul posto (spostamento importato, attivabile per clip)",
-  "retarget.root.keep": "Attivo — il personaggio si sposta (scalato alla sua altezza)",
+  "retarget.root.inPlace": "Disattivo: riproduci sul posto (spostamento importato, attivabile per clip)",
+  "retarget.root.keep": "Attivo: il personaggio si sposta (scalato alla sua altezza)",
   "retarget.root.none": "Non importare la traslazione radice",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "Controlli del viewport",
   "help.controlsText": "Orbita: tasto centrale o Alt+trascina · Pan: tasto destro o Maiusc+centrale · Zoom: rotella · Volo WASD: tieni premuto il tasto destro (Impostazioni → Navigazione). Clic per selezionare, Maiusc+clic per estendere, trascina il gizmo per spostare o ruotare. Spazio alterna Sposta/Ruota.",
   "help.about": "Informazioni",
-  "help.aboutText": "Miliastra Animator — un editor di animazione solo browser per i file .gia di Miliastra. Nulla viene caricato: i progetti restano in questo browser. Flusso: Modello → Rig → Anima → Esporta.",
+  "help.aboutText": "Miliastra Animator: un editor di animazione solo browser per i file .gia di Miliastra. Nulla viene caricato: i progetti restano in questo browser. Flusso: Modello → Rig → Anima → Esporta.",
   "sc.app.search": "Ricerca comandi",
   "sc.app.settings": "Impostazioni",
   "guide.next.import": "Prossimo: importa un modello .gia.",
@@ -1103,7 +1103,7 @@ export default {
   "viewport.import": "Importa .gia…",
   "model.empty": "Nessun modello caricato.",
   "model.emptyHint": "Importa un file .gia per vedere i suoi oggetti. Poi controlla che il modello guardi verso +Z e abbia la dimensione attesa.",
-  "model.orientIntro": "Guarda nella direzione sbagliata o ha la dimensione sbagliata? Ruota o scala l'intero insieme — oggetti, ossa, IK, animazioni — come un'unità e rendilo il nuovo riposo.",
+  "model.orientIntro": "Guarda nella direzione sbagliata o ha la dimensione sbagliata? Ruota o scala l'intero insieme (oggetti, ossa, IK, animazioni) come un'unità e rendilo il nuovo riposo.",
   "model.displayHint": "Il modello di visualizzazione (mesh, box, parti personalizzate) è solo una visualizzazione dell'editor: non modifica mai il file esportato.",
   "rig.noModel": "Importa un modello prima di fare il rig.",
   "rig.bonesHead": "Ossa",
@@ -1129,12 +1129,12 @@ export default {
   "export.check.anims": "Animazioni scelte: {n} / {max}",
   "export.check.initial": "Animazione iniziale: {name}",
   "export.check.paths": "Punti del percorso entro il limite ({max} per percorso)",
-  "export.check.pathsOver": "{n} percorso/i oltre {max} punti — correggi all'esportazione o semplifica",
+  "export.check.pathsOver": "{n} percorso/i oltre {max} punti. Correggi all'esportazione o semplifica",
   "export.check.scale": "Scala degli oggetti entro il limite ({max})",
   "export.check.scaleOver": "{n} oggetto/i superano il limite di scala di {max}",
   "export.check.tip": "Clicca per andare a questa voce",
   "tut.model.t": "Controlla orientamento e scala",
-  "tut.model.b": "Il modello deve guardare verso +Z e avere la dimensione finale. Riorienta o scala qui l'intero modello — oggetti, ossa e animazioni si muovono insieme.",
+  "tut.model.b": "Il modello deve guardare verso +Z e avere la dimensione finale. Riorienta o scala qui l'intero modello. Oggetti, ossa e animazioni si muovono insieme.",
   "palette.unavailable": "non disponibile ora",
   // ---- compact project header ----
   "project.details": "Dettagli del progetto",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Modifica curva",
   "hist.tangent": "Maniglie curva",
   "hist.simplifyCurves": "Semplifica curve",
+  // ---- start screen samples ----
+  "start.sampleHead": "Progetto di esempio",
+  "start.sampleHint": "Lo stesso Bangboo, già con rig, IK e quattro animazioni.",
+  "start.sampleOpen": "Apri progetto di esempio",
+  "start.sampleGia": "Scarica .gia di esempio",
+  "tip.start.importProject": "Apri un file di progetto (.json) esportato da questo editor",
+  "tip.start.sampleOpen": "Apri il Bangboo con rig e le sue quattro animazioni",
+  "tip.start.sampleGia": "Solo il modello, diviso in parti. Niente ossa né animazioni.",
+  "toast.sampleFailed": "Impossibile caricare l'esempio. Funziona solo se l'editor è aperto dal suo sito o da un server locale.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Inizia con un file .gia",
+  "start.giaHint": "Importa un modello esportato da Miliastra. Non ne hai uno? Scarica il Bangboo di esempio. È diviso in parti ma non ha ossa né animazioni, quindi rig e animazione li fai tu.",
+  "start.giaHow": "Come si esporta un .gia?",
+  "tip.start.importGia": "Scegli un file .gia esportato da Miliastra",
+  "giaHelp.title": "Esportare un .gia da Miliastra",
+  "giaHelp.alt": "Due schermate. A sinistra un modello diviso in parti. A destra tutto selezionato, con Assets Exporting nel menu del clic destro.",
+  "giaHelp.step1": "1. Dividi il modello in parti diverse e usa modelli vuoti per impostare i punti di pivot. I genitori come modelli vuoti sono obbligatori.",
+  "giaHelp.step2": "2. Seleziona tutto, fai clic destro e scegli «Assets Exporting».",
+  "giaHelp.warn": "ESPORTA DALLO STAGE, NON DALL'EDITOR DEI PREFAB.",
+  "giaHelp.after": "Quando hai il .gia, importalo qui o trascinalo nell'editor.",
 };

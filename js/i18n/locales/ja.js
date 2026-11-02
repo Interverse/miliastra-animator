@@ -309,7 +309,7 @@ export default {
 
   "hist.scaleModel": "モデル全体をスケール",
 
-  "val.objectScale": "オブジェクト {name}（{guid}）— スケール {axis}：{value} は Miliastra の最大オブジェクトスケール {max} を超えています。",
+  "val.objectScale": "オブジェクト {name}（{guid}）：スケール {axis}：{value} は Miliastra の最大オブジェクトスケール {max} を超えています。",
 
   "toast.exportObjectScale": "書き出しを停止：{n} 個のオブジェクトが最大スケール {max} を超えています（{names}）",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "ビューポートはプロジェクトと一致：{n} エンティティ、{s} シーンオブジェクト",
 
-  "toast.viewportIssues": "ビューポートが同期していません：{n} 件の問題（{kinds}）— コンソールを確認",
+  "toast.viewportIssues": "ビューポートが同期していません：{n} 件の問題（{kinds}）。コンソールを確認",
   "tip.view.frameSelected": "選択項目を画面中央に（{k}）",
   "tip.view.frameAll": "すべてを画面に収める（{k}）",
   "view.views": "視点",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "ビューポートでのドラッグ回転にのみ影響します。パン、ズーム、ナビゲーションギズモは変わりません",
   "rotmode.normal": "子も回転",
   "rotmode.preserve": "子のワールド変換を維持",
-  "tip.rotmode": "このボーンを移動・回転しても、すべての子孫はワールド空間でその場に留まります。子も動く：子孫が一緒に移動・回転します。維持：リグ/レスト編集 — 子孫のローカル変換を再計算し、キーフレームは再基準化（アニメーションは不変）、キーは作成しません。",
+  "tip.rotmode": "このボーンを移動・回転しても、すべての子孫はワールド空間でその場に留まります。子も動く：子孫が一緒に移動・回転します。維持：リグ/レスト編集。子孫のローカル変換を再計算し、キーフレームは再基準化（アニメーションは不変）、キーは作成しません。",
   "props.rotModeHint": "「子のワールド変換を維持」がオン：位置と回転の編集はこの項目のレスト変換を動かします。子孫はその場に留まり、キーは打たれずに再基準化されます。",
   "hist.reorient": "変換（子を維持）",
   "toast.reorientRebased": "向きを変更：{m} クリップの {n} キーフレームを再基準化し、見た目のアニメーションは変わりません",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "ボーン対応（ターゲット ← ソース）",
   "retarget.preview": "プレビュー",
   "retarget.rootMotion": "ルートモーション",
-  "retarget.root.inPlace": "オフ — その場で再生（移動は読み込み、クリップごとにオンにできます）",
-  "retarget.root.keep": "オン — キャラクターが移動（身長に合わせてスケール）",
+  "retarget.root.inPlace": "オフ：その場で再生（移動は読み込み、クリップごとにオンにできます）",
+  "retarget.root.keep": "オン：キャラクターが移動（身長に合わせてスケール）",
   "retarget.root.none": "ルートの移動を読み込まない",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1090,7 +1090,7 @@ export default {
   "help.controls": "ビューポート操作",
   "help.controlsText": "回転：中ボタンまたは Alt+ドラッグ · パン：右ドラッグまたは Shift+中ボタン · ズーム：ホイール · WASD 移動：右ボタンを押したまま（設定 → ナビゲーション）。クリックで選択、Shift+クリックで追加、ギズモをドラッグして移動・回転。Space で移動/回転を切り替え。",
   "help.about": "このアプリについて",
-  "help.aboutText": "Miliastra Animator — Miliastra の .gia ファイル用、ブラウザーだけで動くアニメーションエディター。何もアップロードされず、プロジェクトはこのブラウザーに残ります。手順：モデル → リグ → アニメーション → 書き出し。",
+  "help.aboutText": "Miliastra Animator：Miliastra の .gia ファイル用、ブラウザーだけで動くアニメーションエディター。何もアップロードされず、プロジェクトはこのブラウザーに残ります。手順：モデル → リグ → アニメーション → 書き出し。",
   "sc.app.search": "コマンド検索",
   "sc.app.settings": "設定",
   "guide.next.import": "次：.gia モデルを読み込みます。",
@@ -1129,7 +1129,7 @@ export default {
   "export.check.anims": "選択したアニメーション：{n} / {max}",
   "export.check.initial": "初期アニメーション：{name}",
   "export.check.paths": "パス点は上限内（パスごとに {max}）",
-  "export.check.pathsOver": "{n} 本のパスが {max} 点を超過 — 書き出し時に修正するか簡略化",
+  "export.check.pathsOver": "{n} 本のパスが {max} 点を超過。書き出し時に修正するか簡略化",
   "export.check.scale": "オブジェクトのスケールは上限内（{max}）",
   "export.check.scaleOver": "{n} 個のオブジェクトがスケール上限 {max} を超過",
   "export.check.tip": "クリックでこの項目へ移動",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "カーブ編集",
   "hist.tangent": "カーブハンドル",
   "hist.simplifyCurves": "カーブを簡略化",
+  // ---- start screen samples ----
+  "start.sampleHead": "サンプルプロジェクト",
+  "start.sampleHint": "同じ Bangboo に、リグ、IK、4 つのアニメーションを設定済みです。",
+  "start.sampleOpen": "サンプルプロジェクトを開く",
+  "start.sampleGia": "サンプル .gia をダウンロード",
+  "tip.start.importProject": "このエディターから書き出したプロジェクトファイル (.json) を開く",
+  "tip.start.sampleOpen": "リグ済みの Bangboo を 4 つのアニメーションごと開きます",
+  "tip.start.sampleGia": "パーツに分かれたモデルだけです。ボーンやアニメーションはありません。",
+  "toast.sampleFailed": "サンプルを読み込めませんでした。エディターをウェブサイトかローカルサーバーから開いたときだけ使えます。",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": ".gia ファイルから始める",
+  "start.giaHint": "Miliastra から書き出したモデルを読み込みます。まだ持っていない場合は、サンプルの Bangboo をダウンロードしてください。パーツには分かれていますが、ボーンもアニメーションもないので、リグとアニメーションは自分で作れます。",
+  "start.giaHow": ".gia の書き出し方",
+  "tip.start.importGia": "Miliastra から書き出した .gia ファイルを選びます",
+  "giaHelp.title": "Miliastra から .gia を書き出す",
+  "giaHelp.alt": "スクリーンショット 2 枚。左はパーツに分けたモデル。右はすべてを選択し、右クリックメニューに Assets Exporting が表示されています。",
+  "giaHelp.step1": "1. モデルを複数のパーツに分け、空のモデルでピボットの位置を決めます。空のモデルを親にすることが必須です。",
+  "giaHelp.step2": "2. すべて選択して右クリックし、「Assets Exporting」を選びます。",
+  "giaHelp.warn": "プレハブエディターではなく、ステージから書き出してください。",
+  "giaHelp.after": ".gia ができたら、ここで読み込むか、エディターにドラッグしてください。",
 };

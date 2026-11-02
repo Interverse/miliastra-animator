@@ -16,10 +16,11 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
   --orange: #f5a623; --sel-outline: #ff9f43;
   /* Layering (one scale for every floating thing; nothing sets an ad-hoc z-index):
      page content (viewport, graph, timeline canvases) → HUD over the viewport → panel resize
-     handles → file-drop veil → side drawers → popovers (menus) → floating panels → start
-     screen → tour / command palette → toasts. Native <dialog> uses the browser's top layer. */
-  --z-hud: 10; --z-handles: 20; --z-drop: 30; --z-drawer: 35; --z-popover: 50; --z-float: 60;
-  --z-start: 65; --z-tour: 70; --z-palette: 70; --z-toast: 80;
+     handles → file-drop veil → side drawers → floating panels → start screen → tour / command
+     palette → popovers (menus: always above whatever opened them) → toasts. Native modal
+     <dialog>s use the browser's top layer; menus opened from one are placed inside it. */
+  --z-hud: 10; --z-handles: 20; --z-drop: 30; --z-drawer: 35; --z-float: 50; --z-start: 55;
+  --z-tour: 60; --z-palette: 60; --z-popover: 70; --z-toast: 80;
 }
 
 body {
@@ -500,6 +501,9 @@ button.mini.primary-mini { background: var(--blue); color: #fff; }
 button.mini.primary-mini:hover:not(:disabled) { background: var(--blue-h); }
 #start-screen { position: fixed; inset: 0; z-index: var(--z-start); background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; padding: 20px; }
 .start-card { width: min(640px, 100%); max-height: 88vh; overflow: auto; background: var(--surf); border: 1px solid var(--border-strong); border-radius: 10px; padding: 18px 20px; box-shadow: 0 12px 48px rgba(0,0,0,.6); display: flex; flex-direction: column; gap: 10px; }
+.start-head { display: flex; align-items: flex-start; gap: 12px; }
+.start-head-text { flex: 1; min-width: 0; }
+.start-head select.start-lang { flex: 0 0 auto; width: auto; max-width: 150px; margin: 0; }
 .start-head h2 { margin: 0 0 4px; font-size: 18px; color: var(--accent); letter-spacing: .5px; }
 .recover-card { display: flex; align-items: center; gap: 10px; border: 1px solid var(--amber); background: rgba(240,180,41,.08); border-radius: 8px; padding: 8px 10px; }
 .proj-list { display: flex; flex-direction: column; gap: 4px; max-height: 46vh; overflow-y: auto; }
@@ -512,6 +516,27 @@ button.mini.primary-mini:hover:not(:disabled) { background: var(--blue-h); }
 .proj-sub { font-size: 11px; color: var(--t3); overflow-wrap: anywhere; margin-top: 2px; }
 .proj-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .proj-actions button.mini { flex: 0 0 auto; padding: 4px 10px; }
+/* start screen: two start options side by side (stacked when narrow), then the footer row */
+.start-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.start-option { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); min-width: 0; }
+.start-option-head { display: flex; align-items: center; gap: 8px; }
+.start-option-icon { color: var(--accent); font-size: 14px; width: 16px; text-align: center; }
+.start-option .proj-sub { flex: 1; }
+.start-option-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.start-option-actions button.mini { flex: 0 0 auto; width: auto; margin: 0; }
+.start-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.start-actions .spacer { flex: 1; }
+.start-actions button.mini { flex: 0 0 auto; width: auto; margin: 0; }
+button.link-btn { background: transparent; border: 1px solid transparent; color: var(--accent); padding: 4px 6px; }
+button.link-btn:hover:not(:disabled) { background: var(--hover); color: var(--t0); }
+#vp-empty .vp-empty-help { display: block; margin: 6px auto 0; font-size: 12px; }
+/* .gia export tutorial */
+dialog:has(.gia-help) { width: min(920px, calc(100vw - 40px)); max-width: min(920px, calc(100vw - 40px)); }
+.gia-help { display: flex; flex-direction: column; gap: 10px; }
+.gia-help-img { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); display: block; }
+.gia-help-captions { margin: 0; padding-left: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; font-size: 13px; color: var(--t1); }
+.gia-help-captions li { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; line-height: 1.45; }
+.gia-help-captions .gia-help-warn { display: block; margin-top: 6px; font-weight: 700; color: var(--amber); }
 .stat-grid .v.warn { color: var(--amber); }
 
 @media (max-width: 1199px) {

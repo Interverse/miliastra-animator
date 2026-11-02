@@ -309,13 +309,13 @@ export default {
 
   "hist.scaleModel": "Escalar modelo completo",
 
-  "val.objectScale": "Objeto {name} ({guid}) — escala {axis}: {value} supera la escala máxima de objeto de Miliastra de {max}.",
+  "val.objectScale": "Objeto {name} ({guid}): escala {axis}: {value} supera la escala máxima de objeto de Miliastra de {max}.",
 
   "toast.exportObjectScale": "Exportación detenida: {n} objeto(s) superan la escala máxima de {max} ({names})",
 
   "orient.section": "Orientación y escala del modelo",
 
-  "orient.intro": "Si el modelo mira hacia el lado equivocado (por ejemplo +X en vez de +Z), gira todo el conjunto —objetos, huesos, IK, animación— como una unidad y conviértelo en el nuevo reposo.",
+  "orient.intro": "Si el modelo mira hacia el lado equivocado (por ejemplo +X en vez de +Z), gira todo el conjunto (objetos, huesos, IK, animación) como una unidad y conviértelo en el nuevo reposo.",
 
   "orient.button": "Reorientar modelo…",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "El visor coincide con el proyecto: {n} entidades, {s} objetos de escena",
 
-  "toast.viewportIssues": "Visor desincronizado: {n} problema(s) ({kinds}) — ver la consola",
+  "toast.viewportIssues": "Visor desincronizado: {n} problema(s) ({kinds}). Ver la consola",
   "tip.view.frameSelected": "Centrar la vista en la selección ({k})",
   "tip.view.frameAll": "Ajustar todo en la vista ({k})",
   "view.views": "Vista",
@@ -733,7 +733,7 @@ export default {
   "tip.display.reverseOrbit": "Solo afecta a orbitar arrastrando en la vista 3D; el desplazamiento, el zoom y el gizmo de navegación no cambian",
   "rotmode.normal": "Hijos siguen",
   "rotmode.preserve": "Conservar transformaciones mundiales de los hijos",
-  "tip.rotmode": "Mueve o rota este hueso manteniendo a sus descendientes visualmente fijos en el espacio mundial. Los hijos siguen: los descendientes se mueven y giran con él. Conservar: edición de rig/reposo — se recalculan las transformaciones locales de los descendientes, los fotogramas clave se reajustan para que la animación no cambie y no se crean claves.",
+  "tip.rotmode": "Mueve o rota este hueso manteniendo a sus descendientes visualmente fijos en el espacio mundial. Los hijos siguen: los descendientes se mueven y giran con él. Conservar: edición de rig/reposo. Se recalculan las transformaciones locales de los descendientes, los fotogramas clave se reajustan para que la animación no cambie y no se crean claves.",
   "props.rotModeHint": "Conservar transformaciones de los hijos está activo: los cambios de posición y rotación mueven la transformación de reposo de este elemento; los descendientes se quedan exactamente donde están y los fotogramas clave se reajustan en lugar de crearse.",
   "hist.reorient": "Transformar (conservar hijos)",
   "toast.reorientRebased": "Reorientado: se rebasaron {n} fotograma(s) clave en {m} clip(s) para que la animación visible no cambie",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "Mapeo de huesos (destino ← origen)",
   "retarget.preview": "Vista previa",
   "retarget.rootMotion": "Movimiento raíz",
-  "retarget.root.inPlace": "Desactivado — reproducir en el sitio (desplazamiento importado, activable por clip)",
-  "retarget.root.keep": "Activado — el personaje se desplaza (escalado a su altura)",
+  "retarget.root.inPlace": "Desactivado: reproducir en el sitio (desplazamiento importado, activable por clip)",
+  "retarget.root.keep": "Activado: el personaje se desplaza (escalado a su altura)",
   "retarget.root.none": "No importar la traslación raíz",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "Editar curva",
   "hist.tangent": "Manejadores de curva",
   "hist.simplifyCurves": "Simplificar curvas",
+  // ---- start screen samples ----
+  "start.sampleHead": "Proyecto de ejemplo",
+  "start.sampleHint": "El mismo Bangboo, ya con rig, IK y cuatro animaciones.",
+  "start.sampleOpen": "Abrir proyecto de ejemplo",
+  "start.sampleGia": "Descargar .gia de ejemplo",
+  "tip.start.importProject": "Abrir un archivo de proyecto (.json) exportado desde este editor",
+  "tip.start.sampleOpen": "Abrir el Bangboo con rig y sus cuatro animaciones",
+  "tip.start.sampleGia": "Solo el modelo, separado en partes. Sin huesos ni animaciones.",
+  "toast.sampleFailed": "No se pudo cargar el ejemplo. Solo funciona cuando el editor se abre desde su sitio web o un servidor local.",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "Empezar con un archivo .gia",
+  "start.giaHint": "Importa un modelo que hayas exportado desde Miliastra. ¿No tienes ninguno? Descarga el Bangboo de ejemplo. Está separado en partes, pero no tiene huesos ni animaciones, así que el rig y la animación los haces tú.",
+  "start.giaHow": "¿Cómo exporto un .gia?",
+  "tip.start.importGia": "Elige un archivo .gia que hayas exportado desde Miliastra",
+  "giaHelp.title": "Exportar un .gia desde Miliastra",
+  "giaHelp.alt": "Dos capturas. A la izquierda, un modelo separado en partes. A la derecha, todo seleccionado y Assets Exporting en el menú del clic derecho.",
+  "giaHelp.step1": "1. Separa tu modelo en distintas partes y usa modelos vacíos para fijar los puntos de pivote. Los modelos vacíos como padres son obligatorios.",
+  "giaHelp.step2": "2. Selecciona todo, haz clic derecho y elige «Assets Exporting».",
+  "giaHelp.warn": "EXPORTA DESDE EL STAGE, NO DESDE EL EDITOR DE PREFABS.",
+  "giaHelp.after": "Cuando tengas el .gia, impórtalo aquí o arrástralo al editor.",
 };

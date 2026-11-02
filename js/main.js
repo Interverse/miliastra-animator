@@ -6,6 +6,7 @@ import { Viewport } from './viewport/viewport.js';
 import { initLeftPanels } from './ui/panels-left.js';
 import { initProjectBar } from './ui/project-bar.js';
 import { workflowState } from './ui/workflow.js';
+import { showGiaHelp } from './ui/gia-help.js';
 import { initRightPanels } from './ui/panels-right.js';
 import { Timeline } from './ui/timeline.js';
 import { initTutorial } from './ui/tutorial.js';
@@ -223,6 +224,7 @@ function setupEmptyState(editor) {
       h('small', { text: t('viewport.emptyLead') }),
       btn,
       h('small', { class: 'vp-empty-drop', text: t('viewport.emptyHint') }),
+      h('button', { class: 'mini link-btn vp-empty-help', text: t('start.giaHow'), onclick: () => showGiaHelp(editor) }),
     );
   };
   editor.on('change', render); editor.on('project', render); onLangChange(render); render();

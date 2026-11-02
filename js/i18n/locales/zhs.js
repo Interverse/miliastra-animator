@@ -309,7 +309,7 @@ export default {
 
   "hist.scaleModel": "缩放整个模型",
 
-  "val.objectScale": "对象 {name}（{guid}）— 缩放 {axis}：{value} 超过 Miliastra 的最大对象缩放 {max}。",
+  "val.objectScale": "对象 {name}（{guid}）：缩放 {axis}：{value} 超过 Miliastra 的最大对象缩放 {max}。",
 
   "toast.exportObjectScale": "导出已停止：{n} 个对象超过最大缩放 {max}（{names}）",
 
@@ -553,7 +553,7 @@ export default {
 
   "toast.viewportOk": "视口与项目一致：{n} 个实体，{s} 个场景对象",
 
-  "toast.viewportIssues": "视口未同步：{n} 个问题（{kinds}）— 请查看控制台",
+  "toast.viewportIssues": "视口未同步：{n} 个问题（{kinds}）。请查看控制台",
   "tip.view.frameSelected": "将视图居中到所选项（{k}）",
   "tip.view.frameAll": "让所有内容适配视图（{k}）",
   "view.views": "视图",
@@ -965,8 +965,8 @@ export default {
   "retarget.mapping": "骨骼映射（目标 ← 源）",
   "retarget.preview": "预览",
   "retarget.rootMotion": "根运动",
-  "retarget.root.inPlace": "关 — 原地播放（已导入移动，可按片段开启）",
-  "retarget.root.keep": "开 — 角色移动（按身高缩放）",
+  "retarget.root.inPlace": "关：原地播放（已导入移动，可按片段开启）",
+  "retarget.root.keep": "开：角色移动（按身高缩放）",
   "retarget.root.none": "不导入根平移",
   "retarget.rootDetected": "Root motion detected: the hips travel {d} m.",
   "retarget.rootNone": "No horizontal root motion in this clip.",
@@ -1208,4 +1208,24 @@ export default {
   "hist.editCurve": "编辑曲线",
   "hist.tangent": "曲线控制柄",
   "hist.simplifyCurves": "简化曲线",
+  // ---- start screen samples ----
+  "start.sampleHead": "示例项目",
+  "start.sampleHint": "同一个 Bangboo，已经绑定好，带 IK 和四个动画。",
+  "start.sampleOpen": "打开示例项目",
+  "start.sampleGia": "下载示例 .gia",
+  "tip.start.importProject": "打开从本编辑器导出的项目文件 (.json)",
+  "tip.start.sampleOpen": "打开已绑定的 Bangboo 和它的四个动画",
+  "tip.start.sampleGia": "只有拆分成部件的模型，没有骨骼和动画。",
+  "toast.sampleFailed": "示例加载失败。只有从网站或本地服务器打开编辑器时才能使用。",
+  // ---- .gia section / export tutorial ----
+  "start.giaHead": "从 .gia 文件开始",
+  "start.giaHint": "导入你从 Miliastra 导出的模型。还没有的话，可以下载示例 Bangboo。它已经拆分成多个部件，但没有骨骼和动画，绑定和动画需要你自己来做。",
+  "start.giaHow": "怎么导出 .gia？",
+  "tip.start.importGia": "选择你从 Miliastra 导出的 .gia 文件",
+  "giaHelp.title": "从 Miliastra 导出 .gia",
+  "giaHelp.alt": "两张截图。左边是拆分成部件的模型，右边是全部选中后，右键菜单里的“资产导出”（Assets Exporting）。",
+  "giaHelp.step1": "1. 把模型拆分成不同的部件，并用空模型来设置轴心点。必须用空模型作为父级。",
+  "giaHelp.step2": "2. 全部选中后右键，选择“资产导出”（Assets Exporting）。",
+  "giaHelp.warn": "请从场景（Stage）导出，不要从预制体编辑器导出。",
+  "giaHelp.after": "拿到 .gia 后，在这里导入，或直接拖进编辑器。",
 };

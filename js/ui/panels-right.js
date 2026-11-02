@@ -4,6 +4,7 @@
 import { t, onLangChange } from '../i18n/i18n.js';
 import { h, row, numInput, vec3Row, textInput, selectInput, checkbox, button, btnRow, subhead, hint, empty, rerender, slider, fmt } from './dom.js';
 import { confirmDialog, toast, showMenu } from './dialogs.js';
+import { showGiaHelp } from './gia-help.js';
 import { getNode, childrenOf } from '../scene/scene.js';
 import { displayOf, hasDisplayOffset, isPositionOnly } from './editor.js';
 import { hasPartEdits, PART_KINDS } from '../scene/display-parts.js';
@@ -374,6 +375,10 @@ export function initRightPanels(editor, viewport) {
       drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) editor.readFile?.(f, { guarded: true }); });
       body.append(drop);
       body.append(hint(t('model.emptyHint')));
+      body.append(btnRow(
+        button(t('start.giaHow'), () => showGiaHelp(editor), { cls: 'mini link-btn', tip: t('giaHelp.title') }),
+        button(t('start.sampleGia'), () => editor.downloadSampleGia?.(), { cls: 'mini link-btn', tip: t('tip.start.sampleGia') }),
+      ));
       return;
     }
     const decs = objs.reduce((a, o) => a + (o.decorations?.length || 0), 0);
